@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: GSMC-server-v4
