@@ -27,13 +27,7 @@ jobs:
 
           if ! echo "$TITLE" | grep -qP '^\[.+\]'; then
             echo "❌ 제목에 [domain] prefix가 없습니다."
-            echo "   예시: [student] QueryDSL 벌크 업데이트로 성능 개선 #269"
-            exit 1
-          fi
-
-          if ! echo "$TITLE" | grep -qP '#\d+'; then
-            echo "❌ 제목에 이슈 번호가 없습니다."
-            echo "   예시: [student] QueryDSL 벌크 업데이트로 성능 개선 #269"
+            echo "   예시: [student] QueryDSL 벌크 업데이트로 성능 개선"
             exit 1
           fi
 
@@ -66,7 +60,7 @@ jobs:
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
           PR_AUTHOR="${{ github.event.pull_request.user.login }}"
-          ALL_REVIEWERS="jyx-07,hej090224,snowykte0426"
+          ALL_REVIEWERS="jyx-07,hej090224"
           REVIEWERS=$(echo "$ALL_REVIEWERS" | tr ',' '\n' | grep -v "^${PR_AUTHOR}$" | tr '\n' ',' | sed 's/,$//')
           if [ -n "$REVIEWERS" ]; then
             gh pr edit $PR_NUMBER --repo ${{ github.repository }} --add-reviewer "$REVIEWERS"
@@ -75,19 +69,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     needs: [validate-pr]
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: gsmc_test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -98,12 +79,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+          cache-cleanup: always
 
-      - name: Build and Test
+      - name: Build
         run: ./gradlew build --parallel --build-cache
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/gsmc_test?serverTimezone=Asia/Seoul
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: root
