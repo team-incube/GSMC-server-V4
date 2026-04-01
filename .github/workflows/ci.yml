@@ -102,4 +102,4 @@ jobs:
           cache-cleanup: always
 
       - name: Build
-        run: ./gradlew build --parallel --build-cache -x test
+        run: ./gradlew build --parallel --build-cache
