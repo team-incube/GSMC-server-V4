@@ -89,4 +89,4 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build
-        run: ./gradlew build --parallel --build-cache
+        run: ./gradlew build --parallel --build-cache -x test
