@@ -1,6 +1,6 @@
 ---
 name: convention
-description: Show project code conventions for naming, DTO, Entity, Repository, Service, and Controller.
+description: Code conventions for naming, DTO, Entity, Repository, Service, and Controller in this project.
 ---
 
 ## Naming
@@ -32,19 +32,22 @@ description: Show project code conventions for naming, DTO, Entity, Repository, 
 
 ## Entity / Repository
 
-- e.g. RDB + user information → `MemberJpaEntity`
-- e.g. Redis + blacklist → `BlackListRedisRepository`
+- Name Entity and Repository based on the target database.
+    - e.g. RDB + user information → `MemberJpaEntity`
+    - e.g. Redis + blacklist → `BlackListRedisRepository`
 - Repository method names must follow Spring Data naming conventions.
 
 ## Service
 
+- Name service classes based on the action they perform.
+
 | Action | Keyword |
 |--------|---------|
-| Fetch | Fetch |
-| Search | Search |
-| Update | Modify |
-| Create | Append |
-| Delete | Remove |
+| Fetch | `Fetch` |
+| Search | `Search` |
+| Update | `Modify` |
+| Create | `Append` |
+| Delete | `Remove` |
 
 - Use the `My` keyword when using `SecurityContextHolder`.
     - e.g. Fetch a user's certification by email → `FetchCertificateByEmailService`
@@ -53,7 +56,7 @@ description: Show project code conventions for naming, DTO, Entity, Repository, 
 
 ## Controller
 
-Fix the DTO parameter name to `input` in the Presentation layer.
+- Fix the DTO parameter name to `input` in the Presentation layer.
 ```kotlin
 @MutationMapping
 fun exampleMutation(@Argument input: ExampleInput): ExamplePayload {

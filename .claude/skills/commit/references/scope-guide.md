@@ -6,13 +6,17 @@
 
 | Scope | Description |
 |-------|-------------|
+| alert | Alert management |
+| archive | Archive management |
 | auth | Authentication / API keys |
-| account | Account management |
-| student | Student information |
-| club | Club / project information |
-| neis | NEIS integration |
-| client | OAuth client |
-| oauth | OAuth2 flow |
+| category | Category management |
+| developer | Developer management |
+| evidence | Evidence management |
+| file | File management |
+| member | Member management |
+| project | Project management |
+| score | Score management |
+| sheet | Sheet management |
 
 ## Module Names (Cross-cutting concerns only)
 
@@ -20,13 +24,12 @@
 |-------|-------------|
 | global | Affects multiple modules |
 | ci/cd | Build / deployment |
-| web / openapi | Module-wide impact |
 
 ## Examples
 
 **Wrong:**
-- `fix(web): API 키 삭제 버그 수정` → `fix(auth): API 키 삭제 버그 수정`
-- `refactor(common): 학생 엔티티 수정` → `refactor(student): 엔티티 필드 추가`
+- `fix(global): 인증 토큰 삭제 버그 수정` → `fix(auth): 인증 토큰 삭제 버그 수정`
+- `refactor(global): 멤버 엔티티 수정` → `refactor(member): 엔티티 필드 추가`
 
 **Correct:**
 - `refactor(global): 공통 예외 처리 로직 개선`
