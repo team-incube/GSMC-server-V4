@@ -1,4 +1,4 @@
-package team.incube.GSMC_server_v4
+package team.incube.gsmc
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class GsmcServerV4Application
 
 fun main(args: Array<String>) {
-	runApplication<GsmcServerV4Application>(*args)
+    runApplication<GsmcServerV4Application>(*args)
 }
