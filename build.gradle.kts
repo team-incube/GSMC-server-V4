@@ -1,56 +1,62 @@
 plugins {
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
-	id("org.springframework.boot") version "3.5.13"
-	id("io.spring.dependency-management") version "1.1.7"
-	kotlin("plugin.jpa") version "1.9.25"
+    kotlin("jvm") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
+    kotlin("plugin.jpa") version "1.9.25"
+    id("org.springframework.boot") version "3.5.13"
+    id("io.spring.dependency-management") version "1.1.7"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 }
 
 group = "team.incube"
 version = "0.0.1-SNAPSHOT"
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-data-redis")
-	implementation("org.springframework.boot:spring-boot-starter-graphql")
-	implementation("org.springframework.boot:spring-boot-starter-security")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	compileOnly("org.projectlombok:lombok")
-	runtimeOnly("com.mysql:mysql-connector-j")
-	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testImplementation("org.springframework.graphql:spring-graphql-test")
-	testImplementation("org.springframework.security:spring-security-test")
-	testCompileOnly("org.projectlombok:lombok")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	testAnnotationProcessor("org.projectlombok:lombok")
+    implementation(Libs.THE_SDK)
+    implementation(Libs.SPRING_BOOT_JPA)
+    implementation(Libs.SPRING_BOOT_REDIS)
+    implementation(Libs.SPRING_BOOT_GRAPHQL)
+    implementation(Libs.SPRING_BOOT_SECURITY)
+    implementation(Libs.SPRING_BOOT_WEB)
+    implementation(Libs.JACKSON_KOTLIN)
+    implementation(Libs.KOTLIN_REFLECT)
+
+    compileOnly(Libs.LOMBOK)
+    annotationProcessor(Libs.LOMBOK)
+
+    runtimeOnly(Libs.MYSQL_CONNECTOR)
+
+    testImplementation(Libs.SPRING_BOOT_TEST)
+    testImplementation(Libs.KOTLIN_TEST_JUNIT5)
+    testImplementation(Libs.SPRING_GRAPHQL_TEST)
+    testImplementation(Libs.SPRING_SECURITY_TEST)
+    testCompileOnly(Libs.LOMBOK)
+    testAnnotationProcessor(Libs.LOMBOK)
+    testRuntimeOnly(Libs.JUNIT_PLATFORM_LAUNCHER)
 }
 
 kotlin {
-	compilerOptions {
-		freeCompilerArgs.addAll("-Xjsr305=strict")
-	}
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 allOpen {
-	annotation("jakarta.persistence.Entity")
-	annotation("jakarta.persistence.MappedSuperclass")
-	annotation("jakarta.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
