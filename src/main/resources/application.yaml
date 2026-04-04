@@ -1,3 +1,32 @@
 spring:
   application:
     name: GSMC-server-v4
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+  graphql:
+    graphiql:
+      enabled: true
+    path: /graphql
+
+sdk:
+  logging:
+    enabled: true
+    not-logging-urls:
+      - "/graphiql/**"
+      - "/graphql/**"
+  exception:
+    enabled: false
