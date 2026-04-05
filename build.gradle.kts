@@ -51,6 +51,10 @@ kotlin {
     }
 }
 
+ktlint {
+    version.set("1.5.0")
+}
+
 allOpen {
     annotation("jakarta.persistence.Entity")
     annotation("jakarta.persistence.MappedSuperclass")
