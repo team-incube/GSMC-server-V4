@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "2.3.20"
     kotlin("plugin.spring") version "2.3.20"
     kotlin("plugin.jpa") version "2.3.20"
-    kotlin("kapt") version "2.3.20"
+    id("com.google.devtools.ksp") version "2.3.20-1.0.32"
     id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
@@ -33,7 +33,7 @@ dependencies {
     implementation(Libs.KOTLIN_REFLECT)
     implementation(Libs.QUERYDSL_JPA) { artifact { classifier = "jakarta" } }
 
-    kapt(Libs.QUERYDSL_APT) { artifact { classifier = "jakarta" } }
+    ksp(Libs.QUERYDSL_KSP_CODEGEN)
 
     compileOnly(Libs.LOMBOK)
     annotationProcessor(Libs.LOMBOK)
