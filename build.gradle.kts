@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "2.3.20"
     kotlin("plugin.spring") version "2.3.20"
     kotlin("plugin.jpa") version "2.3.20"
+    kotlin("kapt") version "2.3.20"
     id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
@@ -30,6 +31,9 @@ dependencies {
     implementation(Libs.SPRING_BOOT_WEB)
     implementation(Libs.JACKSON_KOTLIN)
     implementation(Libs.KOTLIN_REFLECT)
+    implementation(Libs.QUERYDSL_JPA) { artifact { classifier = "jakarta" } }
+
+    kapt(Libs.QUERYDSL_APT) { artifact { classifier = "jakarta" } }
 
     compileOnly(Libs.LOMBOK)
     annotationProcessor(Libs.LOMBOK)

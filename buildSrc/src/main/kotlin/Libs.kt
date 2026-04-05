@@ -16,6 +16,10 @@ object Libs {
     // Database
     const val MYSQL_CONNECTOR = "com.mysql:mysql-connector-j"
 
+    //QueryDSL
+    const val QUERYDSL_JPA = "io.github.openfeign.querydsl:querydsl-jpa:6.10.1"
+    const val QUERYDSL_APT = "io.github.openfeign.querydsl:querydsl-apt:6.10.1"
+
     // Util
     const val LOMBOK = "org.projectlombok:lombok"
 
