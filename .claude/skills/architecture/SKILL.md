@@ -2,39 +2,6 @@
 name: architecture
 description: Hexagonal architecture structure and rules for this project. Use this when creating new files or features to place them in the correct layer.
 ---
-
-## Package Structure
-```
-src/main/kotlin/com/team/incube/gsmc/
-├── domain/
-│   └── {domain}/
-│       ├── application/
-│       │   ├── port/
-│       │   │   ├── in/
-│       │   │   │   └── Fetch{Domain}UseCase.kt
-│       │   │   └── out/
-│       │   │       └── {Domain}PersistencePort.kt
-│       │   └── service/
-│       │       └── Fetch{Domain}Service.kt
-│       ├── domain/
-│       │   └── {Domain}.kt
-│       ├── exception/
-│       │   └── {Domain}NotFoundException.kt
-│       └── adapter/
-│           ├── in/
-│           │   └── {Domain}WebAdapter.kt
-│           └── out/
-│               └── persistence/
-│                   ├── entity/
-│                   │   └── {Domain}JpaEntity.kt
-│                   ├── repository/
-│                   │   └── {Domain}JpaRepository.kt
-│                   └── {Domain}PersistenceAdapter.kt
-├── global/
-│   ├── config/
-│   ├── exception/
-│   └── security/
-└── GsmcApplication.kt
 ```
 
 ## Dependency Direction
