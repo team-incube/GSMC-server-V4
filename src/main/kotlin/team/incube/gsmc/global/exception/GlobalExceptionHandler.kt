@@ -16,7 +16,8 @@ class GlobalExceptionHandler : DataFetcherExceptionResolverAdapter() {
     ): GraphQLError? =
         when (ex) {
             is GsmcException ->
-                GraphqlErrorBuilder.newError()
+                GraphqlErrorBuilder
+                    .newError()
                     .errorType(ex.errorCode.status.toGraphQLErrorType())
                     .message(ex.errorCode.message)
                     .path(env.executionStepInfo.path)
@@ -24,7 +25,8 @@ class GlobalExceptionHandler : DataFetcherExceptionResolverAdapter() {
                     .extensions(mapOf("status" to ex.errorCode.status.value()))
                     .build()
             else ->
-                GraphqlErrorBuilder.newError()
+                GraphqlErrorBuilder
+                    .newError()
                     .errorType(ErrorType.INTERNAL_ERROR)
                     .message(ErrorCode.INTERNAL_SERVER_ERROR.message)
                     .path(env.executionStepInfo.path)

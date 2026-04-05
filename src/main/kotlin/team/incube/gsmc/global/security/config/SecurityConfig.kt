@@ -16,8 +16,7 @@ class SecurityConfig {
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth.anyRequest().permitAll()
-            }
-            .formLogin { it.disable() }
+            }.formLogin { it.disable() }
             .httpBasic { it.disable() }
         return http.build()
     }
