@@ -22,6 +22,9 @@ spring:
       enabled: true
     path: /graphql
 
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
 sdk:
   logging:
     enabled: true
