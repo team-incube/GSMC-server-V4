@@ -28,5 +28,9 @@ sdk:
     not-logging-urls:
       - "/graphiql/**"
       - "/graphql/**"
+  response:
+    enabled: false
+  swagger:
+    enabled: false
   exception:
     enabled: false
