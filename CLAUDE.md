@@ -88,32 +88,6 @@ sdk:
 
 This project follows Hexagonal Architecture. See `.claude/skills/architecture/skill.md` for details.
 
-### Package Structure
-```
-src/main/kotlin/team/incube/gsmc/
-├── domain/
-│   └── {domain}/
-│       ├── application/
-│       │   ├── port/
-│       │   │   ├── in/          # UseCase interfaces
-│       │   │   └── out/         # PersistencePort interfaces
-│       │   └── service/         # Business logic
-│       ├── domain/              # Pure domain model (no JPA, no Spring)
-│       ├── exception/           # Domain exceptions
-│       └── adapter/
-│           ├── in/              # WebAdapter (GraphQL)
-│           └── out/
-│               └── persistence/
-│                   ├── entity/
-│                   ├── repository/
-│                   └── {Domain}PersistenceAdapter.kt
-├── global/
-│   ├── config/
-│   ├── exception/
-│   └── security/
-└── GsmcApplication.kt
-```
-
 ### Dependency Direction
 ```
 adapter/in → port/in → service → port/out → adapter/out
