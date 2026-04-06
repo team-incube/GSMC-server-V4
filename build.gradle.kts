@@ -31,7 +31,7 @@ dependencies {
     implementation(Libs.SPRING_BOOT_WEB)
     implementation(Libs.JACKSON_KOTLIN)
     implementation(Libs.KOTLIN_REFLECT)
-    implementation(Libs.QUERYDSL_JPA) { artifact { classifier = "jakarta" } }
+    implementation(Libs.QUERYDSL_JPA)
 
     ksp(Libs.QUERYDSL_KSP_CODEGEN)
 
