@@ -1,1 +1,8 @@
-rootProject.name = "GSMC-server-v4"
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "GSMC-server-V4"

@@ -18,7 +18,9 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-.idea
+.idea/*
+!.idea/icon.png
+!.idea/material_theme_project_new.xml
 *.iws
 *.iml
 *.ipr
