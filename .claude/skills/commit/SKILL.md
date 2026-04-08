@@ -22,7 +22,7 @@ This project uses Git Flow. Feature branches must be created from `develop` and 
     - Examples: `feat/add-student-major-filter`, `fix/auth-api-key-deletion`, `refactor/optimize-club-query`
 3. Create and checkout the branch:
 ```bash
-   git checkout -b <type>/<inferred-name>
+git checkout -b <type>/<inferred-name>
 ```
 4. Proceed with the commit flow below
 
@@ -44,10 +44,11 @@ Format: `type(scope): description`
 ## Commit Flow
 
 1. Inspect changes: `git status`, `git diff`
-2. Categorize into logical units
-3. Group files per unit
-4. For each group:
-    - Stage only relevant files with `git add`
-    - Write a commit message following the rules above
+2. For each changed file, create one commit:
+    - Stage only that single file: `git add <file>`
+    - Write a commit message that describes the change in that file
     - `git commit -m "message"`
-5. Verify with `git log --oneline -n <count>`
+3. Repeat for every changed file
+4. Verify with `git log --oneline -n <count>`
+
+> **Rule**: One file = One commit. Never stage multiple files in a single commit.
