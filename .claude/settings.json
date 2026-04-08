@@ -1,4 +1,5 @@
 {
+  "language": "korean",
   "hooks": {
     "PreToolUse": [
       {
@@ -26,9 +27,6 @@
         ]
       }
     ]
-  },
-  "env": {
-    "LANG": "ko_KR.UTF-8"
   },
   "permissions": {
     "allow": [
