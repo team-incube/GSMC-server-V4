@@ -1,5 +1,7 @@
 # GSMC Server V4 - Project Context
 
+**Please respond and work in Korean.**
+
 ## Language Requirement
 
 You MUST always respond in Korean (한국어). This is mandatory and cannot be overridden. Never use English in any response, explanation, or comment.
@@ -13,8 +15,8 @@ A web service that digitalizes the student competency evaluation system at Gwang
 ## Tech Stack
 
 - Language: Kotlin
-- Framework: Spring Boot 3.x
-- Database: MySQL (JPA)
+- Framework: Spring Boot 4.0.5
+- Database: MySQL (JPA + QueryDSL)
 - Cache: Redis
 - Build Tool: Gradle (Kotlin DSL)
 - API: GraphQL (Spring for GraphQL)
@@ -24,46 +26,21 @@ A web service that digitalizes the student competency evaluation system at Gwang
 
 ## the-sdk
 
-This project uses `the-sdk` — a modular SDK for reusable Spring Boot components by themoment-team.
-
-### Installation
-
-```kotlin
-repositories {
-    maven { url = uri("https://jitpack.io") }
-}
-
-dependencies {
-    implementation("com.github.themoment-team:the-sdk:1.5")
-}
-```
-
 ### Features Used
 
 | Module | Description |
 |--------|-------------|
 | `sdk.logging` | Automatic HTTP request/response logging with UUID-based tracing |
-| `sdk.response` | Consistent API response wrapping via `CommonApiResponse` |
 
 ### Exception Handling
 
-Use `GsmcException` with `ErrorCode` for all exceptions. Global exception handler is implemented directly in this project to customize GraphQL error response format.
-
+Use `GsmcException` with `ErrorCode`. Global exception handler is implemented directly in this project.
 ```kotlin
-enum class ErrorCode(val status: HttpStatus, val message: String) {
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "Member not found"),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
-}
-
-class MemberNotFoundException : GsmcException(ErrorCode.MEMBER_NOT_FOUND)
-
 throw MemberNotFoundException()
 throw GsmcException(ErrorCode.UNAUTHORIZED)
 ```
 
 ### application.yml Configuration
-
 ```yaml
 sdk:
   logging:
@@ -81,17 +58,14 @@ sdk:
 
 ## Architecture
 
-This project follows Hexagonal Architecture. See `.claude/skills/architecture/skill.md` for details.
+Hexagonal Architecture. See `.claude/skills/architecture/skill.md` for details.
 
 ### Dependency Direction
-
-```
-adapter/in → port/in → service → port/out → adapter/out
-```
+- adapter/in → port/in → service → port/out → adapter/out
 
 - `domain/` must not depend on JPA, Spring, or any infrastructure.
 - `service` only knows `port/out` interfaces — never JPA directly.
-- `JpaEntity ↔ Domain` conversion is handled via Kotlin extension functions in `adapter/out/persistence`.
+- `JpaEntity ↔ Domain` conversion via Kotlin extension functions.
 
 ## Domain Modules
 
@@ -113,48 +87,6 @@ adapter/in → port/in → service → port/out → adapter/out
 
 See `.claude/skills/convention/skill.md` for full details.
 
-### Service
-
-| Action | Keyword | Example |
-|--------|---------|---------|
-| Fetch | Fetch | `FetchMemberService` |
-| Search | Search | `SearchProjectService` |
-| Update | Modify | `ModifyMemberService` |
-| Create | Append | `AppendScoreService` |
-| Delete | Remove | `RemoveScoreService` |
-
-- Add `My` keyword when using `SecurityContextHolder`
-    - e.g. `FetchMyScoreService`, `ModifyMyCertificateService`
-
-### DTO
-
-| Action | Request | Response |
-|--------|---------|----------|
-| Fetch | `GetUserQuery` | `UserPayload` |
-| Search | `SearchUserQuery` | `UserPayload` |
-| Create | `CreateUserInput` | `UserMutationPayload` |
-| Update | `UpdateUserInput` | `UserMutationPayload` |
-| Delete | `DeleteUserInput` | `UserMutationPayload` |
-
-### GraphQL Controller
-
-```kotlin
-// With return value
-@QueryMapping
-fun member(@Argument id: Long): MemberPayload {
-    return fetchMemberUseCase.execute(id)
-}
-
-// Without return value - explicitly return CommonApiResponse
-@MutationMapping
-fun deleteMember(@Argument id: Long): CommonApiResponse<Unit> {
-    removeMemberUseCase.execute(id)
-    return CommonApiResponse.success("삭제 성공")
-}
-```
-
-Controller parameter must be named `input`.
-
 ## Transaction Management
 
 - Open transactions in the `service` layer only.
@@ -163,27 +95,6 @@ Controller parameter must be named `input`.
 ## Git Conventions
 
 See `.claude/skills/commit/skill.md` for full details.
-
-### Commit Types
-
-| Type | Usage |
-|------|-------|
-| feat | Add new code or files |
-| refactor | Modify existing code |
-| fix | Bug fix |
-| delete | Delete code or files |
-| docs | Documentation |
-| test | Add/modify tests |
-| merge | Merge branch |
-| init | Project initialization |
-
-### Branch Strategy
-
-- `main`: Production
-- `develop`: Integration branch
-- `feat/{name}`: Feature
-- `fix/{issue}`: Bug fix
-- `refactor/{description}`: Refactoring
 
 ## New Feature Checklist
 
