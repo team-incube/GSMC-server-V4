@@ -26,5 +26,22 @@
         ]
       }
     ]
+  },
+  "env": {
+    "LANG": "ko_KR.UTF-8"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git rebase:*)"
+    ]
   }
 }
