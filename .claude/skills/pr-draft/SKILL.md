@@ -17,15 +17,35 @@ Also read the PR template:
 cat .github/PULL_REQUEST_TEMPLATE.md
 ```
 
-## Step 2 — Determine Labels
+## Step 2 — Find Related Issue
 
-Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1–2 appropriate labels.
+Search GitHub issues to find the issue related to this PR:
+```bash
+gh issue list --limit 50 --state open
+```
 
-## Step 3 — Generate PR Content
+Match by:
+1. Branch name keywords (e.g. `fix/hook` → look for issues about "hook")
+2. Commit message keywords
+3. Changed file names or domains
+
+If a match is found, note the issue number for use in `Close #N`.
+If no match is found, leave `Close #` blank.
+
+Also check the issue title — **use it to align the PR title**.
+
+## Step 3 — Determine Labels
+
+Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1 appropriate label.
+
+> Note: `Type: Bug/UI` is issue-only. Use `Type: Bug/Function` for bug-fix PRs.
+
+## Step 4 — Generate PR Content
 
 **Title** — Generate 3 options in the format `[scope] description`:
 - Scope: domain name (`[member]`, `[auth]`, `[score]`, etc.) or `[global]` / `[ci/cd]` for cross-cutting changes
 - Description: Korean, concise, no period, max 50 characters total
+- If a related issue was found, align the best option's description with the issue title
 - Mark the best option with `← 추천`
 
 **Body** — Follow `.github/PULL_REQUEST_TEMPLATE.md` structure:
@@ -33,7 +53,6 @@ Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1–2 appropriate lab
 - Style: `~하였습니다`, `~되었습니다`, `~추가하였습니다`
 - No emojis, max 2500 characters
 - Auto-check checklist items based on the nature of changes
-- Infer related issue number from branch name or commits if possible
 ```markdown
 ## 개요
 <!-- 무엇을, 왜 변경했는지 작성해주세요 -->
@@ -53,9 +72,9 @@ Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1–2 appropriate lab
 - [ ] PR의 올바른 라벨과 리뷰어를 설정했나요?
 
 ### 관련 이슈
-- Close #
+- Close #N  <!-- replace N with issue number, or remove line if none -->
 ```
 
-## Step 4 — Write Body & Show Preview
+## Step 5 — Write Body & Show Preview
 
 Write the body to `PR_BODY.md`, then display:
