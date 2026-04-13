@@ -65,7 +65,7 @@ jobs:
           PR_AUTHOR="${{ github.event.pull_request.user.login }}"
 
           # 자동 리뷰어 목록
-          ALL_REVIEWERS="jyx-07,hej090224"
+          ALL_REVIEWERS="jyx-07,hej090224,snowykte0426"
 
           # 본인(PR AUTHOR)은 제외
           REVIEWERS=$(echo "$ALL_REVIEWERS" | tr ',' '\n' | grep -v "^${PR_AUTHOR}$" | tr '\n' ',' | sed 's/,$//')
