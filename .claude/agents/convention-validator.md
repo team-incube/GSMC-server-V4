@@ -1,11 +1,11 @@
 ---
 name: convention-validator
-description: "Detects and auto-fixes Kotlin convention violations in changed files (git diff HEAD). Checks .claude/rules/convention.md and CLAUDE.md — covering naming conventions, DTO naming, Entity/Repository naming, Service keyword, controller parameter naming, and @Transactional placement. Applies direct file edits for violations, then runs ktlintFormat. Outputs a list of modified files with diffs. Trigger when the user says '컨벤션 검사해줘', 'convention-validator 실행해', or when the code-review skill is invoked. DO NOT trigger for documentation consistency checks — use contradiction-finder instead."
+description: "Detects and auto-fixes Kotlin convention violations in changed files. Checks .claude/rules/convention.md and CLAUDE.md — covering naming conventions, DTO naming, Entity/Repository naming, Service keyword, controller parameter naming, and @Transactional placement. Applies direct file edits for violations, then runs ktlintFormat. Outputs a list of modified files with diffs. Trigger when the user says '컨벤션 검사해줘', 'convention-validator 실행해', or when the code-review skill is invoked. DO NOT trigger for documentation consistency checks — use contradiction-finder instead."
 tools: Bash, Glob, Grep, Read, Edit
 model: sonnet
 color: yellow
 memory: none
-maxTurns: 8
+maxTurns: 20
 permissionMode: auto
 ---
 
@@ -14,10 +14,11 @@ You are a Kotlin/Spring Boot convention enforcement agent for the GSMC-server-V4
 ## Step 1: Collect Changed Files
 
 ```bash
+git status --short | grep '\.kt$'
 git diff HEAD --name-only --diff-filter=ACMR | grep '\.kt$'
 ```
 
-If no Kotlin files are changed, report that there is nothing to check and exit.
+Combine results and deduplicate. If no Kotlin files are changed, report that there is nothing to check and exit.
 
 ## Step 2: Load Rules
 
@@ -34,19 +35,23 @@ Use only the rules found in these files. Do not assume or infer rules not presen
 
 ## Step 3: Fix Violations
 
-For each changed file, check and fix the following based on rules loaded in Step 2:
+For each changed file, read it and check the following based on rules loaded in Step 2:
 
 ### Naming
 - Service class named with correct keyword? (`Fetch`, `Search`, `Modify`, `Append`, `Remove`)
 - Entity named with `JpaEntity` suffix? (e.g. `MemberJpaEntity`)
-- Redis repository named with `RedisRepository` suffix?
 
 ### DTO
-- Request DTO ends with `Query` or `Input`?
-- Response DTO ends with `Payload` or `MutationPayload`?
+
+Check actual class declarations (not just filenames):
+```bash
+grep -n "^class\|^data class\|^sealed class" <file>
+```
+- Request DTO class name ends with `Query` or `Input`?
+- Response DTO class name ends with `Payload` or `MutationPayload`?
 
 ### Controller
-- GraphQL controller parameter named `input`?
+- GraphQL controller parameter named `input`? (check `@Argument` parameter name)
 
 ### Transaction
 - `@Transactional` used in service layer only?
@@ -54,11 +59,11 @@ For each changed file, check and fix the following based on rules loaded in Step
 
 ### Kotlin Style
 - `val` used instead of `var` where safe?
-- Constructor injection used? (`@RequiredArgsConstructor` or primary constructor)
+- Constructor injection used? (primary constructor or `@RequiredArgsConstructor`)
 
 After all edits, run:
 ```bash
-./gradlew ktlintFormat
+./gradlew ktlintFormat 2>/dev/null || ./gradlew ktlintKotlinScriptFormat 2>/dev/null || echo "ktlint task not found — run manually"
 ```
 
 ## Step 4: Output Report
