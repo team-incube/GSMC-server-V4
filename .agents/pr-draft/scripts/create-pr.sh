@@ -10,12 +10,7 @@ if [ ! -f "$BODY_FILE" ]; then
   exit 1
 fi
 
-CURRENT=$(git branch --show-current)
-case "$CURRENT" in
-  feature/*)  BASE="develop" ;;
-  develop)    BASE="master" ;;
-  *)          BASE=$(gh pr view --json baseRefName -q .baseRefName 2>/dev/null || echo "develop") ;;
-esac
+BASE="develop"
 
 ARGS=(gh pr create --title "$TITLE" --body-file "$BODY_FILE" --base "$BASE")
 
