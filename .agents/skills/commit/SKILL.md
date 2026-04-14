@@ -1,7 +1,6 @@
 ---
 name: commit
 description: Create Git commits by splitting changes into logical units following project conventions. Handles Git Flow automatically — detects develop branch and checks out a feature branch before committing.
-allowed-tools: Bash
 ---
 
 ## Step 0 — Branch Check (Required)
@@ -52,4 +51,4 @@ Format: `type(scope): description`
 3. Repeat for every changed file
 4. Verify with `git log --oneline -n <count>`
 
-> **Rule**: One file = One commit. Never stage multiple files in a single commit.
+> **Rule**: One logical unit = One commit. Ensure each commit is atomic and contains all necessary changes for a single task.
