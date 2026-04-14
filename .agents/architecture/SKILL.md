@@ -54,7 +54,7 @@ fun {Domain}.toEntity() = {Domain}JpaEntity(...)
 | UseCase | `Fetch{Domain}UseCase`, `Append{Domain}UseCase` |
 | PersistencePort | `{Domain}PersistencePort` |
 | Service | `Fetch{Domain}Service`, `Modify{Domain}Service` |
-| WebAdapter | `{Domain}WebAdapter` |
+| GraphQLAdapter | `{Domain}GraphQLAdapter` |
 | PersistenceAdapter | `{Domain}PersistenceAdapter` |
 | JpaEntity | `{Domain}JpaEntity` |
 | JpaRepository | `{Domain}JpaRepository` |
