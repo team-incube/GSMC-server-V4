@@ -78,3 +78,5 @@ Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1 appropriate label.
 ## Step 5 — Write Body & Show Preview
 
 Write the body to `PR_BODY.md`, then display:
+
+> Base branch is always `develop`. Always pass `--base develop` when running `gh pr create`.
