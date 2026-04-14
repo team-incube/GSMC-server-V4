@@ -18,7 +18,7 @@ Analyze changed files and verify the following items.
 - [ ] camelCase used for packages, classes, interfaces, variables, and methods?
 - [ ] snake_case used for `@Table` and DB-related parts?
 - [ ] Table name follows `xxxx_tb` convention and is singular?
-- [ ] Entity named correctly? (e.g. `MemberJpaEntity`, `BlackListRedisRepository`)
+- [ ] Entity named correctly? (e.g. `MemberJpaEntity`)
 - [ ] Service class named with correct keyword? (`Fetch` / `Search` / `Modify` / `Append` / `Remove`)
 - [ ] `My` keyword used when accessing `SecurityContextHolder`?
 
