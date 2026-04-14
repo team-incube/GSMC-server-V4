@@ -2,7 +2,6 @@
 name: architecture
 description: Hexagonal architecture structure and rules for this project. Use this when creating new files or features to place them in the correct layer.
 ---
-```
 
 ## Dependency Direction
 ```
