@@ -74,10 +74,8 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs("build/generated/source/kapt/main")
-        }
+ktlint {
+    filter {
+        exclude("**/generated/**")
     }
 }
