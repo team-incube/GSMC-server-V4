@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "2.3.20"
     kotlin("plugin.spring") version "2.3.20"
     kotlin("plugin.jpa") version "2.3.20"
-    id("com.google.devtools.ksp") version "2.3.6"
+    kotlin("kapt") version "2.3.20"
     id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
@@ -33,10 +33,10 @@ dependencies {
     implementation(Libs.KOTLIN_REFLECT)
     implementation(Libs.QUERYDSL_JPA)
 
-    ksp(Libs.QUERYDSL_KSP_CODEGEN)
+    kapt(Libs.QUERYDSL_KAPT)
 
     compileOnly(Libs.LOMBOK)
-    annotationProcessor(Libs.LOMBOK)
+    kapt(Libs.LOMBOK)
 
     runtimeOnly(Libs.MYSQL_CONNECTOR)
 
@@ -45,7 +45,8 @@ dependencies {
     testImplementation(Libs.SPRING_GRAPHQL_TEST)
     testImplementation(Libs.SPRING_SECURITY_TEST)
     testCompileOnly(Libs.LOMBOK)
-    testAnnotationProcessor(Libs.LOMBOK)
+    kaptTest(Libs.LOMBOK)
+
     testRuntimeOnly(Libs.JUNIT_PLATFORM_LAUNCHER)
 }
 
@@ -59,6 +60,10 @@ ktlint {
     version.set("1.5.0")
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 allOpen {
     annotation("jakarta.persistence.Entity")
     annotation("jakarta.persistence.MappedSuperclass")
@@ -67,4 +72,10 @@ allOpen {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+ktlint {
+    filter {
+        exclude("**/generated/**")
+    }
 }
