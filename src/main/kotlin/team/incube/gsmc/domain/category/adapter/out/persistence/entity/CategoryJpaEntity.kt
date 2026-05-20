@@ -26,27 +26,21 @@ class CategoryJpaEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "category_id", nullable = false)
     val categoryId: Long = 0,
-
     /** 점수 산출 시 적용되는 가중치 */
     @Column(name = "weight", nullable = false)
     val weight: Int,
-
     /** 카테고리 영문명 */
     @Column(name = "category_english_name", nullable = false, length = 50)
     val categoryEnglishName: String,
-
     /** 카테고리 한글명 */
     @Column(name = "category_korean_name", nullable = false, length = 50)
     val categoryKoreanName: String,
-
     /** 카테고리 최대 점수 */
     @Column(name = "category_maximum_value", nullable = false)
     val categoryMaximumValue: Int,
-
     /** 점수 누적 여부 — `true`: 합산, `false`: 최신값 대체 */
     @Column(name = "is_accumulated", nullable = false)
     val isAccumulated: Boolean,
-
     /** 증빙 자료 제출 방식 */
     @Enumerated(EnumType.STRING)
     @Column(name = "evidence_type", nullable = false, length = 20)
