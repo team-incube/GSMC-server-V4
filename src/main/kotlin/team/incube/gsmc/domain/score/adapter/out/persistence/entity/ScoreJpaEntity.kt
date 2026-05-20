@@ -33,27 +33,22 @@ class ScoreJpaEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "score_id", nullable = false)
     val scoreId: Long = 0,
-
     /** 점수를 요청한 사용자 */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     val user: UserJpaEntity,
-
     /** 점수가 속한 카테고리 */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     val category: CategoryJpaEntity,
-
     /** 연결된 근거 자료 — [EvidenceType.UNREQUIRED] 카테고리는 null */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evidence_id", nullable = true)
     val evidence: EvidenceJpaEntity?,
-
     /** 심사 상태 */
     @Enumerated(EnumType.STRING)
     @Column(name = "score_status", nullable = false, length = 20)
     val scoreStatus: ScoreStatus,
-
     /** 활동명 — [EvidenceType.EVIDENCE] 카테고리에서 활동 내용을 직접 기재할 때 사용 */
     @Column(name = "activity_name", nullable = true, length = 255)
     val activityName: String?,
