@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import team.incube.gsmc.domain.user.UserRole
 
 /**
@@ -19,7 +20,10 @@ import team.incube.gsmc.domain.user.UserRole
  * @see UserRole
  */
 @Entity
-@Table(name = "user_tb")
+@Table(
+    name = "user_tb",
+    uniqueConstraints = [UniqueConstraint(name = "uk_user_grade_class_number", columnNames = ["user_grade", "user_class_number", "user_number"])],
+)
 class UserJpaEntity(
     /** 사용자 고유 식별자 */
     @Id
