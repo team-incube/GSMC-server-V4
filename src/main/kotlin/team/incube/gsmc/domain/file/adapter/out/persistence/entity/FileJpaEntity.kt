@@ -27,30 +27,24 @@ class FileJpaEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "file_id", nullable = false)
     val fileId: Long = 0,
-
     /** 파일을 업로드한 사용자 */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     val user: UserJpaEntity,
-
     /** 연결된 점수 요청 (없을 수 있음) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "score_id", nullable = true)
     val score: ScoreJpaEntity?,
-
     /** 연결된 근거 자료 (없을 수 있음) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evidence_id", nullable = true)
     val evidence: EvidenceJpaEntity?,
-
     /** 파일 접근 URI */
     @Column(name = "file_uri", nullable = false, length = 255)
     val fileUri: String,
-
     /** 사용자가 업로드한 원본 파일명 */
     @Column(name = "file_original_name", nullable = false, length = 255)
     val fileOriginalName: String,
-
     /** 서버에 저장된 파일명 */
     @Column(name = "file_stored_name", nullable = false, length = 255)
     val fileStoredName: String,
