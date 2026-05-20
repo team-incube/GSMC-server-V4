@@ -80,3 +80,11 @@ Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1 appropriate label.
 Write the body to `PR_BODY.md`, then display:
 
 > Base branch is always `develop`. Always pass `--base develop` when running `gh pr create`.
+
+## Step 6 — Create PR & Cleanup
+
+After the user confirms and `gh pr create` succeeds, delete the temporary file:
+
+```bash
+rm -f PR_BODY.md
+```
