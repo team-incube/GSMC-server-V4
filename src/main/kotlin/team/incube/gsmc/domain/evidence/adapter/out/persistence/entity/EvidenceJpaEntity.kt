@@ -39,7 +39,7 @@ class EvidenceJpaEntity(
     @Column(name = "evidence_title", nullable = false, length = 255)
     val evidenceTitle: String,
     /** 근거 자료 내용 */
-    @Column(name = "evidence_content", nullable = false, length = 255)
+    @Column(name = "evidence_content", nullable = false, columnDefinition = "TEXT")
     val evidenceContent: String,
 ) {
     /** 최초 등록 일시 */
