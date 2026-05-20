@@ -22,7 +22,12 @@ import team.incube.gsmc.domain.user.UserRole
 @Entity
 @Table(
     name = "user_tb",
-    uniqueConstraints = [UniqueConstraint(name = "uk_user_grade_class_number", columnNames = ["user_grade", "user_class_number", "user_number"])],
+    uniqueConstraints = [
+        UniqueConstraint(
+            name = "uk_user_grade_class_number",
+            columnNames = ["user_grade", "user_class_number", "user_number"],
+        ),
+    ],
 )
 class UserJpaEntity(
     /** 사용자 고유 식별자 */
