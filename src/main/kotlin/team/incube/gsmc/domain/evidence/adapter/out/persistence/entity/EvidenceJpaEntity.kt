@@ -31,16 +31,13 @@ class EvidenceJpaEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "evidence_id", nullable = false)
     val evidenceId: Long = 0,
-
     /** 근거 자료를 제출한 사용자 */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     val user: UserJpaEntity,
-
     /** 근거 자료 제목 */
     @Column(name = "evidence_title", nullable = false, length = 255)
     val evidenceTitle: String,
-
     /** 근거 자료 내용 */
     @Column(name = "evidence_content", nullable = false, length = 255)
     val evidenceContent: String,
