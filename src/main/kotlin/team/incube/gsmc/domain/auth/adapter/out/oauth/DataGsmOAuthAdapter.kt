@@ -22,7 +22,6 @@ private const val DEFAULT_OAUTH_TOKEN_EXPIRY_SECONDS = 3600L
 class DataGsmOAuthAdapter(
     private val client: DataGsmOAuthClient,
 ) : OAuthPort {
-
     /**
      * PKCE를 포함한 OAuth 인가 URL을 생성한다.
      *
