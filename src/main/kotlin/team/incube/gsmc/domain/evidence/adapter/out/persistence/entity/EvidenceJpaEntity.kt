@@ -45,10 +45,10 @@ class EvidenceJpaEntity(
     /** 최초 등록 일시 */
     @CreatedDate
     @Column(name = "evidence_created_at", nullable = false, updatable = false)
-    lateinit var evidenceCreatedAt: LocalDateTime
+    var evidenceCreatedAt: LocalDateTime? = null
 
     /** 최종 수정 일시 */
     @LastModifiedDate
     @Column(name = "evidence_updated_at", nullable = false)
-    lateinit var evidenceUpdatedAt: LocalDateTime
+    var evidenceUpdatedAt: LocalDateTime? = null
 }
