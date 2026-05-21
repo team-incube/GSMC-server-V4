@@ -47,12 +47,17 @@ class RefreshTokenService(
                 ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
 
         val newAccessToken = authTokenPort.generateAccessToken(user.userId, user.userRole)
+        val newRefreshToken = authTokenPort.generateRefreshToken(user.userId)
+
+        refreshTokenPersistencePort.save(user.userId, newRefreshToken)
+
+        val now = System.currentTimeMillis()
 
         return TokenResult(
             accessToken = newAccessToken,
-            refreshToken = refreshToken,
-            accessTokenExpiresIn = authTokenPort.accessTokenExpiresIn,
-            refreshTokenExpiresIn = authTokenPort.refreshTokenExpiresIn,
+            refreshToken = newRefreshToken,
+            accessTokenExpiresIn = now + authTokenPort.accessTokenExpiresIn * 1000,
+            refreshTokenExpiresIn = now + authTokenPort.refreshTokenExpiresIn * 1000,
             role = user.userRole,
         )
     }
