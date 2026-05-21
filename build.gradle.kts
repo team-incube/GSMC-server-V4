@@ -24,6 +24,10 @@ repositories {
 
 dependencies {
     implementation(Libs.THE_SDK)
+    implementation(Libs.DATAGSM_OAUTH_SDK)
+    implementation(Libs.JJWT_API)
+    runtimeOnly(Libs.JJWT_IMPL)
+    runtimeOnly(Libs.JJWT_JACKSON)
     implementation(Libs.SPRING_BOOT_JPA)
     implementation(Libs.SPRING_BOOT_REDIS)
     implementation(Libs.SPRING_BOOT_GRAPHQL)
