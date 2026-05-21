@@ -62,6 +62,7 @@ class LoginService(
                 ?: userPersistencePort.save(
                     User(
                         userId = 0,
+                        // 교사는 SDK에서 이름을 제공하지 않으므로 이메일을 대체 식별자로 사용
                         userName = oAuthUserInfo.name ?: oAuthUserInfo.email,
                         userEmail = oAuthUserInfo.email,
                         userGrade = oAuthUserInfo.grade,

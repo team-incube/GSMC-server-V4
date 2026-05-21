@@ -106,6 +106,7 @@ class DataGsmOAuthAdapter(
         return OAuthUserInfo(
             email = userInfo.email,
             isStudent = isStudent,
+            // DataGSM SDK UserInfo에는 최상위 name 필드가 없어 교사는 항상 null
             name = student?.name,
             grade = student?.grade,
             classNum = student?.classNum,
