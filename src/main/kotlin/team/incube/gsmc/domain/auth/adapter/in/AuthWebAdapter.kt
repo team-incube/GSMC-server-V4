@@ -36,8 +36,8 @@ class AuthWebAdapter(
     ): ResponseEntity<AuthorizationUrlResult> = ResponseEntity.ok(getAuthorizationUrlUseCase.execute(redirectUri))
 
     @Operation(summary = "OAuth 로그인")
-    @PostMapping("/login")
-    fun login(
+    @PostMapping("/signin")
+    fun signin(
         @RequestBody input: LoginInput,
     ): ResponseEntity<TokenResult> = ResponseEntity.ok(loginUseCase.execute(input.code, input.state, input.redirectUri))
 
@@ -49,8 +49,8 @@ class AuthWebAdapter(
 
     @Operation(summary = "로그아웃")
     @SecurityRequirement(name = "JWT")
-    @DeleteMapping("/logout")
-    fun logout(): ResponseEntity<Unit> {
+    @DeleteMapping("/signout")
+    fun signout(): ResponseEntity<Unit> {
         logoutUseCase.execute()
         return ResponseEntity.noContent().build()
     }

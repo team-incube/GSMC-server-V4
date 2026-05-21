@@ -32,7 +32,7 @@ class SecurityConfig(
                 auth
                     .requestMatchers(
                         "/api/auth/authorization-url",
-                        "/api/auth/login",
+                        "/api/auth/signin",
                         "/api/auth/token/refresh",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
