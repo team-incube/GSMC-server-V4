@@ -4,10 +4,10 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
 import team.incube.gsmc.domain.auth.port.out.AuthTokenPort
+import team.incube.gsmc.global.auth.CustomUserDetails
 
 class JwtAuthenticationFilter(
     private val authTokenPort: AuthTokenPort,
@@ -20,12 +20,9 @@ class JwtAuthenticationFilter(
         extractToken(request)
             ?.let { token -> authTokenPort.parseTokenClaims(token) }
             ?.let { (userId, role) ->
+                val userDetails = CustomUserDetails(userId, role)
                 SecurityContextHolder.getContext().authentication =
-                    UsernamePasswordAuthenticationToken(
-                        userId,
-                        null,
-                        listOf(SimpleGrantedAuthority("ROLE_${role.name}")),
-                    )
+                    UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
             }
         filterChain.doFilter(request, response)
     }
