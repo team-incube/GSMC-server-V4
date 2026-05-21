@@ -50,11 +50,14 @@ Format: `type(scope): description`
 ## Commit Flow
 
 1. Inspect changes: `git status`, `git diff`
-2. For each changed file, create one commit:
-    - Stage only that single file: `git add <file>`
-    - Write a commit message that describes the change in that file
+2. Group changed files into logical units — files that belong to the same concern go into one commit:
+    - e.g. new feature's UseCase + Service + Adapter → one `feat` commit
+    - e.g. ktlint formatting across multiple files → one `refactor` commit
+    - e.g. changes in unrelated domains → separate commits
+3. For each logical group:
+    - Stage all files in the group: `git add <file1> <file2> ...`
+    - Write one commit message that describes the group's intent
     - `git commit -m "message"`
-3. Repeat for every changed file
 4. Verify with `git log --oneline -n <count>`
 
-> **Rule**: One file = One commit. Never stage multiple files in a single commit.
+> **Rule**: Changes with the same logical purpose go into one commit. Changes with different purposes must be separated.

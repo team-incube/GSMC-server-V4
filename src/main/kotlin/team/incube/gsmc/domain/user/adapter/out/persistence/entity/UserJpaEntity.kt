@@ -41,7 +41,10 @@ class UserJpaEntity(
     @Column(name = "user_name", nullable = false, length = 25)
     val userName: String,
     /** 학교 이메일 — gsm.hs.kr 도메인만 허용, 중복 불가 */
-    @field:Pattern(regexp = "^[\\w.+\\-]+@gsm\\.hs\\.kr$", message = "이메일은 gsm.hs.kr 도메인만 허용됩니다.")
+    @field:Pattern(
+        regexp = "^[\\w.+\\-]+@gsm\\.hs\\.kr$",
+        message = "이메일은 gsm.hs.kr 도메인만 허용됩니다.",
+    )
     @Column(name = "user_email", nullable = false, unique = true, length = 100)
     val userEmail: String,
     /** 학년 (1~3) */
@@ -53,7 +56,7 @@ class UserJpaEntity(
     /** 번호 */
     @Column(name = "user_number", nullable = true)
     val userNumber: Int?,
-    /** 권한 역할 — 가입 시 [UserRole.UNAUTHORIZED], 승인 후 역할 변경 */
+    /** 권한 역할 — DataGSM OAuth 로그인 시 isStudent 값에 따라 [UserRole.STUDENT] 또는 [UserRole.TEACHER]로 즉시 할당 */
     @Enumerated(EnumType.STRING)
     @Column(name = "user_role", nullable = false, length = 50)
     val userRole: UserRole,
