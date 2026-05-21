@@ -28,11 +28,9 @@ class RefreshTokenService(
      * @throws GsmcException 사용자를 찾을 수 없을 시 [ErrorCode.USER_NOT_FOUND]
      */
     override fun execute(refreshToken: String): TokenResult {
-        if (!authTokenPort.validateToken(refreshToken)) {
-            throw GsmcException(ErrorCode.INVALID_REFRESH_TOKEN)
-        }
-
-        val userId = authTokenPort.getUserIdFromToken(refreshToken)
+        val (userId, _) =
+            authTokenPort.parseTokenClaims(refreshToken)
+                ?: throw GsmcException(ErrorCode.INVALID_REFRESH_TOKEN)
 
         val storedToken =
             refreshTokenPersistencePort.find(userId)

@@ -56,7 +56,7 @@ class UserJpaEntity(
     /** 번호 */
     @Column(name = "user_number", nullable = true)
     val userNumber: Int?,
-    /** 권한 역할 — 가입 시 [UserRole.UNAUTHORIZED], 승인 후 역할 변경 */
+    /** 권한 역할 — DataGSM OAuth 로그인 시 isStudent 값에 따라 [UserRole.STUDENT] 또는 [UserRole.TEACHER]로 즉시 할당 */
     @Enumerated(EnumType.STRING)
     @Column(name = "user_role", nullable = false, length = 50)
     val userRole: UserRole,

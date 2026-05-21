@@ -48,7 +48,9 @@ class JwtTokenProvider(
 
     override fun validateToken(token: String): Boolean = runCatching { parseClaims(token) }.isSuccess
 
-    override fun getUserIdFromToken(token: String): Long = parseClaims(token).subject.toLong()
+    override fun getUserIdFromToken(token: String): Long =
+        runCatching { parseClaims(token).subject.toLong() }
+            .getOrElse { throw GsmcException(ErrorCode.INVALID_TOKEN) }
 
     override fun getRoleFromToken(token: String): UserRole {
         val roleStr =
