@@ -14,18 +14,23 @@ git branch --show-current
 
 **If current branch is `develop`:**
 
-This project uses Git Flow. Feature branches must be created from `develop` and merged back into `develop`.
+This project uses Git Flow. Do NOT commit directly to `develop`.
 
-1. Analyze all changes with `git status` and `git diff`
-2. Infer an appropriate branch name from the changes:
-    - Format: `<type>/<kebab-case-description>` — use the same type as the planned commit (exception: use `cicd/` for `ci/cd` type)
-    - Reflect the domain scope in the name
-    - Examples: `feat/add-member-profile-api`, `fix/auth-token-expiry`, `refactor/optimize-score-query`
-3. Create and checkout the branch:
+1. Inspect all changes: `git status`, `git diff`
+2. Plan every commit before touching git — determine `type`, `scope`, and `description` for each changed file following the Commit Message Rules below
+3. Derive the branch name from the **primary commit** (the most significant change):
+    - Format: `<type>/<scope>-<kebab-case-description>`
+    - Exception: if scope is `ci/cd`, use `cicd/` as the branch prefix instead
+    - Examples:
+        - Primary commit `feat(member): 프로필 조회 API 추가` → `feat/member-add-profile-api`
+        - Primary commit `fix(auth): 토큰 만료 버그 수정` → `fix/auth-token-expiry-bug`
+        - Primary commit `refactor(score): 쿼리 최적화` → `refactor/score-optimize-query`
+        - Primary commit `feat(ci/cd): GitHub Actions 워크플로우 추가` → `cicd/add-github-actions-workflow`
+4. Create and checkout the branch:
    ```bash
-   git checkout -b <type>/<inferred-name>
+   git checkout -b <derived-branch-name>
    ```
-4. Proceed with the commit flow below
+5. Proceed with the commit flow below
 
 **If current branch is NOT `develop`:** proceed directly to the commit flow.
 
