@@ -57,4 +57,13 @@ interface AuthTokenPort {
      * @return 토큰에 포함된 권한 역할
      */
     fun getRoleFromToken(token: String): UserRole
+
+    /**
+     * 토큰을 한 번 파싱하여 사용자 ID와 권한 역할을 함께 반환합니다.
+     * 유효하지 않은 토큰이거나 클레임이 없으면 null을 반환합니다.
+     *
+     * @param token 파싱할 토큰
+     * @return (userId, role) 쌍, 유효하지 않으면 null
+     */
+    fun parseTokenClaims(token: String): Pair<Long, UserRole>?
 }
