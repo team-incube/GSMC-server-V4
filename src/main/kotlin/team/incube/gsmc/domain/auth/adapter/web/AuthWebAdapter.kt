@@ -1,6 +1,4 @@
-@file:Suppress("ktlint:standard:package-name")
-
-package team.incube.gsmc.domain.auth.adapter.`in`
+package team.incube.gsmc.domain.auth.adapter.web
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
