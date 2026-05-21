@@ -18,17 +18,14 @@ class JwtAuthenticationFilter(
         filterChain: FilterChain,
     ) {
         extractToken(request)
-            ?.takeIf { authTokenPort.validateToken(it) }
-            ?.let { token ->
-                val userId = authTokenPort.getUserIdFromToken(token)
-                val role = authTokenPort.getRoleFromToken(token)
-                val auth =
+            ?.let { token -> authTokenPort.parseTokenClaims(token) }
+            ?.let { (userId, role) ->
+                SecurityContextHolder.getContext().authentication =
                     UsernamePasswordAuthenticationToken(
                         userId,
                         null,
                         listOf(SimpleGrantedAuthority("ROLE_${role.name}")),
                     )
-                SecurityContextHolder.getContext().authentication = auth
             }
         filterChain.doFilter(request, response)
     }
