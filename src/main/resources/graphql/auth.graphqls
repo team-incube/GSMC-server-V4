@@ -1,0 +1,32 @@
+type Query {
+    getAuthorizationUrl(redirectUri: String!): AuthorizationUrlPayload!
+}
+
+type Mutation {
+    login(input: LoginInput!): LoginPayload!
+    refreshToken(input: RefreshTokenInput!): LoginPayload!
+    logout: Boolean!
+}
+
+input LoginInput {
+    code: String!
+    state: String!
+    redirectUri: String!
+}
+
+input RefreshTokenInput {
+    refreshToken: String!
+}
+
+type AuthorizationUrlPayload {
+    url: String!
+    state: String!
+}
+
+type LoginPayload {
+    accessToken: String!
+    refreshToken: String!
+    accessTokenExpiresIn: Int!
+    refreshTokenExpiresIn: Int!
+    role: String!
+}
