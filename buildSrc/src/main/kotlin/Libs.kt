@@ -1,6 +1,7 @@
 object Libs {
     // SDK
     const val THE_SDK = "com.github.themoment-team:the-sdk:1.5"
+    const val DATAGSM_OAUTH_SDK = "com.github.themoment-team:datagsm-oauth-sdk-java:1.5.0"
 
     // Spring Boot
     const val SPRING_BOOT_JPA = "org.springframework.boot:spring-boot-starter-data-jpa"
@@ -19,6 +20,11 @@ object Libs {
     // QueryDSL
     const val QUERYDSL_JPA = "io.github.openfeign.querydsl:querydsl-jpa:6.10.1"
     const val QUERYDSL_KAPT = "io.github.openfeign.querydsl:querydsl-apt:6.10.1:jakarta"
+
+    // JWT
+    const val JJWT_API = "io.jsonwebtoken:jjwt-api:0.12.6"
+    const val JJWT_IMPL = "io.jsonwebtoken:jjwt-impl:0.12.6"
+    const val JJWT_JACKSON = "io.jsonwebtoken:jjwt-jackson:0.12.6"
 
     // Util
     const val LOMBOK = "org.projectlombok:lombok"
