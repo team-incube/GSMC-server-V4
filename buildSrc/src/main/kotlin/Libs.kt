@@ -37,5 +37,6 @@ object Libs {
     const val KOTLIN_TEST_JUNIT5 = "org.jetbrains.kotlin:kotlin-test-junit5"
     const val SPRING_GRAPHQL_TEST = "org.springframework.graphql:spring-graphql-test"
     const val SPRING_SECURITY_TEST = "org.springframework.security:spring-security-test"
+    const val MOCKK = "io.mockk:mockk:1.14.6"
     const val JUNIT_PLATFORM_LAUNCHER = "org.junit.platform:junit-platform-launcher"
 }
