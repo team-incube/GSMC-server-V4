@@ -39,6 +39,8 @@ dependencies {
 
     kapt(Libs.QUERYDSL_KAPT)
 
+    implementation(Libs.SPRINGDOC_OPENAPI)
+
     compileOnly(Libs.LOMBOK)
     kapt(Libs.LOMBOK)
 
