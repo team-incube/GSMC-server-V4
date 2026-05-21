@@ -50,11 +50,14 @@ Format: `type(scope): description`
 ## Commit Flow
 
 1. Inspect changes: `git status`, `git diff`
-2. For each changed file, create one commit:
-    - Stage only that single file: `git add <file>`
-    - Write a commit message that describes the change in that file
+2. Group changed files into logical units — files that belong to the same concern go into one commit:
+    - e.g. 새 기능의 UseCase + Service + Adapter → 하나의 `feat` 커밋
+    - e.g. 여러 파일에 걸친 ktlint 포맷팅 → 하나의 `refactor` 커밋
+    - e.g. 관련 없는 도메인의 변경 → 별도 커밋으로 분리
+3. For each logical group:
+    - Stage all files in the group: `git add <file1> <file2> ...`
+    - Write one commit message that describes the group's intent
     - `git commit -m "message"`
-3. Repeat for every changed file
 4. Verify with `git log --oneline -n <count>`
 
-> **Rule**: One file = One commit. Never stage multiple files in a single commit.
+> **Rule**: 논리적으로 같은 목적의 변경은 하나의 커밋으로 묶는다. 목적이 다른 변경은 반드시 분리한다.
