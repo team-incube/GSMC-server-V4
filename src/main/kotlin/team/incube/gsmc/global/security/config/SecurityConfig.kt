@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
@@ -28,18 +29,8 @@ class SecurityConfig(
             .cors { it.configurationSource(corsConfigurationSource()) }
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-            .authorizeHttpRequests { auth ->
-                auth
-                    .requestMatchers(
-                        "/api/auth/authorization-url",
-                        "/api/auth/signin",
-                        "/api/auth/token/refresh",
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                    ).permitAll()
-                    .anyRequest()
-                    .authenticated()
-            }.exceptionHandling {
+            .authorizeHttpRequests(::configureEndpoints)
+            .exceptionHandling {
                 it.authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 it.accessDeniedHandler(jwtAccessDeniedHandler)
             }.formLogin { it.disable() }
@@ -49,6 +40,21 @@ class SecurityConfig(
                 UsernamePasswordAuthenticationFilter::class.java,
             )
         return http.build()
+    }
+
+    private fun configureEndpoints(
+        auth: AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry,
+    ) {
+        auth
+            .requestMatchers(
+                "/api/auth/authorization-url",
+                "/api/auth/signin",
+                "/api/auth/token/refresh",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+            ).permitAll()
+            .anyRequest()
+            .authenticated()
     }
 
     @Bean
