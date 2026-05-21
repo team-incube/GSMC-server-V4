@@ -1,11 +1,12 @@
 package team.incube.gsmc.global.security.jwt
 
-import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.stereotype.Component
 import team.incube.gsmc.domain.auth.port.out.AuthTokenPort
 import team.incube.gsmc.domain.user.UserRole
+import team.incube.gsmc.global.exception.ErrorCode
+import team.incube.gsmc.global.exception.GsmcException
 import java.nio.charset.StandardCharsets
 import java.util.Date
 
@@ -46,29 +47,34 @@ class JwtTokenProvider(
             .compact()
 
     override fun validateToken(token: String): Boolean =
-        runCatching {
-            parseClaims(token)
-            true
-        }.getOrDefault(false)
+        runCatching { parseClaims(token) }.isSuccess
 
     override fun getUserIdFromToken(token: String): Long = parseClaims(token).subject.toLong()
 
-    override fun getRoleFromToken(token: String): UserRole =
-        UserRole.valueOf(
-            parseClaims(token).get("role", String::class.java),
-        )
+    override fun getRoleFromToken(token: String): UserRole {
+        val roleStr =
+            parseClaims(token).get("role", String::class.java)
+                ?: throw GsmcException(ErrorCode.INVALID_TOKEN)
+        return runCatching { UserRole.valueOf(roleStr) }
+            .getOrElse { throw GsmcException(ErrorCode.INVALID_TOKEN) }
+    }
+
+    override fun parseTokenClaims(token: String): Pair<Long, UserRole>? =
+        runCatching {
+            val claims = parseClaims(token)
+            val userId = claims.subject.toLong()
+            val roleStr = claims.get("role", String::class.java) ?: return@runCatching null
+            val role = runCatching { UserRole.valueOf(roleStr) }.getOrNull() ?: return@runCatching null
+            Pair(userId, role)
+        }.getOrNull()
 
     fun getExpiryFromToken(token: String): Long = parseClaims(token).expiration.time
 
     private fun parseClaims(token: String) =
-        try {
-            Jwts
-                .parser()
-                .verifyWith(signingKey)
-                .build()
-                .parseSignedClaims(token)
-                .payload
-        } catch (e: JwtException) {
-            throw e
-        }
+        Jwts
+            .parser()
+            .verifyWith(signingKey)
+            .build()
+            .parseSignedClaims(token)
+            .payload
 }
