@@ -1,28 +1,24 @@
 package team.incube.gsmc.global.security.jwt
 
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.security.Keys
 import org.springframework.stereotype.Component
 import team.incube.gsmc.domain.auth.port.out.AuthTokenPort
 import team.incube.gsmc.domain.user.UserRole
 import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
-import java.nio.charset.StandardCharsets
 import java.util.Date
+import javax.crypto.SecretKey
 
 @Component
 class JwtTokenProvider(
     private val jwtProperties: JwtProperties,
+    private val signingKey: SecretKey,
 ) : AuthTokenPort {
     override val accessTokenExpiresIn: Long
         get() = jwtProperties.accessTokenExpiry
 
     override val refreshTokenExpiresIn: Long
         get() = jwtProperties.refreshTokenExpiry
-
-    private val signingKey by lazy {
-        Keys.hmacShaKeyFor(jwtProperties.secret.toByteArray(StandardCharsets.UTF_8))
-    }
 
     override fun generateAccessToken(
         userId: Long,
