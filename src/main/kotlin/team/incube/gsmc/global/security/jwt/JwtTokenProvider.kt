@@ -46,8 +46,7 @@ class JwtTokenProvider(
             .signWith(signingKey)
             .compact()
 
-    override fun validateToken(token: String): Boolean =
-        runCatching { parseClaims(token) }.isSuccess
+    override fun validateToken(token: String): Boolean = runCatching { parseClaims(token) }.isSuccess
 
     override fun getUserIdFromToken(token: String): Long = parseClaims(token).subject.toLong()
 
