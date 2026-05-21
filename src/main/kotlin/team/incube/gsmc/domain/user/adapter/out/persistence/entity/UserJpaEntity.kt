@@ -40,10 +40,10 @@ class UserJpaEntity(
     /** 사용자 이름 */
     @Column(name = "user_name", nullable = false, length = 25)
     val userName: String,
-    /** 학교 이메일 — gsm.hs.kr 도메인만 허용 */
+    /** 학교 이메일 — gsm.hs.kr 도메인만 허용, 중복 불가 */
     @field:Pattern(regexp = "^[\\w.+\\-]+@gsm\\.hs\\.kr$", message = "이메일은 gsm.hs.kr 도메인만 허용됩니다.")
-    @Column(name = "user_email", nullable = false, length = 100)
-    val userEmail: String?,
+    @Column(name = "user_email", nullable = false, unique = true, length = 100)
+    val userEmail: String,
     /** 학년 (1~3) */
     @Column(name = "user_grade", nullable = true)
     val userGrade: Int?,
