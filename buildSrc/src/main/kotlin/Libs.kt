@@ -26,6 +26,9 @@ object Libs {
     const val JJWT_IMPL = "io.jsonwebtoken:jjwt-impl:0.12.6"
     const val JJWT_JACKSON = "io.jsonwebtoken:jjwt-jackson:0.12.6"
 
+    // Swagger
+    const val SPRINGDOC_OPENAPI = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8"
+
     // Util
     const val LOMBOK = "org.projectlombok:lombok"
 
