@@ -76,11 +76,13 @@ class LoginService(
 
         refreshTokenPersistencePort.save(user.userId, refreshToken)
 
+        val now = System.currentTimeMillis()
+
         return TokenResult(
             accessToken = accessToken,
             refreshToken = refreshToken,
-            accessTokenExpiresIn = authTokenPort.accessTokenExpiresIn,
-            refreshTokenExpiresIn = authTokenPort.refreshTokenExpiresIn,
+            accessTokenExpiresIn = now + authTokenPort.accessTokenExpiresIn * 1000,
+            refreshTokenExpiresIn = now + authTokenPort.refreshTokenExpiresIn * 1000,
             role = user.userRole,
         )
     }
