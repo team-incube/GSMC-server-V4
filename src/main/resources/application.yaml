@@ -24,7 +24,9 @@ cors:
 sdk:
   logging:
     enabled: true
-    not-logging-urls: []
+    not-logging-urls:
+      - "/graphiql/**"
+      - "/graphql/**"
   response:
     enabled: false
   swagger:
