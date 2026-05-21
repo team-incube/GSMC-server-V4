@@ -37,3 +37,13 @@ sdk:
     enabled: false
   exception:
     enabled: false
+
+oauth:
+  client-id: ${OAUTH_CLIENT_ID}
+  client-secret: ${OAUTH_CLIENT_SECRET}
+  redirect-uri: ${OAUTH_REDIRECT_URI}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiry: 3600
+  refresh-token-expiry: 2592000
