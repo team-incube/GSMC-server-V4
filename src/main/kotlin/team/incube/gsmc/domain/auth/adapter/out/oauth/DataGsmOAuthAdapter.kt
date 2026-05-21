@@ -19,6 +19,8 @@ import team.themoment.datagsm.sdk.oauth.DataGsmOAuthClient
  * @param clientSecret OAuth 클라이언트 시크릿
  * @param allowedRedirectUri 서버에 등록된 허용 리다이렉트 URI
  */
+private const val DEFAULT_OAUTH_TOKEN_EXPIRY_SECONDS = 3600L
+
 @Adapter(direction = PortDirection.OUTBOUND)
 class DataGsmOAuthAdapter(
     @param:Value("\${oauth.client-id}") private val clientId: String,
@@ -81,7 +83,7 @@ class DataGsmOAuthAdapter(
         return OAuthTokenResult(
             accessToken = response.accessToken,
             refreshToken = response.refreshToken,
-            expiresIn = response.expiresIn ?: 3600L,
+            expiresIn = response.expiresIn ?: DEFAULT_OAUTH_TOKEN_EXPIRY_SECONDS,
         )
     }
 
