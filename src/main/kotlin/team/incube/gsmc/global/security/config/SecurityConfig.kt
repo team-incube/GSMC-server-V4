@@ -25,7 +25,9 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
-                auth.anyRequest().permitAll()
+                auth
+                    .requestMatchers("/graphql", "/graphiql/**").permitAll()
+                    .anyRequest().authenticated()
             }.formLogin { it.disable() }
             .httpBasic { it.disable() }
             .addFilterBefore(
