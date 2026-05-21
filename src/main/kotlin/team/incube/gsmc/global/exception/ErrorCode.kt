@@ -14,4 +14,5 @@ enum class ErrorCode(
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     INVALID_REDIRECT_URI(HttpStatus.BAD_REQUEST, "허용되지 않은 리다이렉트 URI입니다."),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 }
