@@ -15,7 +15,7 @@
 ```
 일반적인 레이어드 구조           헥사고날 구조
 ────────────────────           ─────────────────────
-Controller                     adapter/in  (GraphQL)
+Controller                     adapter/web  (REST)
     ↓                               ↓
 Service          ←→ 비즈니스    port/in → service → port/out
     ↓                               ↓
@@ -39,8 +39,8 @@ domain/auth/
 │
 ├── port/
 │   ├── in/                         ← 인바운드 포트 (UseCase 인터페이스)
-│   │   ├── LoginUseCase.kt
-│   │   └── LogoutUseCase.kt
+│   │   ├── SigninUseCase.kt
+│   │   └── SignoutUseCase.kt
 │   │
 │   └── out/                        ← 아웃바운드 포트 (저장소/외부 인터페이스)
 │       ├── UserPersistencePort.kt
@@ -49,10 +49,10 @@ domain/auth/
 │
 ├── service/                        ← 비즈니스 로직 (UseCase 구현체)
 │   ├── LoginService.kt
-│   └── LogoutService.kt
+│   └── SignoutService.kt
 │
 └── adapter/
-    ├── in/                         ← GraphQL 컨트롤러
+    ├── web/                        ← REST 컨트롤러
     │   └── AuthWebAdapter.kt
     │
     └── out/
@@ -91,11 +91,11 @@ data class TokenResult(...)
 ### 인바운드 포트 (`port/in/`) — UseCase 인터페이스
 
 "이 도메인이 외부에 제공하는 기능"을 인터페이스로 선언합니다.
-`adapter/in`이 호출하고, `service`가 구현합니다.
+`adapter/web`이 호출하고, `service`가 구현합니다.
 
 ```kotlin
-// LoginUseCase.kt
-interface LoginUseCase {
+// SigninUseCase.kt
+interface SigninUseCase {
     fun execute(code: String, state: String, redirectUri: String): TokenResult
 }
 ```
@@ -132,7 +132,7 @@ class LoginService(
     private val userPersistencePort: UserPersistencePort,       // port/out 주입
     private val refreshTokenPersistencePort: RefreshTokenPersistencePort,
     private val authTokenPort: AuthTokenPort,
-) : LoginUseCase {                                              // port/in 구현
+) : SigninUseCase {                                             // port/in 구현
 
     @Transactional
     override fun execute(code: String, state: String, redirectUri: String): TokenResult {
@@ -146,20 +146,20 @@ class LoginService(
 
 ---
 
-### 인바운드 어댑터 (`adapter/in/`) — GraphQL 컨트롤러
+### 인바운드 어댑터 (`adapter/web/`) — REST 컨트롤러
 
-외부(GraphQL)로부터 요청을 받아 UseCase를 호출합니다.
+외부(REST)로부터 요청을 받아 UseCase를 호출합니다.
 비즈니스 로직은 전혀 없습니다.
 
 ```kotlin
 // AuthWebAdapter.kt
-@Controller
+@RestController
 class AuthWebAdapter(
-    private val loginUseCase: LoginUseCase,  // Service가 아닌 UseCase 인터페이스를 주입
+    private val signinUseCase: SigninUseCase,  // Service가 아닌 UseCase 인터페이스를 주입
 ) {
-    @MutationMapping
-    fun login(@Argument input: LoginInput): TokenResult =
-        loginUseCase.execute(input.code, input.state, input.redirectUri)
+    @PostMapping("/api/auth/signin")
+    fun signin(@RequestBody input: LoginInput): ResponseEntity<TokenResult> =
+        ResponseEntity.ok(signinUseCase.execute(input.code, input.state, input.redirectUri))
 }
 ```
 
@@ -194,8 +194,8 @@ fun User.toEntity(): UserJpaEntity = UserJpaEntity(userName = userName, ...)
 ## 의존성 방향 (핵심)
 
 ```
-adapter/in  →  port/in  →  service  →  port/out  ←  adapter/out
-              (UseCase)              (Persistence)
+adapter/web  →  port/in  →  service  →  port/out  ←  adapter/out
+               (UseCase)              (Persistence)
 ```
 
 - 화살표는 "알고 있다(의존한다)"는 뜻입니다.
@@ -213,8 +213,8 @@ adapter/in  →  port/in  →  service  →  port/out  ←  adapter/out
 3. **port/out** — 필요한 저장소 인터페이스 작성 (이미 있으면 생략)
 4. **service** — `RemoveMemberService` 비즈니스 로직 작성
 5. **adapter/out** — JPA 어댑터에 삭제 로직 추가
-6. **adapter/in** — GraphQL 컨트롤러에 mutation 추가
-7. **GraphQL 스키마** — `*.graphqls` 에 타입/뮤테이션 정의
+6. **adapter/web** — REST 컨트롤러에 엔드포인트 추가
+7. **GraphQL 스키마** — GraphQL 도메인이라면 `*.graphqls` 에 타입/뮤테이션 정의
 
 ---
 
@@ -225,7 +225,7 @@ adapter/in  →  port/in  →  service  →  port/out  ←  adapter/out
 | UseCase (port/in) | `FetchMemberUseCase`, `AppendScoreUseCase` |
 | PersistencePort (port/out) | `MemberPersistencePort` |
 | Service | `FetchMemberService`, `RemoveScoreService` |
-| WebAdapter (adapter/in) | `MemberWebAdapter` |
+| WebAdapter (adapter/web) | `MemberWebAdapter` |
 | PersistenceAdapter (adapter/out) | `MemberPersistenceAdapter` |
 | JpaEntity | `MemberJpaEntity` |
 | JpaRepository | `MemberJpaRepository` |
@@ -240,7 +240,7 @@ adapter/in  →  port/in  →  service  →  port/out  ←  adapter/out
 | 실수 | 올바른 방법 |
 |------|------------|
 | `service`에서 `JpaRepository`를 직접 주입 | `port/out` 인터페이스를 주입 |
-| `adapter/in`에 비즈니스 로직 작성 | 로직은 `service`로 이동 |
+| `adapter/web`에 비즈니스 로직 작성 | 로직은 `service`로 이동 |
 | `domain` 모델에 `@Entity` 사용 | `adapter/out/entity`에 별도 JpaEntity 작성 |
 | `repository`에 `@Transactional` 사용 | `service`에만 `@Transactional` 사용 |
-| `Service` 클래스를 직접 주입 (`LoginService`) | UseCase 인터페이스를 주입 (`LoginUseCase`) |
+| `Service` 클래스를 직접 주입 (`LoginService`) | UseCase 인터페이스를 주입 (`SigninUseCase`) |
