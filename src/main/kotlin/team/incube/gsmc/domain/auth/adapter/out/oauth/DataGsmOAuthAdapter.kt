@@ -12,17 +12,15 @@ import team.themoment.datagsm.sdk.oauth.DataGsmOAuthClient
 /**
  * DataGSM OAuth 공급자와의 연동을 담당하는 아웃바운드 어댑터 클래스입니다.
  * [OAuthPort]를 구현하며, 인가 URL 생성·토큰 교환·사용자 정보 조회 기능을 DataGSM OAuth SDK에 위임합니다.
- * PKCE 방식을 사용하며, OAuth 설정은 [OAuthProperties]로, 클라이언트는 [DataGsmOAuthConfig]에서 Bean으로 관리됩니다.
+ * PKCE 방식을 사용하며, 클라이언트는 [DataGsmOAuthConfig]에서 Bean으로 관리됩니다.
  *
  * @param client DataGSM OAuth 클라이언트 Bean
- * @param oAuthProperties OAuth 설정 프로퍼티 (redirectUri 검증에 사용)
  */
 private const val DEFAULT_OAUTH_TOKEN_EXPIRY_SECONDS = 3600L
 
 @Adapter(direction = PortDirection.OUTBOUND)
 class DataGsmOAuthAdapter(
     private val client: DataGsmOAuthClient,
-    private val oAuthProperties: OAuthProperties,
 ) : OAuthPort {
 
     /**
@@ -31,15 +29,11 @@ class DataGsmOAuthAdapter(
      * @param redirectUri 인증 완료 후 리다이렉트될 URI
      * @param state CSRF 방지용 무작위 값
      * @return (인가 URL, codeVerifier) 쌍
-     * @throws GsmcException 허용되지 않은 URI일 경우 [ErrorCode.INVALID_REDIRECT_URI]
      */
     override fun createAuthorizationUrl(
         redirectUri: String,
         state: String,
     ): Pair<String, String> {
-        if (redirectUri != oAuthProperties.redirectUri) {
-            throw GsmcException(ErrorCode.INVALID_REDIRECT_URI)
-        }
         val builder =
             client
                 .createAuthorizationUrl(redirectUri)
@@ -57,7 +51,6 @@ class DataGsmOAuthAdapter(
      * @param redirectUri 인가 요청 시 사용한 리다이렉트 URI
      * @param codeVerifier PKCE 코드 검증자
      * @return OAuth 공급자로부터 받은 토큰 정보
-     * @throws GsmcException 허용되지 않은 URI일 경우 [ErrorCode.INVALID_REDIRECT_URI]
      * @throws GsmcException 토큰 교환 실패 시 [ErrorCode.OAUTH_TOKEN_EXCHANGE_FAILED]
      */
     override fun exchangeCodeForToken(
@@ -65,10 +58,6 @@ class DataGsmOAuthAdapter(
         redirectUri: String,
         codeVerifier: String,
     ): OAuthTokenResult {
-        if (redirectUri != oAuthProperties.redirectUri) {
-            throw GsmcException(ErrorCode.INVALID_REDIRECT_URI)
-        }
-
         val response =
             runCatching {
                 client.exchangeCodeForToken(code, redirectUri, codeVerifier)
