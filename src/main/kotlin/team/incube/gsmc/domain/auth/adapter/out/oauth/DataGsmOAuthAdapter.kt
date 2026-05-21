@@ -1,6 +1,5 @@
 package team.incube.gsmc.domain.auth.adapter.out.oauth
 
-import org.springframework.beans.factory.annotation.Value
 import team.incube.gsmc.domain.auth.OAuthTokenResult
 import team.incube.gsmc.domain.auth.OAuthUserInfo
 import team.incube.gsmc.domain.auth.port.out.OAuthPort
@@ -13,23 +12,18 @@ import team.themoment.datagsm.sdk.oauth.DataGsmOAuthClient
 /**
  * DataGSM OAuth 공급자와의 연동을 담당하는 아웃바운드 어댑터 클래스입니다.
  * [OAuthPort]를 구현하며, 인가 URL 생성·토큰 교환·사용자 정보 조회 기능을 DataGSM OAuth SDK에 위임합니다.
- * PKCE 방식을 사용하며, clientId·clientSecret·allowedRedirectUri는 환경변수로 주입됩니다.
+ * PKCE 방식을 사용하며, OAuth 설정은 [OAuthProperties]로, 클라이언트는 [DataGsmOAuthConfig]에서 Bean으로 관리됩니다.
  *
- * @param clientId OAuth 클라이언트 ID
- * @param clientSecret OAuth 클라이언트 시크릿
- * @param allowedRedirectUri 서버에 등록된 허용 리다이렉트 URI
+ * @param client DataGSM OAuth 클라이언트 Bean
+ * @param oAuthProperties OAuth 설정 프로퍼티 (redirectUri 검증에 사용)
  */
 private const val DEFAULT_OAUTH_TOKEN_EXPIRY_SECONDS = 3600L
 
 @Adapter(direction = PortDirection.OUTBOUND)
 class DataGsmOAuthAdapter(
-    @param:Value("\${oauth.client-id}") private val clientId: String,
-    @param:Value("\${oauth.client-secret}") private val clientSecret: String,
-    @param:Value("\${oauth.redirect-uri}") private val allowedRedirectUri: String,
+    private val client: DataGsmOAuthClient,
+    private val oAuthProperties: OAuthProperties,
 ) : OAuthPort {
-    private val client: DataGsmOAuthClient by lazy {
-        DataGsmOAuthClient.builder(clientId, clientSecret).build()
-    }
 
     /**
      * PKCE를 포함한 OAuth 인가 URL을 생성한다.
@@ -43,7 +37,7 @@ class DataGsmOAuthAdapter(
         redirectUri: String,
         state: String,
     ): Pair<String, String> {
-        if (redirectUri != allowedRedirectUri) {
+        if (redirectUri != oAuthProperties.redirectUri) {
             throw GsmcException(ErrorCode.INVALID_REDIRECT_URI)
         }
         val builder =
@@ -71,7 +65,7 @@ class DataGsmOAuthAdapter(
         redirectUri: String,
         codeVerifier: String,
     ): OAuthTokenResult {
-        if (redirectUri != allowedRedirectUri) {
+        if (redirectUri != oAuthProperties.redirectUri) {
             throw GsmcException(ErrorCode.INVALID_REDIRECT_URI)
         }
 
