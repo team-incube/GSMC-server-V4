@@ -1,6 +1,8 @@
 package team.incube.gsmc.domain.auth.service
 
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
+import team.incube.gsmc.domain.auth.OAuthUserInfo
 import team.incube.gsmc.domain.auth.TokenResult
 import team.incube.gsmc.domain.auth.port.`in`.LoginUseCase
 import team.incube.gsmc.domain.auth.port.out.AuthTokenPort
@@ -27,7 +29,10 @@ class LoginService(
     private val userPersistencePort: UserPersistencePort,
     private val refreshTokenPersistencePort: RefreshTokenPersistencePort,
     private val authTokenPort: AuthTokenPort,
+    transactionManager: PlatformTransactionManager,
 ) : LoginUseCase {
+    private val transactionTemplate = TransactionTemplate(transactionManager)
+
     /**
      * @param code OAuth 인가 코드
      * @param state CSRF 방지용 state 값
@@ -35,7 +40,6 @@ class LoginService(
      * @return 발급된 액세스·리프레시 토큰 및 만료 정보
      * @throws GsmcException state 불일치 시 [ErrorCode.INVALID_OAUTH_STATE]
      */
-    @Transactional
     override fun execute(
         code: String,
         state: String,
@@ -48,6 +52,11 @@ class LoginService(
         val oAuthToken = oAuthPort.exchangeCodeForToken(code, redirectUri, codeVerifier)
         val oAuthUserInfo = oAuthPort.getUserInfo(oAuthToken.accessToken)
 
+        return transactionTemplate.execute { persistUserAndIssueTokens(oAuthUserInfo) }
+            ?: throw GsmcException(ErrorCode.INTERNAL_SERVER_ERROR)
+    }
+
+    private fun persistUserAndIssueTokens(oAuthUserInfo: OAuthUserInfo): TokenResult {
         val user =
             userPersistencePort.findByEmail(oAuthUserInfo.email)
                 ?: userPersistencePort.save(
