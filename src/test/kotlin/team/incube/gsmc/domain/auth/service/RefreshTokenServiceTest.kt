@@ -48,13 +48,15 @@ class RefreshTokenServiceTest {
             every { authTokenPort.refreshTokenExpiresIn } returns 7200
             every { refreshTokenPersistencePort.save(user.userId, "new-refresh-token") } just runs
 
+            val before = System.currentTimeMillis()
             val result = refreshTokenService.execute("refresh-token")
+            val after = System.currentTimeMillis()
 
             assertEquals("new-access-token", result.accessToken)
             assertEquals("new-refresh-token", result.refreshToken)
             assertEquals(UserRole.STUDENT, result.role)
-            assertTrue(result.accessTokenExpiresIn > System.currentTimeMillis())
-            assertTrue(result.refreshTokenExpiresIn > result.accessTokenExpiresIn)
+            assertTrue(result.accessTokenExpiresIn in (before + 3600 * 1000)..(after + 3600 * 1000))
+            assertTrue(result.refreshTokenExpiresIn in (before + 7200 * 1000)..(after + 7200 * 1000))
             verify(exactly = 1) { refreshTokenPersistencePort.save(user.userId, "new-refresh-token") }
         }
     }
@@ -88,6 +90,7 @@ class RefreshTokenServiceTest {
                 }
 
             assertEquals(ErrorCode.INVALID_REFRESH_TOKEN, exception.errorCode)
+            verify(exactly = 0) { userPersistencePort.findByUserId(any()) }
         }
 
         @Test
@@ -102,6 +105,7 @@ class RefreshTokenServiceTest {
                 }
 
             assertEquals(ErrorCode.INVALID_REFRESH_TOKEN, exception.errorCode)
+            verify(exactly = 0) { userPersistencePort.findByUserId(any()) }
         }
     }
 

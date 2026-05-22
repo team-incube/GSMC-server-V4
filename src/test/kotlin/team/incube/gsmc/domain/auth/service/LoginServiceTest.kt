@@ -62,18 +62,20 @@ class LoginServiceTest {
             every { authTokenPort.refreshTokenExpiresIn } returns 7200
             every { refreshTokenPersistencePort.save(user.userId, "refresh-token") } just runs
 
+            val before = System.currentTimeMillis()
             val result =
                 loginService.execute(
                     code = "code",
                     state = "state",
                     redirectUri = "https://client.example.com/callback",
                 )
+            val after = System.currentTimeMillis()
 
             assertEquals("access-token", result.accessToken)
             assertEquals("refresh-token", result.refreshToken)
             assertEquals(UserRole.STUDENT, result.role)
-            assertTrue(result.accessTokenExpiresIn > System.currentTimeMillis())
-            assertTrue(result.refreshTokenExpiresIn > result.accessTokenExpiresIn)
+            assertTrue(result.accessTokenExpiresIn in (before + 3600 * 1000)..(after + 3600 * 1000))
+            assertTrue(result.refreshTokenExpiresIn in (before + 7200 * 1000)..(after + 7200 * 1000))
             verify(exactly = 0) { userPersistencePort.save(any()) }
             verify(exactly = 1) { refreshTokenPersistencePort.save(user.userId, "refresh-token") }
         }
@@ -156,6 +158,9 @@ class LoginServiceTest {
             assertEquals(UserRole.TEACHER, result.role)
             assertEquals(teacherEmail, userSlot.captured.userName)
             assertEquals(UserRole.TEACHER, userSlot.captured.userRole)
+            assertEquals(null, userSlot.captured.userGrade)
+            assertEquals(null, userSlot.captured.userClassNumber)
+            assertEquals(null, userSlot.captured.userNumber)
         }
     }
 
