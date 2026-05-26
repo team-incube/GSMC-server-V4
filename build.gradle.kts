@@ -50,6 +50,9 @@ dependencies {
     testImplementation(Libs.KOTLIN_TEST_JUNIT5)
     testImplementation(Libs.SPRING_GRAPHQL_TEST)
     testImplementation(Libs.SPRING_SECURITY_TEST)
+    testImplementation(Libs.MOCKK)
+    testImplementation(Libs.KOTEST_RUNNER)
+    testImplementation(Libs.KOTEST_ASSERTIONS)
     testCompileOnly(Libs.LOMBOK)
     kaptTest(Libs.LOMBOK)
 
