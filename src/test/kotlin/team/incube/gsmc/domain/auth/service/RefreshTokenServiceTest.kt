@@ -47,7 +47,7 @@ class RefreshTokenServiceTest :
                 Then("새 토큰을 발급하고 저장한다") {
                     val user = user()
 
-                    every { authTokenPort.parseTokenClaims("refresh-token") } returns (user.userId to user.userRole)
+                    every { authTokenPort.getUserIdFromToken("refresh-token") } returns user.userId
                     every { refreshTokenPersistencePort.find(user.userId) } returns "refresh-token"
                     every { userPersistencePort.findByUserId(user.userId) } returns user
                     every { authTokenPort.generateAccessToken(user.userId, user.userRole) } returns "new-access-token"
@@ -73,7 +73,7 @@ class RefreshTokenServiceTest :
         Given("유효하지 않은 리프레시 토큰이 주어졌을 때") {
             When("토큰 파싱에 실패하면") {
                 Then("INVALID_REFRESH_TOKEN 예외가 발생한다") {
-                    every { authTokenPort.parseTokenClaims("invalid-token") } returns null
+                    every { authTokenPort.getUserIdFromToken("invalid-token") } throws GsmcException(ErrorCode.INVALID_TOKEN)
 
                     val exception =
                         shouldThrow<GsmcException> {
@@ -88,7 +88,7 @@ class RefreshTokenServiceTest :
 
             When("저장된 토큰이 없으면") {
                 Then("INVALID_REFRESH_TOKEN 예외가 발생한다") {
-                    every { authTokenPort.parseTokenClaims("refresh-token") } returns (1L to UserRole.STUDENT)
+                    every { authTokenPort.getUserIdFromToken("refresh-token") } returns 1L
                     every { refreshTokenPersistencePort.find(1L) } returns null
 
                     val exception =
@@ -103,7 +103,7 @@ class RefreshTokenServiceTest :
 
             When("저장된 토큰과 다르면") {
                 Then("INVALID_REFRESH_TOKEN 예외가 발생한다") {
-                    every { authTokenPort.parseTokenClaims("refresh-token") } returns (1L to UserRole.STUDENT)
+                    every { authTokenPort.getUserIdFromToken("refresh-token") } returns 1L
                     every { refreshTokenPersistencePort.find(1L) } returns "other-refresh-token"
 
                     val exception =
@@ -120,7 +120,7 @@ class RefreshTokenServiceTest :
         Given("토큰은 유효하지만 사용자가 없을 때") {
             When("토큰을 갱신하면") {
                 Then("USER_NOT_FOUND 예외가 발생한다") {
-                    every { authTokenPort.parseTokenClaims("refresh-token") } returns (1L to UserRole.STUDENT)
+                    every { authTokenPort.getUserIdFromToken("refresh-token") } returns 1L
                     every { refreshTokenPersistencePort.find(1L) } returns "refresh-token"
                     every { userPersistencePort.findByUserId(1L) } returns null
 
