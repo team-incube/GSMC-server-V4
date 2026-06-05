@@ -52,8 +52,7 @@ class LoginService(
         val oAuthToken = oAuthPort.exchangeCodeForToken(code, redirectUri, codeVerifier)
         val oAuthUserInfo = oAuthPort.getUserInfo(oAuthToken.accessToken)
 
-        return transactionTemplate.execute { persistUserAndIssueTokens(oAuthUserInfo) }
-            ?: throw GsmcException(ErrorCode.INTERNAL_SERVER_ERROR)
+        return transactionTemplate.execute { persistUserAndIssueTokens(oAuthUserInfo) }!!
     }
 
     private fun persistUserAndIssueTokens(oAuthUserInfo: OAuthUserInfo): TokenResult {
