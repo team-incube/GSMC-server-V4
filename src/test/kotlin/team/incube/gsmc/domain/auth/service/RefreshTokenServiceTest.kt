@@ -73,7 +73,8 @@ class RefreshTokenServiceTest :
         Given("유효하지 않은 리프레시 토큰이 주어졌을 때") {
             When("토큰 파싱에 실패하면") {
                 Then("INVALID_REFRESH_TOKEN 예외가 발생한다") {
-                    every { authTokenPort.getUserIdFromToken("invalid-token") } throws GsmcException(ErrorCode.INVALID_TOKEN)
+                    every { authTokenPort.getUserIdFromToken("invalid-token") } throws
+                        GsmcException(ErrorCode.INVALID_TOKEN)
 
                     val exception =
                         shouldThrow<GsmcException> {
