@@ -40,7 +40,7 @@ class DataGsmOAuthAdapter(
                 .enablePkce()
         val url = builder.build()
         val codeVerifier = builder.codeVerifier
-        return Pair(url, codeVerifier)
+        return url to codeVerifier
     }
 
     /**
@@ -80,7 +80,7 @@ class DataGsmOAuthAdapter(
         val userInfo =
             runCatching {
                 client.getUserInfo(accessToken)
-            }.getOrElse { throw GsmcException(ErrorCode.OAUTH_TOKEN_EXCHANGE_FAILED) }
+            }.getOrElse { throw GsmcException(ErrorCode.OAUTH_USER_INFO_FETCH_FAILED) }
 
         val isStudent = userInfo.getIsStudent() == true
         val student = if (isStudent) userInfo.student else null

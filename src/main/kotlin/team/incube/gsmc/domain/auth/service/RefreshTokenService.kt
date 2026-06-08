@@ -1,5 +1,6 @@
 package team.incube.gsmc.domain.auth.service
 
+import org.springframework.transaction.annotation.Transactional
 import team.incube.gsmc.domain.auth.TokenResult
 import team.incube.gsmc.domain.auth.port.`in`.RefreshTokenUseCase
 import team.incube.gsmc.domain.auth.port.out.AuthTokenPort
@@ -27,15 +28,13 @@ class RefreshTokenService(
      * @throws GsmcException 토큰이 유효하지 않거나 저장된 토큰과 불일치 시 [ErrorCode.INVALID_REFRESH_TOKEN]
      * @throws GsmcException 사용자를 찾을 수 없을 시 [ErrorCode.USER_NOT_FOUND]
      */
+    @Transactional(readOnly = true)
     override fun execute(refreshToken: String): TokenResult {
-        val (userId, _) =
-            authTokenPort.parseTokenClaims(refreshToken)
-                ?: throw GsmcException(ErrorCode.INVALID_REFRESH_TOKEN)
+        val userId =
+            runCatching { authTokenPort.getUserIdFromToken(refreshToken) }
+                .getOrElse { throw GsmcException(ErrorCode.INVALID_REFRESH_TOKEN) }
 
-        val storedToken =
-            refreshTokenPersistencePort.find(userId)
-                ?: throw GsmcException(ErrorCode.INVALID_REFRESH_TOKEN)
-
+        val storedToken = refreshTokenPersistencePort.find(userId)
         if (storedToken != refreshToken) {
             throw GsmcException(ErrorCode.INVALID_REFRESH_TOKEN)
         }
