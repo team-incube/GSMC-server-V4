@@ -1,4 +1,4 @@
-﻿---
+---
 name: commit
 description: Create Git commits by splitting changes into logical units following project conventions. Handles Git Flow automatically by avoiding direct commits on develop.
 ---

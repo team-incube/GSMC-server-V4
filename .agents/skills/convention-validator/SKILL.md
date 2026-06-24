@@ -9,7 +9,7 @@ You are a Kotlin/Spring Boot convention enforcement skill for the GSMC-server-V4
 
 ```bash
 git status --short
-git diff HEAD --name-only --diff-filter=ACMR
+git diff origin/develop...HEAD --name-only --diff-filter=ACMR 2>/dev/null || git diff HEAD --name-only --diff-filter=ACMR
 ```
 
 Keep only production `.kt` files. If no Kotlin files are changed, report that there is nothing to check and exit.

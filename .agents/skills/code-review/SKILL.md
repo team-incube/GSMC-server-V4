@@ -42,6 +42,7 @@ Analyze changed files and verify the following items.
 - [ ] `@Transactional` opened in service layer, not repository layer?
 - [ ] `@Transactional(readOnly = true)` applied for read operations?
 - [ ] No N+1 problem? (Fetch Join needed?)
+- [ ] Kotlin type's nullability matches `@Column(nullable = ...)`? (For unique identifiers, use non-nullable with `unique = true` and `nullable = false`)
 
 ### Commit
 - [ ] Following commit message convention? (`type(scope): description`)
