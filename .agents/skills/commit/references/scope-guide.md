@@ -28,8 +28,8 @@
 ## Examples
 
 **Wrong:**
-- `fix(global): 인증 토큰 삭제 버그 수정` → `fix(auth): 인증 토큰 삭제 버그 수정`
-- `refactor(global): 멤버 엔티티 수정` → `refactor(member): 엔티티 필드 추가`
+- `fix(global): 인증 토큰 삭제 버그 수정` -> `fix(auth): 인증 토큰 삭제 버그 수정`
+- `refactor(global): 멤버 엔티티 수정` -> `refactor(member): 엔티티 필드 추가`
 
 **Correct:**
 - `refactor(global): 공통 예외 처리 로직 개선`
