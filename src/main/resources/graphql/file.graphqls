@@ -1,0 +1,10 @@
+input CreatePresignedUploadUrlInput {
+    fileName: String!
+    fileSize: Int!
+    contentType: String!
+}
+
+input ConfirmFileUploadInput {
+    fileKey: String!
+    originalFileName: String!
+}

@@ -1,0 +1,20 @@
+input CreateProjectInput {
+    title: String!
+    description: String!
+    fileIds: [ID!] = []
+    participantIds: [ID!]!
+}
+
+input PatchProjectInput {
+    title: String
+    description: String
+    fileIds: [ID!]
+    participantIds: [ID!]
+}
+
+input CreateProjectDraftInput {
+    title: String = ""
+    description: String = ""
+    fileIds: [ID!] = []
+    participantIds: [ID!] = []
+}

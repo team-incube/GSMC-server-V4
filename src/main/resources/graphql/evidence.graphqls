@@ -1,0 +1,19 @@
+input CreateEvidenceInput {
+    scoreId: ID!
+    title: String!
+    content: String!
+    fileIds: [ID!] = []
+}
+
+input PatchEvidenceInput {
+    scoreId: ID
+    title: String
+    content: String
+    fileIds: [ID!]
+}
+
+input CreateEvidenceDraftInput {
+    title: String = ""
+    content: String = ""
+    fileIds: [ID!] = []
+}
