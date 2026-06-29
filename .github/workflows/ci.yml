@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - develop
-    types: [opened, edited, synchronize, reopened]
+    types: [opened, edited, synchronize, reopened, closed]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,6 +15,7 @@ jobs:
 
   validate-pr:
     runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
 
     permissions:
       pull-requests: write
@@ -69,31 +70,65 @@ jobs:
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
           PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          EVENT="${{ github.event.action }}"
 
           echo "PR Number: $PR_NUMBER"
           echo "PR Author: $PR_AUTHOR"
+          echo "Branch: $BRANCH"
+          echo "Event: $EVENT"
 
-          # 자동 리뷰어 목록
-          ALL_REVIEWERS="jyx-07,hej090224,snowykte0426"
+          REPO="${{ github.repository }}"
 
-          # PR 작성자는 제외
-          REVIEWERS=$(echo "$ALL_REVIEWERS" \
-            | tr ',' '\n' \
-            | grep -v "^${PR_AUTHOR}$" \
-            | tr '\n' ',' \
-            | sed 's/,$//')
+          # PR 닫힘/머지 → Status: Done
+          if [ "$EVENT" = "closed" ]; then
+            gh pr edit "$PR_NUMBER" --repo "$REPO" \
+              --remove-label "🌟 Status: Reviewing" 2>/dev/null || true
+            gh pr edit "$PR_NUMBER" --repo "$REPO" \
+              --add-label "🌟 Status: Done"
+            exit 0
+          fi
 
-          echo "Reviewers: $REVIEWERS"
+          # PR 열림/재오픈 → Status: Reviewing + 타입 라벨 + 리뷰어
+          if [ "$EVENT" = "opened" ] || [ "$EVENT" = "reopened" ]; then
+            gh pr edit "$PR_NUMBER" --repo "$REPO" \
+              --remove-label "🌟 Status: Done" 2>/dev/null || true
+            gh pr edit "$PR_NUMBER" --repo "$REPO" \
+              --add-label "🌟 Status: Reviewing"
 
-          # 리뷰어 등록
-          if [ -n "$REVIEWERS" ]; then
-            gh pr edit "$PR_NUMBER" \
-              --repo "${{ github.repository }}" \
-              --add-reviewer "$REVIEWERS"
+            # 브랜치명 패턴으로 타입 라벨 판단
+            if echo "$BRANCH" | grep -qP '^fix/'; then
+              TYPE_LABEL="🐞 Type: Bug/Function"
+            elif echo "$BRANCH" | grep -qP '^docs/'; then
+              TYPE_LABEL="📜 Type: Feature/Document"
+            elif echo "$BRANCH" | grep -qP '^cicd/'; then
+              TYPE_LABEL="⚙ Setting"
+            else
+              TYPE_LABEL="📩 Type: Feature/Function"
+            fi
+
+            echo "Type Label: $TYPE_LABEL"
+            gh pr edit "$PR_NUMBER" --repo "$REPO" \
+              --add-label "$TYPE_LABEL"
+
+            # 자동 리뷰어 등록 (작성자 제외)
+            ALL_REVIEWERS="jyx-07,hej090224,snowykte0426"
+            REVIEWERS=$(echo "$ALL_REVIEWERS" \
+              | tr ',' '\n' \
+              | grep -v "^${PR_AUTHOR}$" \
+              | tr '\n' ',' \
+              | sed 's/,$//')
+
+            echo "Reviewers: $REVIEWERS"
+            if [ -n "$REVIEWERS" ]; then
+              gh pr edit "$PR_NUMBER" --repo "$REPO" \
+                --add-reviewer "$REVIEWERS"
+            fi
           fi
 
   build-and-test:
     runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
 
     needs:
       - validate-pr
