@@ -8,15 +8,22 @@ import org.springframework.stereotype.Component
 
 @Component
 class GsmcExceptionResolver : DataFetcherExceptionResolverAdapter() {
-    override fun resolveToSingleError(ex: Throwable, env: DataFetchingEnvironment): GraphQLError? =
+    override fun resolveToSingleError(
+        ex: Throwable,
+        env: DataFetchingEnvironment,
+    ): GraphQLError? =
         when (ex) {
-            is GsmcException -> GraphqlErrorBuilder.newError(env)
-                .message(ex.errorCode.message)
-                .extensions(mapOf("code" to ex.errorCode.code))
-                .build()
-            else -> GraphqlErrorBuilder.newError(env)
-                .message(ErrorCode.INTERNAL_SERVER_ERROR.message)
-                .extensions(mapOf("code" to ErrorCode.INTERNAL_SERVER_ERROR.code))
-                .build()
+            is GsmcException ->
+                GraphqlErrorBuilder
+                    .newError(env)
+                    .message(ex.errorCode.message)
+                    .extensions(mapOf("code" to ex.errorCode.code))
+                    .build()
+            else ->
+                GraphqlErrorBuilder
+                    .newError(env)
+                    .message(ErrorCode.INTERNAL_SERVER_ERROR.message)
+                    .extensions(mapOf("code" to ErrorCode.INTERNAL_SERVER_ERROR.code))
+                    .build()
         }
 }
