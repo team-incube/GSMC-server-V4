@@ -11,11 +11,11 @@ COMMAND="$TOOL_PARAMS_COMMAND"
 # ── git push 처리 ──────────────────────────────────────────────────
 if [[ "$COMMAND" =~ git[[:space:]]+push ]]; then
     PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
-    if [[ -z "$PROJECT_ROOT" || ! -f "$PROJECT_ROOT/gradlew" ]]; then
+    if [[ -z "$PROJECT_ROOT" || ! -x "$PROJECT_ROOT/gradlew" ]]; then
         exit 0
     fi
     echo "[Hook] Running ktlintCheck..."
-    cd "$PROJECT_ROOT" && ./gradlew ktlintCheck -q 2>&1
+    (cd "$PROJECT_ROOT" && ./gradlew ktlintCheck -q 2>&1)
     if [[ $? -ne 0 ]]; then
         echo "[Hook] ✗ ktlint 위반이 있습니다. 아래 명령어로 포맷 적용 후 커밋하세요:"
         echo "       ./gradlew ktlintFormat"
@@ -34,9 +34,9 @@ if [[ "$COMMAND" =~ \$\( || "$COMMAND" =~ "<<" ]]; then
 fi
 
 PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
-if [[ -n "$PROJECT_ROOT" && -f "$PROJECT_ROOT/gradlew" ]]; then
+if [[ -n "$PROJECT_ROOT" && -x "$PROJECT_ROOT/gradlew" ]]; then
     echo "[Hook] Running ktlintFormat..."
-    cd "$PROJECT_ROOT" && ./gradlew ktlintFormat -q 2>&1
+    (cd "$PROJECT_ROOT" && ./gradlew ktlintFormat -q 2>&1)
     if [[ $? -ne 0 ]]; then
         echo "[Hook] ✗ ktlintFormat 실패"
         exit 2
