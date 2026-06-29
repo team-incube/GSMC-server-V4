@@ -33,6 +33,17 @@ if [[ "$COMMAND" =~ \$\( || "$COMMAND" =~ "<<" ]]; then
     exit 0
 fi
 
+PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+if [[ -n "$PROJECT_ROOT" && -f "$PROJECT_ROOT/gradlew" ]]; then
+    echo "[Hook] Running ktlintFormat..."
+    cd "$PROJECT_ROOT" && ./gradlew ktlintFormat -q 2>&1
+    if [[ $? -ne 0 ]]; then
+        echo "[Hook] ✗ ktlintFormat 실패"
+        exit 2
+    fi
+    echo "[Hook] ✓ ktlintFormat 완료"
+fi
+
 COMMIT_MSG=$(echo "$COMMAND" | sed -n -e 's/.*-m[[:space:]]*"\([^"]*\)".*/\1/p' -e "s/.*-m[[:space:]]*'\([^']*\)'.*/\1/p" | head -n 1)
 if [[ -z "$COMMIT_MSG" ]]; then
     exit 0
