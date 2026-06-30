@@ -1,6 +1,6 @@
 input CreatePresignedUploadUrlInput {
     fileName: String!
-    fileSize: Int!
+    fileSize: Float!
     contentType: String!
 }
 
