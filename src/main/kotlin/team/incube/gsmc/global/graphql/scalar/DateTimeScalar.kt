@@ -44,7 +44,7 @@ object DateTimeScalar {
                                     ).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                             is LocalDateTime ->
                                 dataFetcherResult
-                                    .atZone(ZoneId.systemDefault())
+                                    .atZone(ZoneId.of("Asia/Seoul"))
                                     .toOffsetDateTime()
                                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                             is String -> dataFetcherResult
