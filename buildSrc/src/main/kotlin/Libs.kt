@@ -29,6 +29,9 @@ object Libs {
     // Swagger
     const val SPRINGDOC_OPENAPI = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8"
 
+    // GraphQL Extended Scalars
+    const val GRAPHQL_EXTENDED_SCALARS = "com.graphql-java:graphql-java-extended-scalars:22.0"
+
     // Util
     const val LOMBOK = "org.projectlombok:lombok"
 
