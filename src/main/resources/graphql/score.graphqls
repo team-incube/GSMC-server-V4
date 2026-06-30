@@ -1,0 +1,20 @@
+enum ScoreStatus {
+    INCOMPLETE
+    PENDING
+    APPROVED
+    REJECTED
+}
+
+input ScoreInput {
+    value: String
+    fileId: ID
+    evidenceId: ID
+}
+
+input UpdateScoreStatusInput {
+    scoreStatus: ScoreStatus!
+}
+
+input RejectScoreInput {
+    rejectionReason: String!
+}

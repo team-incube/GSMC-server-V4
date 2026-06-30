@@ -1,0 +1,7 @@
+enum UserRole {
+    UNAUTHORIZED
+    STUDENT
+    TEACHER
+    ROOT
+    HOMEROOM_TEACHER
+}
