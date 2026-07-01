@@ -31,6 +31,7 @@ dependencies {
     implementation(Libs.SPRING_BOOT_JPA)
     implementation(Libs.SPRING_BOOT_REDIS)
     implementation(Libs.SPRING_BOOT_GRAPHQL)
+    implementation(Libs.GRAPHQL_EXTENDED_SCALARS)
     implementation(Libs.SPRING_BOOT_SECURITY)
     implementation(Libs.SPRING_BOOT_WEB)
     implementation(Libs.JACKSON_KOTLIN)

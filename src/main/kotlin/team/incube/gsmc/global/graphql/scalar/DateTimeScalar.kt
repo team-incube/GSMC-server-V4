@@ -9,9 +9,12 @@ import graphql.schema.CoercingParseLiteralException
 import graphql.schema.CoercingParseValueException
 import graphql.schema.CoercingSerializeException
 import graphql.schema.GraphQLScalarType
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -30,9 +33,19 @@ object DateTimeScalar {
                     ): String =
                         when (dataFetcherResult) {
                             is OffsetDateTime -> dataFetcherResult.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                            is ZonedDateTime ->
+                                dataFetcherResult.toOffsetDateTime().format(
+                                    DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+                                )
+                            is Instant ->
+                                dataFetcherResult
+                                    .atOffset(
+                                        ZoneOffset.UTC,
+                                    ).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                             is LocalDateTime ->
                                 dataFetcherResult
-                                    .atOffset(ZoneOffset.UTC)
+                                    .atZone(ZoneId.of("Asia/Seoul"))
+                                    .toOffsetDateTime()
                                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                             is String -> dataFetcherResult
                             else -> throw CoercingSerializeException(
