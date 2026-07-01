@@ -1,10 +1,11 @@
 type User {
     userId: ID!
-    userName: String
+    userName: String!
+    userEmail: String!
     userGrade: Int
     userClassNumber: Int
     userNumber: Int
-    userRole: UserRole
+    userRole: UserRole!
 }
 
 enum UserRole {
