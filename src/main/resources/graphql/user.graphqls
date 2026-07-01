@@ -1,3 +1,13 @@
+type User {
+    userId: ID!
+    userName: String!
+    userEmail: String!
+    userGrade: Int
+    userClassNumber: Int
+    userNumber: Int
+    userRole: UserRole!
+}
+
 enum UserRole {
     UNAUTHORIZED
     STUDENT

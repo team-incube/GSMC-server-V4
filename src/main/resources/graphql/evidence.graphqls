@@ -1,3 +1,13 @@
+type Evidence {
+    evidenceId: ID!
+    userId: ID!
+    evidenceTitle: String
+    evidenceContent: String
+    evidenceCreatedAt: DateTime
+    evidenceUpdatedAt: DateTime
+    files: [File!]!
+}
+
 input CreateEvidenceInput {
     scoreId: ID!
     title: String!

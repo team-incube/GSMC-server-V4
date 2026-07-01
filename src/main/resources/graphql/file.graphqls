@@ -1,3 +1,11 @@
+type File {
+    fileId: ID!
+    userId: ID!
+    fileUri: String
+    fileOriginalName: String
+    fileStoredName: String
+}
+
 input CreatePresignedUploadUrlInput {
     fileName: String!
     fileSize: Long!
