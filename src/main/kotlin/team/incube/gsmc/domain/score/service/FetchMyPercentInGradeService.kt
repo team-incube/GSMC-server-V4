@@ -32,8 +32,9 @@ class FetchMyPercentInGradeService(
         val me = memberPersistencePort.findByUserId(userId) ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
         val userGrade = requireNotNull(me.userGrade) { "학생은 userGrade가 null일 수 없습니다." }
 
-        val gradeMateIds = memberPersistencePort.findAllStudentsByUserGrade(userGrade).map { it.userId }
-        val scoresByUserId = scorePersistencePort.findAllByUserIdIn(gradeMateIds).groupBy { it.userId }
+        val gradeMateIds =
+            memberPersistencePort.findAllStudentsByUserGrade(userGrade).map { it.userId }.toSet() + userId
+        val scoresByUserId = scorePersistencePort.findAllByUserIdIn(gradeMateIds.toList()).groupBy { it.userId }
         val totalScoreByUserId =
             gradeMateIds.associateWith { id ->
                 ScoreCalculator.totalScoreOf(scoresByUserId[id] ?: emptyList(), includeApprovedOnly)

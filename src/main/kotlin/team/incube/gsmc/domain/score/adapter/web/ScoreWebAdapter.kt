@@ -57,22 +57,22 @@ class ScoreWebAdapter(
 
     @QueryMapping
     fun myTotalScore(
-        @Argument includeApprovedOnly: Boolean,
-    ): TotalScore = fetchMyTotalScoreUseCase.execute(includeApprovedOnly)
+        @Argument includeApprovedOnly: Boolean?,
+    ): TotalScore = fetchMyTotalScoreUseCase.execute(includeApprovedOnly ?: true)
 
     @QueryMapping
     fun totalScore(
         @Argument memberId: Long,
-        @Argument includeApprovedOnly: Boolean,
-    ): TotalScore = fetchTotalScoreUseCase.execute(memberId, includeApprovedOnly)
+        @Argument includeApprovedOnly: Boolean?,
+    ): TotalScore = fetchTotalScoreUseCase.execute(memberId, includeApprovedOnly ?: true)
 
     @QueryMapping
     fun myPercentInClass(
-        @Argument includeApprovedOnly: Boolean,
-    ): Percentile = fetchMyPercentInClassUseCase.execute(includeApprovedOnly)
+        @Argument includeApprovedOnly: Boolean?,
+    ): Percentile = fetchMyPercentInClassUseCase.execute(includeApprovedOnly ?: true)
 
     @QueryMapping
     fun myPercentInGrade(
-        @Argument includeApprovedOnly: Boolean,
-    ): Percentile = fetchMyPercentInGradeUseCase.execute(includeApprovedOnly)
+        @Argument includeApprovedOnly: Boolean?,
+    ): Percentile = fetchMyPercentInGradeUseCase.execute(includeApprovedOnly ?: true)
 }

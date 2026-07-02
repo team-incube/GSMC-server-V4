@@ -40,6 +40,8 @@ class ScorePersistenceAdapter(
     override fun findAllByUserId(userId: Long): List<Score> = findAllByUserIdIn(listOf(userId))
 
     override fun findAllByUserIdIn(userIds: List<Long>): List<Score> {
+        if (userIds.isEmpty()) return emptyList()
+
         val entities =
             queryFactory
                 .selectFrom(scoreJpaEntity)

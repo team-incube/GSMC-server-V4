@@ -24,6 +24,6 @@ fun ScoreJpaEntity.toDomain(file: File?): Score =
         activityName = activityName,
         scoreValue = scoreValue,
         rejectionReason = rejectionReason,
-        createdAt = requireNotNull(createdAt) { "createdAt은 저장 시점에 auditing으로 채워지므로 null일 수 없습니다." },
-        updatedAt = requireNotNull(updatedAt) { "updatedAt은 저장 시점에 auditing으로 채워지므로 null일 수 없습니다." },
+        createdAt = createdAt,
+        updatedAt = updatedAt,
     )
