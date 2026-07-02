@@ -74,14 +74,19 @@ object ScoreCalculator {
      * 점수 요청 목록으로 총점을 계산한다. 카테고리별로 묶어 인정 점수를 계산한 뒤 모두 합산한다.
      *
      * @param allScores 대상 사용자의 전체 점수 요청 목록 (모든 상태 포함)
-     * @param includeApprovedOnly true면 승인된 점수만 합산, false면 전체 상태 포함
+     * @param includeApprovedOnly true면 승인된 점수만 합산, false면 반려(REJECTED)를 제외한 나머지 상태 포함
      * @return 총점
      */
     fun totalScoreOf(
         allScores: List<Score>,
         includeApprovedOnly: Boolean,
     ): Int {
-        val target = if (includeApprovedOnly) allScores.filter { it.scoreStatus == ScoreStatus.APPROVED } else allScores
+        val target =
+            if (includeApprovedOnly) {
+                allScores.filter { it.scoreStatus == ScoreStatus.APPROVED }
+            } else {
+                allScores.filter { it.scoreStatus != ScoreStatus.REJECTED }
+            }
         return target
             .groupBy { it.category }
             .entries
