@@ -13,9 +13,9 @@ import team.incube.gsmc.global.annotation.adapter.Adapter
 
 /**
  * 점수 요청 영속성 처리를 담당하는 아웃바운드 어댑터 클래스입니다.
- * [ScorePersistencePort]를 구현하며, QueryDSL로 category/evidence를 fetch join하여 조회합니다.
- * `user`는 식별자(userId)만 필요하므로 fetch join하지 않습니다 — 지연 로딩 프록시에서도 식별자 조회는
- * 초기화를 유발하지 않습니다.
+ * [ScorePersistencePort]를 구현하며, QueryDSL로 user/category/evidence를 fetch join하여 조회합니다.
+ * Kotlin + JPA는 기본적으로 FIELD Access를 사용하므로, 지연 로딩 프록시의 식별자(`user.userId`)를
+ * 읽는 것만으로도 초기화(추가 쿼리)가 유발될 수 있어 user도 fetch join 대상에 포함합니다.
  * [ScoreJpaEntity]는 [team.incube.gsmc.domain.file.adapter.out.persistence.entity.FileJpaEntity]에 대한
  * 참조가 없어(역방향 연관관계), 첨부 파일은 별도 쿼리로 조회 후 병합합니다.
  */
@@ -27,6 +27,8 @@ class ScorePersistenceAdapter(
         val entity =
             queryFactory
                 .selectFrom(scoreJpaEntity)
+                .join(scoreJpaEntity.user)
+                .fetchJoin()
                 .join(scoreJpaEntity.category)
                 .fetchJoin()
                 .leftJoin(scoreJpaEntity.evidence)
@@ -45,6 +47,8 @@ class ScorePersistenceAdapter(
         val entities =
             queryFactory
                 .selectFrom(scoreJpaEntity)
+                .join(scoreJpaEntity.user)
+                .fetchJoin()
                 .join(scoreJpaEntity.category)
                 .fetchJoin()
                 .leftJoin(scoreJpaEntity.evidence)
