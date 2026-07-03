@@ -6,7 +6,7 @@ import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.score.port.`in`.FetchScoresByCategoryUseCase
 import team.incube.gsmc.domain.score.port.out.MemberPersistencePort
 import team.incube.gsmc.domain.score.port.out.ScorePersistencePort
-import team.incube.gsmc.domain.user.isTeacherOrAbove
+import team.incube.gsmc.domain.user.canAccessScoresOf
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.port.Port
 import team.incube.gsmc.global.exception.ErrorCode
@@ -15,7 +15,8 @@ import team.incube.gsmc.global.util.MemberUtil
 
 /**
  * 특정 사용자 카테고리별 점수 조회 유스케이스 구현 클래스입니다.
- * [FetchScoresByCategoryUseCase]를 구현하며, 교사(TEACHER) 이상만 호출을 허용합니다.
+ * [FetchScoresByCategoryUseCase]를 구현하며, [team.incube.gsmc.domain.user.canAccessScoresOf]로 판단한
+ * 접근 권한이 있는 경우에만 호출을 허용합니다 (담임 교사는 본인 담당 학급 학생만 조회 가능).
  */
 @Port(direction = PortDirection.INBOUND)
 class FetchScoresByCategoryService(
@@ -27,10 +28,13 @@ class FetchScoresByCategoryService(
         memberId: Long,
         status: ScoreStatus?,
     ): List<ScoreCategoryGroup> {
-        if (!memberUtil.getCurrentUserRole().isTeacherOrAbove()) {
+        val target = memberPersistencePort.findByUserId(memberId) ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
+        val currentUser =
+            memberPersistencePort.findByUserId(memberUtil.getCurrentUserId())
+                ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
+        if (!currentUser.canAccessScoresOf(target)) {
             throw GsmcException(ErrorCode.FORBIDDEN)
         }
-        memberPersistencePort.findByUserId(memberId) ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
 
         val scores = scorePersistencePort.findAllByUserId(memberId)
         return ScoreCalculator.categoryGroups(scores, status)
