@@ -69,6 +69,9 @@ class LoginService(
                         userClassNumber = oAuthUserInfo.classNum,
                         userNumber = oAuthUserInfo.number,
                         userRole = if (oAuthUserInfo.isStudent) UserRole.STUDENT else UserRole.TEACHER,
+                        // 담임 배정은 로그인 시점에 알 수 없으므로 최초 생성 시 항상 null — 이후 ROOT가 별도로 배정
+                        homeroomGrade = null,
+                        homeroomClassNumber = null,
                     ),
                 )
 

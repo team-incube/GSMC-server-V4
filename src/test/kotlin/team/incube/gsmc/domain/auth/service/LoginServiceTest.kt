@@ -82,6 +82,8 @@ class LoginServiceTest :
                 userClassNumber = 3,
                 userNumber = 4,
                 userRole = UserRole.STUDENT,
+                homeroomGrade = null,
+                homeroomClassNumber = null,
             )
 
         Given("유효한 OAuth state가 주어졌을 때") {
@@ -162,6 +164,8 @@ class LoginServiceTest :
                             userClassNumber = null,
                             userNumber = null,
                             userRole = UserRole.TEACHER,
+                            homeroomGrade = null,
+                            homeroomClassNumber = null,
                         )
                     val userSlot = slot<User>()
 

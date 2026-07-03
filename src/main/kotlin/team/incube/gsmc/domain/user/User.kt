@@ -13,6 +13,8 @@ package team.incube.gsmc.domain.user
  * @param userClassNumber 반 번호, 교사는 null
  * @param userNumber 번호, 교사는 null
  * @param userRole 권한 역할
+ * @param homeroomGrade 담임을 맡은 학년, [UserRole.HOMEROOM_TEACHER]가 아니면 null
+ * @param homeroomClassNumber 담임을 맡은 반 번호, [UserRole.HOMEROOM_TEACHER]가 아니면 null
  * @see UserRole
  */
 data class User(
@@ -23,4 +25,22 @@ data class User(
     val userClassNumber: Int?,
     val userNumber: Int?,
     val userRole: UserRole,
+    val homeroomGrade: Int?,
+    val homeroomClassNumber: Int?,
 )
+
+/**
+ * 다른 사용자([target])의 점수를 조회할 권한이 있는지 확인한다.
+ * [UserRole.TEACHER], [UserRole.ROOT]는 전체 학생에 접근 가능하고, [UserRole.HOMEROOM_TEACHER]는
+ * 본인이 담임을 맡은 학급([User.homeroomGrade]/[User.homeroomClassNumber])의 학생만 접근 가능하다.
+ *
+ * @receiver 조회를 시도하는 사용자
+ * @param target 조회 대상 사용자
+ * @return 접근 가능 여부
+ */
+fun User.canAccessScoresOf(target: User): Boolean =
+    when (userRole) {
+        UserRole.TEACHER, UserRole.ROOT -> true
+        UserRole.HOMEROOM_TEACHER -> homeroomGrade == target.userGrade && homeroomClassNumber == target.userClassNumber
+        UserRole.STUDENT, UserRole.UNAUTHORIZED -> false
+    }

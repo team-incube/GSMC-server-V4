@@ -40,6 +40,8 @@ class RefreshTokenServiceTest :
                 userClassNumber = 3,
                 userNumber = 4,
                 userRole = UserRole.STUDENT,
+                homeroomGrade = null,
+                homeroomClassNumber = null,
             )
 
         Given("유효한 리프레시 토큰이 주어졌을 때") {

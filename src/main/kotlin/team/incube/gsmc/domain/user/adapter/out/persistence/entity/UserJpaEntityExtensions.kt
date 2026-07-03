@@ -17,6 +17,8 @@ fun UserJpaEntity.toDomain(): User =
         userClassNumber = userClassNumber,
         userNumber = userNumber,
         userRole = userRole,
+        homeroomGrade = homeroomGrade,
+        homeroomClassNumber = homeroomClassNumber,
     )
 
 /**
@@ -34,4 +36,6 @@ fun User.toEntity(): UserJpaEntity =
         userClassNumber = userClassNumber,
         userNumber = userNumber,
         userRole = userRole,
+        homeroomGrade = homeroomGrade,
+        homeroomClassNumber = homeroomClassNumber,
     )

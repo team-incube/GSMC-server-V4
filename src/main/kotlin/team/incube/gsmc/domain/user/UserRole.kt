@@ -27,7 +27,3 @@ enum class UserRole {
     /** 담임 교사 */
     HOMEROOM_TEACHER,
 }
-
-/** 교사 권한(TEACHER, HOMEROOM_TEACHER, ROOT) 이상인지 여부 */
-fun UserRole.isTeacherOrAbove(): Boolean =
-    this == UserRole.TEACHER || this == UserRole.HOMEROOM_TEACHER || this == UserRole.ROOT

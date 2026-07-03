@@ -60,4 +60,10 @@ class UserJpaEntity(
     @Enumerated(EnumType.STRING)
     @Column(name = "user_role", nullable = false, length = 50)
     val userRole: UserRole,
+    /** 담임을 맡은 학년 — [UserRole.HOMEROOM_TEACHER]만 값을 가지며, 그 외는 null */
+    @Column(name = "homeroom_grade", nullable = true)
+    val homeroomGrade: Int?,
+    /** 담임을 맡은 반 번호 — [UserRole.HOMEROOM_TEACHER]만 값을 가지며, 그 외는 null */
+    @Column(name = "homeroom_class_number", nullable = true)
+    val homeroomClassNumber: Int?,
 )
