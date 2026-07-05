@@ -2,6 +2,7 @@ package team.incube.gsmc.domain.score.adapter.out.persistence.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
@@ -11,10 +12,14 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import team.incube.gsmc.domain.category.adapter.out.persistence.entity.CategoryJpaEntity
 import team.incube.gsmc.domain.evidence.adapter.out.persistence.entity.EvidenceJpaEntity
 import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
+import java.time.LocalDateTime
 
 /**
  * 점수 요청 엔티티
@@ -27,6 +32,7 @@ import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
  */
 @Entity
 @Table(name = "score_tb")
+@EntityListeners(AuditingEntityListener::class)
 class ScoreJpaEntity(
     /** 점수 요청 고유 식별자 */
     @Id
@@ -52,4 +58,20 @@ class ScoreJpaEntity(
     /** 활동명 — [EvidenceType.EVIDENCE] 카테고리에서 활동 내용을 직접 기재할 때 사용 */
     @Column(name = "activity_name", nullable = true, length = 255)
     val activityName: String?,
-)
+    /** 인정 점수 값 — 심사 전([ScoreStatus.INCOMPLETE]/[ScoreStatus.PENDING])에는 null일 수 있음 */
+    @Column(name = "score_value", nullable = true)
+    val scoreValue: Int?,
+    /** 반려 사유 — [ScoreStatus.REJECTED]가 아니면 null */
+    @Column(name = "rejection_reason", nullable = true, length = 255)
+    val rejectionReason: String?,
+) {
+    /** 최초 등록 일시 */
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    var createdAt: LocalDateTime = LocalDateTime.now()
+
+    /** 최종 수정 일시 */
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    var updatedAt: LocalDateTime = LocalDateTime.now()
+}

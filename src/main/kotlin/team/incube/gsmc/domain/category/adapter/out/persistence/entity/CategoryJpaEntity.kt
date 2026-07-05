@@ -8,7 +8,9 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.category.EvidenceType
+import team.incube.gsmc.domain.category.ScoreCalculationType
 
 /**
  * 역량 평가 카테고리 엔티티
@@ -45,4 +47,12 @@ class CategoryJpaEntity(
     @Enumerated(EnumType.STRING)
     @Column(name = "evidence_type", nullable = false, length = 20)
     val evidenceType: EvidenceType,
+    /** 카테고리 유형 */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category_type", nullable = false, length = 30)
+    val categoryType: CategoryType,
+    /** 점수 집계 방식 */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "calculation_type", nullable = false, length = 20)
+    val calculationType: ScoreCalculationType,
 )

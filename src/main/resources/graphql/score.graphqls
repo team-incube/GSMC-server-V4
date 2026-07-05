@@ -3,8 +3,29 @@ type Score {
     userId: ID!
     category: Category!
     evidence: Evidence
+    file: File
     scoreStatus: ScoreStatus!
     activityName: String
+    scoreValue: Int
+    rejectionReason: String
+    updatedAt: DateTime!
+}
+
+type ScoreCategoryGroup {
+    categoryType: CategoryType!
+    categoryEnglishName: String!
+    categoryKoreanName: String!
+    recognizedScore: Int!
+    scores: [Score!]!
+}
+
+type TotalScore {
+    totalScore: Int!
+}
+
+type Percentile {
+    topPercentile: Int!
+    bottomPercentile: Int!
 }
 
 enum ScoreStatus {
@@ -12,6 +33,17 @@ enum ScoreStatus {
     PENDING
     APPROVED
     REJECTED
+}
+
+type Query {
+    myScores(categoryType: CategoryType, status: ScoreStatus): [Score!]!
+    score(scoreId: ID!): Score!
+    myScoresByCategory(status: ScoreStatus): [ScoreCategoryGroup!]!
+    scoresByCategory(memberId: ID!, status: ScoreStatus): [ScoreCategoryGroup!]!
+    myTotalScore(includeApprovedOnly: Boolean = true): TotalScore!
+    totalScore(memberId: ID!, includeApprovedOnly: Boolean = true): TotalScore!
+    myPercentInClass(includeApprovedOnly: Boolean = true): Percentile!
+    myPercentInGrade(includeApprovedOnly: Boolean = true): Percentile!
 }
 
 input ScoreInput {
