@@ -41,6 +41,10 @@ data class User(
 fun User.canAccessScoresOf(target: User): Boolean =
     when (userRole) {
         UserRole.TEACHER, UserRole.ROOT -> true
-        UserRole.HOMEROOM_TEACHER -> homeroomGrade == target.userGrade && homeroomClassNumber == target.userClassNumber
+        UserRole.HOMEROOM_TEACHER ->
+            homeroomGrade != null &&
+                homeroomClassNumber != null &&
+                homeroomGrade == target.userGrade &&
+                homeroomClassNumber == target.userClassNumber
         UserRole.STUDENT, UserRole.UNAUTHORIZED -> false
     }
