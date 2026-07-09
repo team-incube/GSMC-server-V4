@@ -22,6 +22,8 @@ enum CategoryType {
     AWARD
     ACADEMIC_GRADE
     EXTERNAL_ACTIVITY
+    NCS
+    NEWRROW_SCHOOL
 }
 
 enum EvidenceType {
