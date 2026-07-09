@@ -26,4 +26,8 @@ enum class ErrorCode(
 
     // 점수
     SCORE_NOT_FOUND(HttpStatus.NOT_FOUND, "점수를 찾을 수 없습니다.", "NOT_FOUND"),
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다.", "NOT_FOUND"),
+    INVALID_CATEGORY_TYPE(HttpStatus.BAD_REQUEST, "해당 요청에 사용할 수 없는 카테고리입니다.", "BAD_REQUEST"),
+    INVALID_SCORE_VALUE(HttpStatus.BAD_REQUEST, "점수 값이 올바르지 않습니다.", "BAD_REQUEST"),
+    FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.", "NOT_FOUND"),
 }
