@@ -51,7 +51,7 @@ class AppendMyScoreWithFileService(
         val activityName = if (category.calculationType == ScoreCalculationType.COUNT_BASED) value else null
 
         val target = appendScoreSupport.findOrCreateScore(userId, category)
-        val oldFile = if (target.scoreId != 0L) filePersistencePort.findByScoreId(target.scoreId) else null
+        val oldFile = target.file
         if (oldFile != null && oldFile.fileId != fileId) {
             filePersistencePort.unlinkFromScore(oldFile.fileId)
         }

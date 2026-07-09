@@ -15,14 +15,6 @@ interface FilePersistencePort {
     fun findById(fileId: Long): File?
 
     /**
-     * 특정 점수 요청에 직접 첨부된 파일을 조회한다.
-     *
-     * @param scoreId 조회할 점수 요청 ID
-     * @return 해당 점수 요청에 첨부된 파일, 없으면 null
-     */
-    fun findByScoreId(scoreId: Long): File?
-
-    /**
      * 파일을 점수 요청에 직접 연결한다(score FK 갈아끼움). [team.incube.gsmc.domain.category.EvidenceType.FILE]
      * 증빙 카테고리에서 사용한다.
      *

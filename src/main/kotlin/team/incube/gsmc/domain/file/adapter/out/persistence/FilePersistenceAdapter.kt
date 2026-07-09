@@ -22,8 +22,6 @@ class FilePersistenceAdapter(
 ) : FilePersistencePort {
     override fun findById(fileId: Long): File? = fileJpaRepository.findById(fileId).orElse(null)?.toDomain()
 
-    override fun findByScoreId(scoreId: Long): File? = fileJpaRepository.findByScoreScoreId(scoreId)?.toDomain()
-
     override fun linkToScore(
         fileId: Long,
         scoreId: Long,

@@ -171,6 +171,7 @@ class AppendMyScoreWithFileServiceTest :
                             scoreStatus = ScoreStatus.REJECTED,
                             rejectionReason = "다시 제출하세요",
                             scoreValue = 700,
+                            file = file(15L),
                         )
                     every { memberUtil.getCurrentUserId() } returns userId
                     every { appendScoreSupport.resolveCategory(CategoryType.CERTIFICATE, EvidenceType.FILE) } returns
@@ -178,7 +179,6 @@ class AppendMyScoreWithFileServiceTest :
                     every { filePersistencePort.findById(20L) } returns file(20L)
                     every { appendScoreSupport.parseScoreValue("900") } returns 900
                     every { appendScoreSupport.findOrCreateScore(userId, cat) } returns existing
-                    every { filePersistencePort.findByScoreId(55L) } returns file(15L)
                     every { filePersistencePort.unlinkFromScore(15L) } just runs
                     every { scorePersistencePort.save(any()) } answers { firstArg() }
                     every { filePersistencePort.linkToScore(20L, 55L) } just runs
