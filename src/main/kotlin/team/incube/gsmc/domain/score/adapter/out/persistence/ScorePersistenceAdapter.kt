@@ -112,7 +112,11 @@ class ScorePersistenceAdapter(
         val evidence = score.evidence?.let { entityManager.getReference(EvidenceJpaEntity::class.java, it.evidenceId) }
 
         val saved = scoreJpaRepository.save(score.toEntity(user, category, evidence))
-        return saved.toDomain(score.file)
+        return score.copy(
+            scoreId = saved.scoreId,
+            createdAt = saved.createdAt,
+            updatedAt = saved.updatedAt,
+        )
     }
 
     override fun deleteById(scoreId: Long) {
