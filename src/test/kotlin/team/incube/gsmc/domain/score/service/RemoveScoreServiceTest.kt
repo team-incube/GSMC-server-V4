@@ -13,6 +13,8 @@ import team.incube.gsmc.domain.category.Category
 import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.category.EvidenceType
 import team.incube.gsmc.domain.category.ScoreCalculationType
+import team.incube.gsmc.domain.file.File
+import team.incube.gsmc.domain.file.port.out.FilePersistencePort
 import team.incube.gsmc.domain.score.Score
 import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.score.port.out.ScorePersistencePort
@@ -25,12 +27,13 @@ import java.time.LocalDateTime
 class RemoveScoreServiceTest :
     BehaviorSpec({
         val scorePersistencePort = mockk<ScorePersistencePort>()
+        val filePersistencePort = mockk<FilePersistencePort>()
         val memberUtil = mockk<MemberUtil>()
-        val service = RemoveScoreService(scorePersistencePort, memberUtil)
+        val service = RemoveScoreService(scorePersistencePort, filePersistencePort, memberUtil)
 
         beforeEach { clearAllMocks() }
 
-        fun approvedScore() =
+        fun approvedScore(file: File? = null) =
             Score(
                 scoreId = 1L,
                 userId = 10L,
@@ -47,7 +50,7 @@ class RemoveScoreServiceTest :
                         calculationType = ScoreCalculationType.COUNT_BASED,
                     ),
                 evidence = null,
-                file = null,
+                file = file,
                 scoreStatus = ScoreStatus.APPROVED,
                 activityName = "수상 내역",
                 scoreValue = null,
@@ -66,6 +69,23 @@ class RemoveScoreServiceTest :
                     val result = service.execute(1L)
 
                     result shouldBe true
+                    verify(exactly = 1) { scorePersistencePort.deleteById(1L) }
+                    verify(exactly = 0) { filePersistencePort.unlinkFromScore(any()) }
+                }
+            }
+
+            When("첨부 파일이 있는 점수를 삭제하면") {
+                Then("파일의 점수 연결을 먼저 해제한 뒤 삭제한다") {
+                    val file = File(15L, 10L, "https://example.com/15", "cert.png", "stored-15.png")
+                    every { memberUtil.getCurrentUserRole() } returns UserRole.TEACHER
+                    every { scorePersistencePort.findById(1L) } returns approvedScore(file)
+                    every { filePersistencePort.unlinkFromScore(15L) } just runs
+                    every { scorePersistencePort.deleteById(1L) } just runs
+
+                    val result = service.execute(1L)
+
+                    result shouldBe true
+                    verify(exactly = 1) { filePersistencePort.unlinkFromScore(15L) }
                     verify(exactly = 1) { scorePersistencePort.deleteById(1L) }
                 }
             }
