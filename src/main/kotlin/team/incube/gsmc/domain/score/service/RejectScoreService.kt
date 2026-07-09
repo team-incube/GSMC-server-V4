@@ -11,9 +11,12 @@ import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
 import team.incube.gsmc.global.util.MemberUtil
 
+private const val MAX_REJECTION_REASON_LENGTH = 500
+
 /**
  * 점수 거절 유스케이스 구현 클래스입니다.
- * [RejectScoreUseCase]를 구현하며, 교사(TEACHER) 이상만 호출을 허용합니다.
+ * [RejectScoreUseCase]를 구현하며, 교사(TEACHER) 이상만 호출을 허용합니다. `rejectionReason`은
+ * `score_tb.rejection_reason` 컬럼 길이(500자)를 초과하면 DB 예외 대신 명확한 에러로 미리 막는다.
  */
 @Port(direction = PortDirection.INBOUND)
 class RejectScoreService(
@@ -27,6 +30,9 @@ class RejectScoreService(
     ): Boolean {
         if (!memberUtil.getCurrentUserRole().isTeacherOrAbove()) {
             throw GsmcException(ErrorCode.FORBIDDEN)
+        }
+        if (rejectionReason.isBlank() || rejectionReason.length > MAX_REJECTION_REASON_LENGTH) {
+            throw GsmcException(ErrorCode.INVALID_REJECTION_REASON)
         }
 
         val score = scorePersistencePort.findById(scoreId) ?: throw GsmcException(ErrorCode.SCORE_NOT_FOUND)

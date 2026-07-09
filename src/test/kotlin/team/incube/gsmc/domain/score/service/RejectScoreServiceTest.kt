@@ -82,6 +82,27 @@ class RejectScoreServiceTest :
                     exception.errorCode shouldBe ErrorCode.SCORE_NOT_FOUND
                 }
             }
+
+            When("거절 사유가 500자를 초과하면") {
+                Then("INVALID_REJECTION_REASON 예외가 발생하고 조회조차 하지 않는다") {
+                    every { memberUtil.getCurrentUserRole() } returns UserRole.TEACHER
+
+                    val exception = shouldThrow<GsmcException> { service.execute(1L, "가".repeat(501)) }
+
+                    exception.errorCode shouldBe ErrorCode.INVALID_REJECTION_REASON
+                    verify(exactly = 0) { scorePersistencePort.findById(any()) }
+                }
+            }
+
+            When("거절 사유가 빈 문자열이면") {
+                Then("INVALID_REJECTION_REASON 예외가 발생한다") {
+                    every { memberUtil.getCurrentUserRole() } returns UserRole.TEACHER
+
+                    val exception = shouldThrow<GsmcException> { service.execute(1L, "   ") }
+
+                    exception.errorCode shouldBe ErrorCode.INVALID_REJECTION_REASON
+                }
+            }
         }
 
         Given("학생 권한으로") {
