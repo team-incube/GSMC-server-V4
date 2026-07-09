@@ -88,7 +88,7 @@ class AppendScoreSupport(
 
         val now = LocalDateTime.now()
         return Score(
-            scoreId = 0,
+            scoreId = 0L,
             userId = userId,
             category = category,
             evidence = null,
