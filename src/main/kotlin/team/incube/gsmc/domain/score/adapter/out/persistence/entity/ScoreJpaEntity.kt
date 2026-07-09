@@ -62,7 +62,7 @@ class ScoreJpaEntity(
     @Column(name = "score_value", nullable = true)
     val scoreValue: Int?,
     /** 반려 사유 — [ScoreStatus.REJECTED]가 아니면 null */
-    @Column(name = "rejection_reason", nullable = true, length = 255)
+    @Column(name = "rejection_reason", nullable = true, length = 500)
     val rejectionReason: String?,
 ) {
     /** 최초 등록 일시 */
