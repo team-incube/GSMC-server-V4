@@ -101,7 +101,7 @@ class ScorePersistenceAdapter(
                     scoreJpaEntity.user.userId.eq(userId),
                     scoreJpaEntity.category.categoryType.eq(categoryType),
                     scoreJpaEntity.scoreStatus.eq(scoreStatus),
-                ).fetchOne() ?: return null
+                ).fetchFirst() ?: return null
 
         return entity.toDomain(findFileByScoreId(entity.scoreId))
     }
