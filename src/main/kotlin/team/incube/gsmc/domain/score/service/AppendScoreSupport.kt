@@ -69,6 +69,12 @@ class AppendScoreSupport(
      * 재사용할 기존 `REJECTED` 점수 요청이 있으면 그것을, 없으면 새로 저장할 빈 [Score]를 반환한다.
      * 호출부는 반환된 객체를 `copy()`해서 실제 값을 채운 뒤 저장한다.
      *
+     * 누적 카테고리([Category.isAccumulated]=true, 예: 자격증)는 같은 카테고리에 여러 건이 동시에
+     * 존재할 수 있어(취득한 자격증마다 별개의 제출) `REJECTED` row가 여러 개일 수 있다 — 카테고리
+     * 단위로 하나만 재사용하면 다른 제출을 덮어쓰고, `fetchOne()`이 `NonUniqueResultException`을
+     * 던질 수도 있다. 그래서 누적 카테고리는 항상 새 [Score]를 생성하고, 비누적 카테고리에서만
+     * 재사용한다(비누적 카테고리는 카테고리당 제출이 항상 1건이므로 안전).
+     *
      * @param userId 현재 사용자 ID
      * @param category 대상 카테고리
      * @return 재사용 또는 신규 생성용 [Score]
@@ -77,14 +83,16 @@ class AppendScoreSupport(
         userId: Long,
         category: Category,
     ): Score {
-        scorePersistencePort
-            .findByUserIdAndCategoryTypeAndScoreStatus(
-                userId,
-                category.categoryType,
-                ScoreStatus.REJECTED,
-            )?.let {
-                return it
-            }
+        if (!category.isAccumulated) {
+            scorePersistencePort
+                .findByUserIdAndCategoryTypeAndScoreStatus(
+                    userId,
+                    category.categoryType,
+                    ScoreStatus.REJECTED,
+                )?.let {
+                    return it
+                }
+        }
 
         val now = LocalDateTime.now()
         return Score(
