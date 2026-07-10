@@ -69,6 +69,6 @@ class AppendMyScoreWithFileService(
             filePersistencePort.linkToScore(fileId, saved.scoreId)
         }
 
-        return saved
+        return saved.copy(file = file)
     }
 }
