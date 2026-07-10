@@ -193,4 +193,33 @@ class AppendMyScoreWithFileServiceTest :
                 }
             }
         }
+
+        Given("REJECTED 상태의 기존 제출을 같은 파일로 재제출할 때") {
+            When("제출하면") {
+                Then("파일 연결/해제를 다시 호출하지 않는다") {
+                    val cat = category(ScoreCalculationType.SCORE_BASED)
+                    val existing =
+                        freshScore(cat).copy(
+                            scoreId = 55L,
+                            scoreStatus = ScoreStatus.REJECTED,
+                            rejectionReason = "다시 제출하세요",
+                            scoreValue = 700,
+                            file = file(20L),
+                        )
+                    every { memberUtil.getCurrentUserId() } returns userId
+                    every { appendScoreSupport.resolveCategory(CategoryType.CERTIFICATE, EvidenceType.FILE) } returns
+                        cat
+                    every { filePersistencePort.findById(20L) } returns file(20L)
+                    every { appendScoreSupport.parseScoreValue("900") } returns 900
+                    every { appendScoreSupport.findOrCreateScore(userId, cat) } returns existing
+                    every { scorePersistencePort.save(any()) } answers { firstArg() }
+
+                    val result = service.execute(CategoryType.CERTIFICATE, "900", 20L)
+
+                    result.scoreStatus shouldBe ScoreStatus.PENDING
+                    verify(exactly = 0) { filePersistencePort.unlinkFromScore(any()) }
+                    verify(exactly = 0) { filePersistencePort.linkToScore(any(), any()) }
+                }
+            }
+        }
     })

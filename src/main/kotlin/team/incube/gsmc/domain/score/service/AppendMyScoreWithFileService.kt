@@ -65,7 +65,9 @@ class AppendMyScoreWithFileService(
                     rejectionReason = null,
                 ),
             )
-        filePersistencePort.linkToScore(fileId, saved.scoreId)
+        if (oldFile?.fileId != fileId) {
+            filePersistencePort.linkToScore(fileId, saved.scoreId)
+        }
 
         return saved
     }
