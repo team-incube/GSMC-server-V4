@@ -55,4 +55,7 @@ fun Score.toEntity(
         activityName = activityName,
         scoreValue = scoreValue,
         rejectionReason = rejectionReason,
-    )
+    ).apply {
+        this.createdAt = this@toEntity.createdAt
+        this.updatedAt = this@toEntity.updatedAt
+    }
