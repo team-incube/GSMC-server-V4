@@ -154,3 +154,40 @@ jobs:
 
       - name: Build
         run: ./gradlew build --parallel --build-cache
+
+  notify:
+    runs-on: ubuntu-latest
+    if: always() && github.event.action != 'closed'
+
+    needs:
+      - validate-pr
+      - setup-pr-metadata
+      - build-and-test
+
+    steps:
+      - name: Determine Status
+        id: status
+        run: |
+          if [[ "${{ needs.validate-pr.result }}" == "failure" ]] || \
+             [[ "${{ needs.build-and-test.result }}" == "failure" ]]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "color=0xFF4C4C" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.build-and-test.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "color=0x4CAF50" >> $GITHUB_OUTPUT
+          else
+            echo "status=cancelled" >> $GITHUB_OUTPUT
+            echo "color=0xFFA500" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_INFORMATION_ALERT_CHANNEL_WEBHOOK }}
+          status: ${{ steps.status.outputs.status }}
+          color: ${{ steps.status.outputs.color }}
+          title: "GSMC Server V4 CI"
+          description: |
+            **Validate PR:** ${{ needs.validate-pr.result }}
+            **Setup Metadata:** ${{ needs.setup-pr-metadata.result }}
+            **Build & Test:** ${{ needs.build-and-test.result }}
