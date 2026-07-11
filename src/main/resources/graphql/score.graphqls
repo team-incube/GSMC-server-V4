@@ -46,16 +46,25 @@ type Query {
     myPercentInGrade(includeApprovedOnly: Boolean = true): Percentile!
 }
 
-input ScoreInput {
+input ScoreWithValueAndFileInput {
     value: String
-    fileId: ID
-    evidenceId: ID
+    fileId: ID!
 }
 
-input UpdateScoreStatusInput {
-    scoreStatus: ScoreStatus!
+input ScoreWithValueInput {
+    value: String
 }
 
 input RejectScoreInput {
     rejectionReason: String!
+}
+
+type Mutation {
+    addScoreWithFile(categoryType: CategoryType!, input: ScoreWithValueAndFileInput!): Score!
+    addScoreWithEvidence(categoryType: CategoryType!, input: ScoreWithValueInput!): Score!
+    addScoreWithValue(categoryType: CategoryType!, input: ScoreWithValueInput!): Score!
+    addScoreOnly(categoryType: CategoryType!): Score!
+    approveScore(scoreId: ID!): Boolean!
+    rejectScore(scoreId: ID!, input: RejectScoreInput!): Boolean!
+    deleteScore(scoreId: ID!): Boolean!
 }

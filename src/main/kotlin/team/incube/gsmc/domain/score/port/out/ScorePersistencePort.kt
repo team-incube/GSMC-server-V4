@@ -1,6 +1,8 @@
 package team.incube.gsmc.domain.score.port.out
 
+import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.score.Score
+import team.incube.gsmc.domain.score.ScoreStatus
 
 /**
  * 점수 요청 영속성을 추상화하는 아웃바운드 포트 인터페이스입니다.
@@ -31,4 +33,35 @@ interface ScorePersistencePort {
      * @return 해당 사용자들의 점수 요청 목록
      */
     fun findAllByUserIdIn(userIds: List<Long>): List<Score>
+
+    /**
+     * 특정 사용자가 특정 카테고리에 제출한 점수 요청 중 특정 상태인 것을 조회한다. 범용 점수 추가
+     * 뮤테이션의 반려 후 재제출 시(§8.4) 재사용할 기존 `REJECTED` row를 찾는 데 사용한다.
+     *
+     * @param userId 조회할 사용자 ID
+     * @param categoryType 조회할 카테고리 유형
+     * @param scoreStatus 조회할 심사 상태
+     * @return 조건에 맞는 점수 요청, 없으면 null
+     */
+    fun findByUserIdAndCategoryTypeAndScoreStatus(
+        userId: Long,
+        categoryType: CategoryType,
+        scoreStatus: ScoreStatus,
+    ): Score?
+
+    /**
+     * 점수 요청을 저장한다. [score]의 scoreId가 기존 점수 요청의 ID와 같으면 값을 갈아끼우고(update),
+     * 0이면 새로 생성한다(insert).
+     *
+     * @param score 저장할 점수 요청 도메인 객체
+     * @return 저장된 점수 요청 도메인 객체
+     */
+    fun save(score: Score): Score
+
+    /**
+     * ID로 점수 요청을 삭제한다.
+     *
+     * @param scoreId 삭제할 점수 요청 ID
+     */
+    fun deleteById(scoreId: Long)
 }
