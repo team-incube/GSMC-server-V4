@@ -1,20 +1,34 @@
-input CreateProjectInput {
-    title: String!
-    description: String!
-    fileIds: [ID!] = []
-    participantIds: [ID!]!
+type DataGsmClub {
+    clubId: ID!
+    clubName: String!
+    clubType: String
 }
 
-input PatchProjectInput {
-    title: String
+type DataGsmProjectParticipant {
+    participantId: ID!
+    participantName: String!
+    participantEmail: String!
+    studentNumber: String
+    major: String
+    sex: String
+}
+
+enum DataGsmProjectStatus {
+    ACTIVE
+    ENDED
+}
+
+type DataGsmProject {
+    dgProjectId: ID!
+    name: String!
     description: String
-    fileIds: [ID!]
-    participantIds: [ID!]
+    startYear: Int
+    endYear: Int
+    status: DataGsmProjectStatus!
+    club: DataGsmClub
+    participants: [DataGsmProjectParticipant!]!
 }
 
-input CreateProjectDraftInput {
-    title: String = ""
-    description: String = ""
-    fileIds: [ID!] = []
-    participantIds: [ID!] = []
+extend type Query {
+    myWritableDataGsmProjects: [DataGsmProject!]!
 }

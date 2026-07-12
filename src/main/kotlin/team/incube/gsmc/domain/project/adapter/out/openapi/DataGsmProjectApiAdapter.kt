@@ -1,0 +1,64 @@
+package team.incube.gsmc.domain.project.adapter.out.openapi
+
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.web.client.RestClient
+import team.incube.gsmc.domain.project.DataGsmProject
+import team.incube.gsmc.domain.project.adapter.out.openapi.dto.DataGsmApiResponseDto
+import team.incube.gsmc.domain.project.adapter.out.openapi.dto.DataGsmProjectPageDto
+import team.incube.gsmc.domain.project.adapter.out.openapi.dto.toDomain
+import team.incube.gsmc.domain.project.port.out.DataGsmProjectApiPort
+import team.incube.gsmc.global.annotation.PortDirection
+import team.incube.gsmc.global.annotation.adapter.Adapter
+import team.incube.gsmc.global.exception.ErrorCode
+import team.incube.gsmc.global.exception.GsmcException
+
+private const val PROJECTS_PATH = "/v1/projects"
+private const val PAGE_SIZE = 100
+private const val ACTIVE_STATUS = "ACTIVE"
+
+/**
+ * DataGSM 프로젝트 데이터 OpenAPI(`GET /v1/projects`) 연동을 담당하는 아웃바운드 어댑터 클래스입니다.
+ * [DataGsmProjectApiPort]를 구현하며, `X-API-KEY` 헤더 인증을 사용하는 순수 REST 호출을 [RestClient]로 처리합니다.
+ * 참여자 이메일 필터는 API가 직접 지원하지 않아 클라이언트 측에서 전체 ACTIVE 프로젝트를 조회한 뒤 걸러낸다.
+ */
+@Adapter(direction = PortDirection.OUTBOUND)
+class DataGsmProjectApiAdapter(
+    private val dataGsmOpenApiRestClient: RestClient,
+) : DataGsmProjectApiPort {
+    override fun findActiveProjectsByParticipantEmail(email: String): List<DataGsmProject> =
+        fetchAllActiveProjects().filter { project -> project.participants.any { it.participantEmail == email } }
+
+    override fun findProjectById(dgProjectId: Long): DataGsmProject? =
+        fetchProjectPage(mapOf("projectId" to dgProjectId)).projects.firstOrNull()?.toDomain()
+
+    private fun fetchAllActiveProjects(): List<DataGsmProject> {
+        val result = mutableListOf<DataGsmProject>()
+        var page = 0
+
+        while (true) {
+            val pageDto = fetchProjectPage(mapOf("status" to ACTIVE_STATUS, "page" to page, "size" to PAGE_SIZE))
+            result += pageDto.projects.map { it.toDomain() }
+
+            page++
+            if (page >= pageDto.totalPages) break
+        }
+
+        return result
+    }
+
+    private fun fetchProjectPage(queryParams: Map<String, Any>): DataGsmProjectPageDto {
+        val response =
+            runCatching {
+                dataGsmOpenApiRestClient
+                    .get()
+                    .uri { uriBuilder ->
+                        uriBuilder.path(PROJECTS_PATH)
+                        queryParams.forEach { (key, value) -> uriBuilder.queryParam(key, value) }
+                        uriBuilder.build()
+                    }.retrieve()
+                    .body(object : ParameterizedTypeReference<DataGsmApiResponseDto<DataGsmProjectPageDto>>() {})
+            }.getOrElse { throw GsmcException(ErrorCode.DATAGSM_API_CALL_FAILED) }
+
+        return response?.data ?: throw GsmcException(ErrorCode.DATAGSM_API_CALL_FAILED)
+    }
+}
