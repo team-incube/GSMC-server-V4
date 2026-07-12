@@ -27,6 +27,7 @@ fun ScoreJpaEntity.toDomain(file: File?): Score =
         activityName = activityName,
         scoreValue = scoreValue,
         rejectionReason = rejectionReason,
+        dgProjectId = dgProjectId,
         createdAt = createdAt,
         updatedAt = updatedAt,
     )
@@ -55,6 +56,7 @@ fun Score.toEntity(
         activityName = activityName,
         scoreValue = scoreValue,
         rejectionReason = rejectionReason,
+        dgProjectId = dgProjectId,
     ).apply {
         this.createdAt = this@toEntity.createdAt
         this.updatedAt = this@toEntity.updatedAt

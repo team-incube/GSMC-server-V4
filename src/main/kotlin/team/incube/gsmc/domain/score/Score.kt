@@ -22,6 +22,8 @@ import java.time.LocalDateTime
  * @param activityName 활동명
  * @param scoreValue 인정 점수 값
  * @param rejectionReason 반려 사유
+ * @param dgProjectId 연결된 DataGSM 프로젝트 ID — [team.incube.gsmc.domain.category.CategoryType.PROJECT_PARTICIPATION]
+ * 카테고리에서만 값이 있고, 그 외 카테고리는 항상 null
  * @param createdAt 최초 등록 일시
  * @param updatedAt 최종 수정 일시
  * @see ScoreStatus
@@ -36,6 +38,7 @@ data class Score(
     val activityName: String?,
     val scoreValue: Int?,
     val rejectionReason: String?,
+    val dgProjectId: Long?,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
 )

@@ -50,6 +50,28 @@ interface ScorePersistencePort {
     ): Score?
 
     /**
+     * 특정 사용자가 특정 DataGSM 프로젝트로 제출한 점수 요청을 조회한다.
+     * [team.incube.gsmc.domain.category.CategoryType.PROJECT_PARTICIPATION] 카테고리의 중복 제출 판단에 사용한다.
+     *
+     * @param userId 조회할 사용자 ID
+     * @param dgProjectId 조회할 DataGSM 프로젝트 ID
+     * @return 해당 점수 요청, 없으면 null
+     */
+    fun findByUserIdAndDgProjectId(
+        userId: Long,
+        dgProjectId: Long,
+    ): Score?
+
+    /**
+     * 특정 DataGSM 프로젝트로 제출된 모든 사용자의 점수 요청을 조회한다. 같은 프로젝트로 제출한
+     * 사람들을 모아보는 교사용 조회에 사용한다.
+     *
+     * @param dgProjectId 조회할 DataGSM 프로젝트 ID
+     * @return 해당 프로젝트로 제출된 점수 요청 목록
+     */
+    fun findAllByDgProjectId(dgProjectId: Long): List<Score>
+
+    /**
      * 점수 요청을 저장한다. [score]의 scoreId가 기존 점수 요청의 ID와 같으면 값을 갈아끼우고(update),
      * 0이면 새로 생성한다(insert).
      *

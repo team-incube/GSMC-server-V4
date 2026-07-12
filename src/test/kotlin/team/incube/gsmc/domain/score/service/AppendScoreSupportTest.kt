@@ -160,6 +160,7 @@ class AppendScoreSupportTest :
                             activityName = null,
                             scoreValue = 100,
                             rejectionReason = "사유",
+                            dgProjectId = null,
                             createdAt = LocalDateTime.now(),
                             updatedAt = LocalDateTime.now(),
                         )
