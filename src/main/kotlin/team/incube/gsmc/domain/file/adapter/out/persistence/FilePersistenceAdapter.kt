@@ -1,6 +1,7 @@
 package team.incube.gsmc.domain.file.adapter.out.persistence
 
 import jakarta.persistence.EntityManager
+import team.incube.gsmc.domain.evidence.adapter.out.persistence.entity.EvidenceJpaEntity
 import team.incube.gsmc.domain.file.File
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.FileJpaEntity
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.toDomain
@@ -12,7 +13,7 @@ import team.incube.gsmc.global.annotation.adapter.Adapter
 
 /**
  * 업로드 파일 영속성 처리를 담당하는 아웃바운드 어댑터 클래스입니다.
- * [FilePersistencePort]를 구현합니다. [FileJpaEntity]의 필드가 전부 불변(`val`)이라, score 연결
+ * [FilePersistencePort]를 구현합니다. [FileJpaEntity]의 필드가 전부 불변(`val`)이라, score/evidence 연결
  * 변경은 기존 값을 그대로 옮긴 새 엔티티를 만들어 같은 ID로 저장(update)하는 방식으로 처리합니다.
  */
 @Adapter(direction = PortDirection.OUTBOUND)
@@ -21,6 +22,23 @@ class FilePersistenceAdapter(
     private val entityManager: EntityManager,
 ) : FilePersistencePort {
     override fun findById(fileId: Long): File? = fileJpaRepository.findById(fileId).orElse(null)?.toDomain()
+
+    override fun findAllByEvidenceId(evidenceId: Long): List<File> =
+        fileJpaRepository.findAllByEvidenceEvidenceId(evidenceId).map { it.toDomain() }
+
+    override fun linkToEvidence(
+        fileId: Long,
+        evidenceId: Long,
+    ) {
+        val entity = fileJpaRepository.findById(fileId).orElse(null) ?: return
+        val evidence = entityManager.getReference(EvidenceJpaEntity::class.java, evidenceId)
+        fileJpaRepository.save(entity.copy(evidence = evidence))
+    }
+
+    override fun unlinkFromEvidence(fileId: Long) {
+        val entity = fileJpaRepository.findById(fileId).orElse(null) ?: return
+        fileJpaRepository.save(entity.copy(evidence = null))
+    }
 
     override fun linkToScore(
         fileId: Long,
@@ -36,7 +54,10 @@ class FilePersistenceAdapter(
         fileJpaRepository.save(entity.copy(score = null))
     }
 
-    private fun FileJpaEntity.copy(score: ScoreJpaEntity?): FileJpaEntity =
+    private fun FileJpaEntity.copy(
+        score: ScoreJpaEntity? = this.score,
+        evidence: EvidenceJpaEntity? = this.evidence,
+    ): FileJpaEntity =
         FileJpaEntity(
             fileId = fileId,
             user = user,

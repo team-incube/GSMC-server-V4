@@ -15,6 +15,32 @@ interface FilePersistencePort {
     fun findById(fileId: Long): File?
 
     /**
+     * 특정 근거 자료에 연결된 모든 파일을 조회한다.
+     *
+     * @param evidenceId 조회할 근거 자료 ID
+     * @return 해당 근거 자료에 연결된 파일 목록
+     */
+    fun findAllByEvidenceId(evidenceId: Long): List<File>
+
+    /**
+     * 파일을 근거 자료에 연결한다(evidence FK 갈아끼움).
+     *
+     * @param fileId 연결할 파일 ID
+     * @param evidenceId 연결할 근거 자료 ID
+     */
+    fun linkToEvidence(
+        fileId: Long,
+        evidenceId: Long,
+    )
+
+    /**
+     * 파일의 근거 자료 연결을 해제한다(evidence FK를 null로 갈아끼움).
+     *
+     * @param fileId 연결을 해제할 파일 ID
+     */
+    fun unlinkFromEvidence(fileId: Long)
+
+    /**
      * 파일을 점수 요청에 직접 연결한다(score FK 갈아끼움). [team.incube.gsmc.domain.category.EvidenceType.FILE]
      * 증빙 카테고리에서 사용한다.
      *
