@@ -50,6 +50,7 @@ class RejectScoreServiceTest :
                 activityName = "수상 내역",
                 scoreValue = null,
                 rejectionReason = null,
+                dgProjectId = null,
                 createdAt = LocalDateTime.now(),
                 updatedAt = LocalDateTime.now(),
             )

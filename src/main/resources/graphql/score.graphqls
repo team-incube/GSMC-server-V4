@@ -8,6 +8,7 @@ type Score {
     activityName: String
     scoreValue: Int
     rejectionReason: String
+    dgProjectId: ID
     updatedAt: DateTime!
 }
 
@@ -44,6 +45,7 @@ type Query {
     totalScore(memberId: ID!, includeApprovedOnly: Boolean = true): TotalScore!
     myPercentInClass(includeApprovedOnly: Boolean = true): Percentile!
     myPercentInGrade(includeApprovedOnly: Boolean = true): Percentile!
+    scoresByDgProjectId(dgProjectId: ID!): [Score!]!
 }
 
 input ScoreWithValueAndFileInput {
@@ -59,11 +61,17 @@ input RejectScoreInput {
     rejectionReason: String!
 }
 
+input SubmitProjectParticipationInput {
+    content: String!
+    fileIds: [ID!]!
+}
+
 type Mutation {
     addScoreWithFile(categoryType: CategoryType!, input: ScoreWithValueAndFileInput!): Score!
     addScoreWithEvidence(categoryType: CategoryType!, input: ScoreWithValueInput!): Score!
     addScoreWithValue(categoryType: CategoryType!, input: ScoreWithValueInput!): Score!
     addScoreOnly(categoryType: CategoryType!): Score!
+    submitProjectParticipation(dgProjectId: ID!, input: SubmitProjectParticipationInput!): Score!
     approveScore(scoreId: ID!): Boolean!
     rejectScore(scoreId: ID!, input: RejectScoreInput!): Boolean!
     deleteScore(scoreId: ID!): Boolean!

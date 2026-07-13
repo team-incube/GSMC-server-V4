@@ -31,4 +31,12 @@ enum class ErrorCode(
     INVALID_SCORE_VALUE(HttpStatus.BAD_REQUEST, "점수 값이 올바르지 않습니다.", "BAD_REQUEST"),
     FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.", "NOT_FOUND"),
     INVALID_REJECTION_REASON(HttpStatus.BAD_REQUEST, "거절 사유는 1자 이상 500자 이하여야 합니다.", "BAD_REQUEST"),
+
+    // 프로젝트 참여
+    DATAGSM_PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "DataGSM 프로젝트를 찾을 수 없습니다.", "NOT_FOUND"),
+    DATAGSM_PROJECT_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "종료된 프로젝트는 제출할 수 없습니다.", "BAD_REQUEST"),
+    DATAGSM_API_CALL_FAILED(HttpStatus.BAD_GATEWAY, "DataGSM 연동에 실패했습니다.", "BAD_GATEWAY"),
+    NOT_A_DATAGSM_PROJECT_PARTICIPANT(HttpStatus.BAD_REQUEST, "해당 프로젝트의 참여자가 아닙니다.", "BAD_REQUEST"),
+    INVALID_PROJECT_PARTICIPANT_COUNT(HttpStatus.BAD_REQUEST, "프로젝트 참여자는 2인 이상이어야 합니다.", "BAD_REQUEST"),
+    PROJECT_PARTICIPATION_ALREADY_SUBMITTED(HttpStatus.CONFLICT, "이미 제출하거나 심사 중인 프로젝트입니다.", "CONFLICT"),
 }

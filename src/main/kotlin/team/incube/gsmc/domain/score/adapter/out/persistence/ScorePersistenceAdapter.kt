@@ -106,6 +106,56 @@ class ScorePersistenceAdapter(
         return entity.toDomain(findFileByScoreId(entity.scoreId))
     }
 
+    override fun findByUserIdAndDgProjectId(
+        userId: Long,
+        dgProjectId: Long,
+    ): Score? {
+        val entity =
+            queryFactory
+                .selectFrom(scoreJpaEntity)
+                .join(scoreJpaEntity.user)
+                .fetchJoin()
+                .join(scoreJpaEntity.category)
+                .fetchJoin()
+                .leftJoin(scoreJpaEntity.evidence)
+                .fetchJoin()
+                .where(
+                    scoreJpaEntity.user.userId.eq(userId),
+                    scoreJpaEntity.dgProjectId.eq(dgProjectId),
+                ).fetchFirst() ?: return null
+
+        return entity.toDomain(findFileByScoreId(entity.scoreId))
+    }
+
+    override fun findAllByDgProjectId(dgProjectId: Long): List<Score> {
+        val entities =
+            queryFactory
+                .selectFrom(scoreJpaEntity)
+                .join(scoreJpaEntity.user)
+                .fetchJoin()
+                .join(scoreJpaEntity.category)
+                .fetchJoin()
+                .leftJoin(scoreJpaEntity.evidence)
+                .fetchJoin()
+                .where(scoreJpaEntity.dgProjectId.eq(dgProjectId))
+                .fetch()
+
+        if (entities.isEmpty()) return emptyList()
+
+        val filesByScoreId =
+            queryFactory
+                .selectFrom(fileJpaEntity)
+                .join(fileJpaEntity.score)
+                .fetchJoin()
+                .where(fileJpaEntity.score.scoreId.`in`(entities.map { it.scoreId }))
+                .fetch()
+                .groupBy { it.score!!.scoreId }
+
+        return entities.map { entity ->
+            entity.toDomain(filesByScoreId[entity.scoreId]?.firstOrNull()?.toDomain())
+        }
+    }
+
     override fun save(score: Score): Score {
         val user = entityManager.getReference(UserJpaEntity::class.java, score.userId)
         val category = entityManager.getReference(CategoryJpaEntity::class.java, score.category.categoryId)

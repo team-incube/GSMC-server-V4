@@ -64,6 +64,9 @@ class ScoreJpaEntity(
     /** 반려 사유 — [ScoreStatus.REJECTED]가 아니면 null */
     @Column(name = "rejection_reason", nullable = true, length = 500)
     val rejectionReason: String?,
+    /** 연결된 DataGSM 프로젝트 ID — [team.incube.gsmc.domain.category.CategoryType.PROJECT_PARTICIPATION] 카테고리에서만 값이 있음 */
+    @Column(name = "dg_project_id", nullable = true)
+    val dgProjectId: Long?,
 ) {
     /** 최초 등록 일시 */
     @CreatedDate

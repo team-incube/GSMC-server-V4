@@ -22,9 +22,11 @@ import team.incube.gsmc.domain.score.port.`in`.FetchMyScoresUseCase
 import team.incube.gsmc.domain.score.port.`in`.FetchMyTotalScoreUseCase
 import team.incube.gsmc.domain.score.port.`in`.FetchScoreUseCase
 import team.incube.gsmc.domain.score.port.`in`.FetchScoresByCategoryUseCase
+import team.incube.gsmc.domain.score.port.`in`.FetchScoresByDgProjectIdUseCase
 import team.incube.gsmc.domain.score.port.`in`.FetchTotalScoreUseCase
 import team.incube.gsmc.domain.score.port.`in`.RejectScoreUseCase
 import team.incube.gsmc.domain.score.port.`in`.RemoveScoreUseCase
+import team.incube.gsmc.domain.score.port.`in`.SubmitProjectParticipationUseCase
 
 /**
  * 점수 조회/추가/승인/거절/삭제 GraphQL Query·Mutation 리졸버입니다.
@@ -40,10 +42,12 @@ class ScoreWebAdapter(
     private val fetchTotalScoreUseCase: FetchTotalScoreUseCase,
     private val fetchMyPercentInClassUseCase: FetchMyPercentInClassUseCase,
     private val fetchMyPercentInGradeUseCase: FetchMyPercentInGradeUseCase,
+    private val fetchScoresByDgProjectIdUseCase: FetchScoresByDgProjectIdUseCase,
     private val appendMyScoreWithFileUseCase: AppendMyScoreWithFileUseCase,
     private val appendMyScoreWithEvidenceUseCase: AppendMyScoreWithEvidenceUseCase,
     private val appendMyScoreWithValueUseCase: AppendMyScoreWithValueUseCase,
     private val appendMyScoreOnlyUseCase: AppendMyScoreOnlyUseCase,
+    private val submitProjectParticipationUseCase: SubmitProjectParticipationUseCase,
     private val approveScoreUseCase: ApproveScoreUseCase,
     private val rejectScoreUseCase: RejectScoreUseCase,
     private val removeScoreUseCase: RemoveScoreUseCase,
@@ -91,6 +95,11 @@ class ScoreWebAdapter(
         @Argument includeApprovedOnly: Boolean?,
     ): Percentile = fetchMyPercentInGradeUseCase.execute(includeApprovedOnly ?: true)
 
+    @QueryMapping
+    fun scoresByDgProjectId(
+        @Argument dgProjectId: Long,
+    ): List<Score> = fetchScoresByDgProjectIdUseCase.execute(dgProjectId)
+
     @MutationMapping
     fun addScoreWithFile(
         @Argument categoryType: CategoryType,
@@ -113,6 +122,12 @@ class ScoreWebAdapter(
     fun addScoreOnly(
         @Argument categoryType: CategoryType,
     ): Score = appendMyScoreOnlyUseCase.execute(categoryType)
+
+    @MutationMapping
+    fun submitProjectParticipation(
+        @Argument dgProjectId: Long,
+        @Argument input: SubmitProjectParticipationInput,
+    ): Score = submitProjectParticipationUseCase.execute(dgProjectId, input.content, input.fileIds)
 
     @MutationMapping
     fun approveScore(

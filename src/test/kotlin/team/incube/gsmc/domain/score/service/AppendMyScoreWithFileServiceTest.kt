@@ -77,6 +77,7 @@ class AppendMyScoreWithFileServiceTest :
                 activityName = null,
                 scoreValue = null,
                 rejectionReason = null,
+                dgProjectId = null,
                 createdAt = LocalDateTime.now(),
                 updatedAt = LocalDateTime.now(),
             )

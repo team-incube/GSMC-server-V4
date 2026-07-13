@@ -105,6 +105,7 @@ class AppendScoreSupport(
             activityName = null,
             scoreValue = null,
             rejectionReason = null,
+            dgProjectId = null,
             createdAt = now,
             updatedAt = now,
         )
