@@ -140,7 +140,20 @@ class ScorePersistenceAdapter(
                 .where(scoreJpaEntity.dgProjectId.eq(dgProjectId))
                 .fetch()
 
-        return entities.map { entity -> entity.toDomain(findFileByScoreId(entity.scoreId)) }
+        if (entities.isEmpty()) return emptyList()
+
+        val filesByScoreId =
+            queryFactory
+                .selectFrom(fileJpaEntity)
+                .join(fileJpaEntity.score)
+                .fetchJoin()
+                .where(fileJpaEntity.score.scoreId.`in`(entities.map { it.scoreId }))
+                .fetch()
+                .groupBy { it.score!!.scoreId }
+
+        return entities.map { entity ->
+            entity.toDomain(filesByScoreId[entity.scoreId]?.firstOrNull()?.toDomain())
+        }
     }
 
     override fun save(score: Score): Score {
