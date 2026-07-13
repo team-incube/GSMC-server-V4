@@ -1,6 +1,7 @@
 package team.incube.gsmc.domain.project.adapter.out.openapi
 
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClient
 import team.incube.gsmc.domain.project.DataGsmProject
 import team.incube.gsmc.domain.project.adapter.out.openapi.dto.DataGsmApiResponseDto
@@ -29,14 +30,15 @@ class DataGsmProjectApiAdapter(
         fetchAllActiveProjects().filter { project -> project.participants.any { it.participantEmail == email } }
 
     override fun findProjectById(dgProjectId: Long): DataGsmProject? =
-        fetchProjectPage(mapOf("projectId" to dgProjectId)).projects.firstOrNull()?.toDomain()
+        fetchProjectPage(mapOf("projectId" to dgProjectId))?.projects?.firstOrNull()?.toDomain()
 
     private fun fetchAllActiveProjects(): List<DataGsmProject> {
         val result = mutableListOf<DataGsmProject>()
         var page = 0
 
         while (true) {
-            val pageDto = fetchProjectPage(mapOf("status" to ACTIVE_STATUS, "page" to page, "size" to PAGE_SIZE))
+            val pageDto =
+                fetchProjectPage(mapOf("status" to ACTIVE_STATUS, "page" to page, "size" to PAGE_SIZE)) ?: break
             result += pageDto.projects.map { it.toDomain() }
 
             page++
@@ -46,7 +48,7 @@ class DataGsmProjectApiAdapter(
         return result
     }
 
-    private fun fetchProjectPage(queryParams: Map<String, Any>): DataGsmProjectPageDto {
+    private fun fetchProjectPage(queryParams: Map<String, Any>): DataGsmProjectPageDto? {
         val response =
             runCatching {
                 dataGsmOpenApiRestClient
@@ -57,7 +59,10 @@ class DataGsmProjectApiAdapter(
                         uriBuilder.build()
                     }.retrieve()
                     .body(object : ParameterizedTypeReference<DataGsmApiResponseDto<DataGsmProjectPageDto>>() {})
-            }.getOrElse { throw GsmcException(ErrorCode.DATAGSM_API_CALL_FAILED) }
+            }.getOrElse { exception ->
+                if (exception is HttpClientErrorException.NotFound) return null
+                throw GsmcException(ErrorCode.DATAGSM_API_CALL_FAILED)
+            }
 
         return response?.data ?: throw GsmcException(ErrorCode.DATAGSM_API_CALL_FAILED)
     }

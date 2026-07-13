@@ -21,6 +21,7 @@ data class DataGsmProjectDto(
 
 /**
  * [DataGsmProjectDto]를 도메인 모델 [DataGsmProject]로 변환한다.
+ * DataGSM API의 status 값 누락 또는 예상치 못한 표기에 대비하여 기본값(ENDED)으로 폴백 처리한다.
  */
 fun DataGsmProjectDto.toDomain(): DataGsmProject =
     DataGsmProject(
@@ -29,7 +30,9 @@ fun DataGsmProjectDto.toDomain(): DataGsmProject =
         description = description,
         startYear = startYear,
         endYear = endYear,
-        status = DataGsmProjectStatus.valueOf(status),
+        status =
+            DataGsmProjectStatus.entries.find { it.name.equals(status, ignoreCase = true) }
+                ?: DataGsmProjectStatus.ENDED,
         club = club?.toDomain(),
         participants = participants.map { it.toDomain() },
     )
