@@ -68,7 +68,8 @@ class SubmitProjectParticipationService(
             categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION)
                 ?: throw GsmcException(ErrorCode.CATEGORY_NOT_FOUND)
 
-        fileIds.forEach { fileId ->
+        val uniqueFileIds = fileIds.distinct()
+        uniqueFileIds.forEach { fileId ->
             val file = filePersistencePort.findById(fileId) ?: throw GsmcException(ErrorCode.FILE_NOT_FOUND)
             if (file.userId != userId) throw GsmcException(ErrorCode.FORBIDDEN)
         }
@@ -82,11 +83,17 @@ class SubmitProjectParticipationService(
         val evidence =
             if (existing != null && existingEvidence != null) {
                 val updated = evidencePersistencePort.save(existingEvidence.copy(evidenceContent = content))
-                filePersistencePort
-                    .findAllByEvidenceId(updated.evidenceId)
-                    .filter { it.fileId !in fileIds }
-                    .forEach { filePersistencePort.unlinkFromEvidence(it.fileId) }
-                fileIds.forEach { filePersistencePort.linkToEvidence(it, updated.evidenceId) }
+                val existingFileIds =
+                    filePersistencePort
+                        .findAllByEvidenceId(
+                            updated.evidenceId,
+                        ).map { it.fileId }
+                        .toSet()
+
+                existingFileIds.filter { it !in uniqueFileIds }.forEach { filePersistencePort.unlinkFromEvidence(it) }
+                uniqueFileIds
+                    .filter { it !in existingFileIds }
+                    .forEach { filePersistencePort.linkToEvidence(it, updated.evidenceId) }
                 updated
             } else {
                 val created =
@@ -100,7 +107,7 @@ class SubmitProjectParticipationService(
                             evidenceUpdatedAt = null,
                         ),
                     )
-                fileIds.forEach { filePersistencePort.linkToEvidence(it, created.evidenceId) }
+                uniqueFileIds.forEach { filePersistencePort.linkToEvidence(it, created.evidenceId) }
                 created
             }
 
