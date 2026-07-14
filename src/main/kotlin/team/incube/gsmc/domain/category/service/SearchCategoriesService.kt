@@ -19,6 +19,6 @@ class SearchCategoriesService(
         if (keyword.isNullOrBlank()) {
             categoryPersistencePort.findAll()
         } else {
-            categoryPersistencePort.searchByKeyword(keyword)
+            categoryPersistencePort.searchByKeyword(keyword.trim())
         }
 }
