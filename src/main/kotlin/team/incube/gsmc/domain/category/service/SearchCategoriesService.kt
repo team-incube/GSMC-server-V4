@@ -1,5 +1,6 @@
 package team.incube.gsmc.domain.category.service
 
+import org.springframework.transaction.annotation.Transactional
 import team.incube.gsmc.domain.category.Category
 import team.incube.gsmc.domain.category.port.`in`.SearchCategoriesUseCase
 import team.incube.gsmc.domain.category.port.out.CategoryPersistencePort
@@ -15,6 +16,7 @@ import team.incube.gsmc.global.annotation.port.Port
 class SearchCategoriesService(
     private val categoryPersistencePort: CategoryPersistencePort,
 ) : SearchCategoriesUseCase {
+    @Transactional(readOnly = true)
     override fun execute(keyword: String?): List<Category> =
         if (keyword.isNullOrBlank()) {
             categoryPersistencePort.findAll()

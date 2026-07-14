@@ -1,5 +1,6 @@
 package team.incube.gsmc.domain.category.service
 
+import org.springframework.transaction.annotation.Transactional
 import team.incube.gsmc.domain.category.Category
 import team.incube.gsmc.domain.category.port.`in`.FetchCategoriesUseCase
 import team.incube.gsmc.domain.category.port.out.CategoryPersistencePort
@@ -14,5 +15,6 @@ import team.incube.gsmc.global.annotation.port.Port
 class FetchCategoriesService(
     private val categoryPersistencePort: CategoryPersistencePort,
 ) : FetchCategoriesUseCase {
+    @Transactional(readOnly = true)
     override fun execute(): List<Category> = categoryPersistencePort.findAll()
 }
