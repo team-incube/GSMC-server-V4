@@ -14,4 +14,19 @@ interface CategoryPersistencePort {
      * @return 해당 카테고리, 없으면 null
      */
     fun findByCategoryType(categoryType: CategoryType): Category?
+
+    /**
+     * 전체 카테고리를 categoryId 오름차순으로 조회한다.
+     *
+     * @return 전체 카테고리 목록
+     */
+    fun findAll(): List<Category>
+
+    /**
+     * 영문명 또는 한글명에 keyword가 포함된(대소문자 무시) 카테고리를 categoryId 오름차순으로 조회한다.
+     *
+     * @param keyword 검색 키워드
+     * @return 매칭된 카테고리 목록
+     */
+    fun searchByKeyword(keyword: String): List<Category>
 }

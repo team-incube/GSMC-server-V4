@@ -36,3 +36,18 @@ enum ScoreCalculationType {
     COUNT_BASED
     SCORE_BASED
 }
+
+type CategoryPayload {
+    categoryType: CategoryType!
+    englishName: String!
+    koreanName: String!
+    weight: Int!
+    maxRecordCount: Int!
+    evidenceType: EvidenceType!
+    calculationType: ScoreCalculationType!
+}
+
+extend type Query {
+    categories: [CategoryPayload!]!
+    searchCategories(keyword: String): [CategoryPayload!]!
+}
