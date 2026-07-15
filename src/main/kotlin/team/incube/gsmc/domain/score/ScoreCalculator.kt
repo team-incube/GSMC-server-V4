@@ -1,6 +1,7 @@
 package team.incube.gsmc.domain.score
 
 import team.incube.gsmc.domain.category.Category
+import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.category.ScoreCalculationType
 import kotlin.math.roundToInt
 
@@ -23,25 +24,47 @@ object ScoreCalculator {
     fun recognizedScore(
         scoresInCategory: List<Score>,
         category: Category,
+    ): Int = minOf(rawScoreOf(scoresInCategory, category), category.categoryMaximumValue) * category.weight
+
+    /**
+     * 카테고리의 raw 값(캡·가중치 적용 전)을 계산한다. [ScoreCalculationType.COUNT_BASED]는 건수,
+     * [ScoreCalculationType.SCORE_BASED]는 [Score.scoreValue] 합산 또는 최신값을 원점수로 한다.
+     */
+    private fun rawScoreOf(
+        scoresInCategory: List<Score>,
+        category: Category,
+    ): Int =
+        when (category.calculationType) {
+            ScoreCalculationType.COUNT_BASED ->
+                if (category.isAccumulated) {
+                    scoresInCategory.size
+                } else if (scoresInCategory.isNotEmpty()) {
+                    1
+                } else {
+                    0
+                }
+            ScoreCalculationType.SCORE_BASED ->
+                if (category.isAccumulated) {
+                    scoresInCategory.sumOf { it.scoreValue ?: 0 }
+                } else {
+                    scoresInCategory.maxByOrNull { it.updatedAt }?.scoreValue ?: 0
+                }
+        }
+
+    /**
+     * TOEIC(JLPT 포함) 카테고리의 인정점수를 계산하되, 토익사관학교([CategoryType.TOEIC_ACADEMY]) 참여
+     * 승인 여부를 raw 값에 가산한 뒤 캡·가중치를 적용한다. 토익사관학교는 독립 카테고리로 집계되지 않고
+     * 이 보너스로만 총점에 반영된다.
+     */
+    private fun recognizedToeicScoreWithAcademyBonus(
+        toeicScores: List<Score>,
+        toeicCategory: Category,
+        academyScores: List<Score>,
+        academyCategory: Category?,
     ): Int {
-        val raw =
-            when (category.calculationType) {
-                ScoreCalculationType.COUNT_BASED ->
-                    if (category.isAccumulated) {
-                        scoresInCategory.size
-                    } else if (scoresInCategory.isNotEmpty()) {
-                        1
-                    } else {
-                        0
-                    }
-                ScoreCalculationType.SCORE_BASED ->
-                    if (category.isAccumulated) {
-                        scoresInCategory.sumOf { it.scoreValue ?: 0 }
-                    } else {
-                        scoresInCategory.maxByOrNull { it.updatedAt }?.scoreValue ?: 0
-                    }
-            }
-        return minOf(raw, category.categoryMaximumValue) * category.weight
+        val academyBonus = academyCategory?.let { rawScoreOf(academyScores, it) } ?: 0
+        val raw = rawScoreOf(toeicScores, toeicCategory) + academyBonus
+        return minOf(raw, toeicCategory.categoryMaximumValue) * toeicCategory.weight
     }
 
     /**
@@ -59,15 +82,32 @@ object ScoreCalculator {
         val approvedScores = allScores.filter { it.scoreStatus == ScoreStatus.APPROVED }
         val displayScores = if (statusFilter != null) allScores.filter { it.scoreStatus == statusFilter } else allScores
 
-        return allScores.map { it.category }.distinct().map { category ->
-            ScoreCategoryGroup(
-                categoryType = category.categoryType,
-                categoryEnglishName = category.categoryEnglishName,
-                categoryKoreanName = category.categoryKoreanName,
-                recognizedScore = recognizedScore(approvedScores.filter { it.category == category }, category),
-                scores = displayScores.filter { it.category == category },
-            )
-        }
+        val categories = allScores.map { it.category }.distinct()
+        val academyCategory = categories.find { it.categoryType == CategoryType.TOEIC_ACADEMY }
+
+        return categories
+            .filterNot { it.categoryType == CategoryType.TOEIC_ACADEMY }
+            .map { category ->
+                val scoresInCategory = approvedScores.filter { it.category == category }
+                val recognized =
+                    if (category.categoryType == CategoryType.TOEIC) {
+                        recognizedToeicScoreWithAcademyBonus(
+                            scoresInCategory,
+                            category,
+                            approvedScores.filter { it.category == academyCategory },
+                            academyCategory,
+                        )
+                    } else {
+                        recognizedScore(scoresInCategory, category)
+                    }
+                ScoreCategoryGroup(
+                    categoryType = category.categoryType,
+                    categoryEnglishName = category.categoryEnglishName,
+                    categoryKoreanName = category.categoryKoreanName,
+                    recognizedScore = recognized,
+                    scores = displayScores.filter { it.category == category },
+                )
+            }
     }
 
     /**
@@ -87,10 +127,23 @@ object ScoreCalculator {
             } else {
                 allScores.filter { it.scoreStatus != ScoreStatus.REJECTED }
             }
-        return target
-            .groupBy { it.category }
-            .entries
-            .sumOf { (category, scoresInCategory) -> recognizedScore(scoresInCategory, category) }
+        val grouped = target.groupBy { it.category }
+        val academyCategory = grouped.keys.find { it.categoryType == CategoryType.TOEIC_ACADEMY }
+
+        return grouped.entries
+            .filterNot { (category, _) -> category.categoryType == CategoryType.TOEIC_ACADEMY }
+            .sumOf { (category, scoresInCategory) ->
+                if (category.categoryType == CategoryType.TOEIC) {
+                    recognizedToeicScoreWithAcademyBonus(
+                        scoresInCategory,
+                        category,
+                        academyCategory?.let { grouped[it].orEmpty() } ?: emptyList(),
+                        academyCategory,
+                    )
+                } else {
+                    recognizedScore(scoresInCategory, category)
+                }
+            }
     }
 
     /**
