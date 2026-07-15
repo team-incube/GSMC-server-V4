@@ -52,6 +52,7 @@ class SecurityConfig(
                 "/api/auth/token/refresh",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
+                "/graphiql/**",
             ).permitAll()
             .anyRequest()
             .authenticated()
