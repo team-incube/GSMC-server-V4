@@ -8,6 +8,7 @@ import team.incube.gsmc.domain.category.ScoreCalculationType
 import team.incube.gsmc.domain.category.port.out.CategoryPersistencePort
 import team.incube.gsmc.domain.score.Score
 import team.incube.gsmc.domain.score.ScoreStatus
+import team.incube.gsmc.domain.score.ScoreValueConverter
 import team.incube.gsmc.domain.score.port.out.ScorePersistencePort
 import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
@@ -58,12 +59,17 @@ class AppendScoreSupport(
     }
 
     /**
-     * 문자열 [value]를 정수 점수 값으로 파싱한다.
+     * 문자열 [value]를 [category]의 환산 규칙에 따라 인정점수로 파싱·변환한다.
      *
      * @throws GsmcException 파싱할 수 없으면 [ErrorCode.INVALID_SCORE_VALUE]
      */
-    fun parseScoreValue(value: String?): Int =
-        value?.trim()?.toIntOrNull() ?: throw GsmcException(ErrorCode.INVALID_SCORE_VALUE)
+    fun parseScoreValue(
+        value: String?,
+        category: Category,
+    ): Int {
+        val raw = value?.trim()?.toDoubleOrNull() ?: throw GsmcException(ErrorCode.INVALID_SCORE_VALUE)
+        return ScoreValueConverter.convert(category, raw)
+    }
 
     /**
      * 재사용할 기존 `REJECTED` 점수 요청이 있으면 그것을, 없으면 새로 저장할 빈 [Score]를 반환한다.
@@ -111,6 +117,13 @@ class AppendScoreSupport(
         )
     }
 
-    private fun findCategoryOrThrow(categoryType: CategoryType): Category =
-        categoryPersistencePort.findByCategoryType(categoryType) ?: throw GsmcException(ErrorCode.CATEGORY_NOT_FOUND)
+    /**
+     * [categoryType]으로 카테고리를 조회한다. JLPT는 TOEIC과 `category_tb` 행을 공유하므로
+     * TOEIC으로 캐노니컬 매핑한 뒤 조회한다 ([team.incube.gsmc.domain.category.CategoryType] 참고).
+     */
+    private fun findCategoryOrThrow(categoryType: CategoryType): Category {
+        val canonicalType = if (categoryType == CategoryType.JLPT) CategoryType.TOEIC else categoryType
+        return categoryPersistencePort.findByCategoryType(canonicalType)
+            ?: throw GsmcException(ErrorCode.CATEGORY_NOT_FOUND)
+    }
 }
