@@ -19,6 +19,7 @@ fun CategoryJpaEntity.toDomain(): Category =
         evidenceType = evidenceType,
         categoryType = categoryType,
         calculationType = calculationType,
+        conversionDivisor = conversionDivisor,
     )
 
 /**
@@ -38,4 +39,5 @@ fun Category.toEntity(): CategoryJpaEntity =
         evidenceType = evidenceType,
         categoryType = categoryType,
         calculationType = calculationType,
+        conversionDivisor = conversionDivisor,
     )
