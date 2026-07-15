@@ -11,7 +11,6 @@ import team.incube.gsmc.domain.score.ScoreCategoryGroup
 import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.score.TotalScore
 import team.incube.gsmc.domain.score.port.`in`.AppendMyScoreOnlyUseCase
-import team.incube.gsmc.domain.score.port.`in`.AppendMyScoreWithEvidenceUseCase
 import team.incube.gsmc.domain.score.port.`in`.AppendMyScoreWithFileUseCase
 import team.incube.gsmc.domain.score.port.`in`.AppendMyScoreWithValueUseCase
 import team.incube.gsmc.domain.score.port.`in`.ApproveScoreUseCase
@@ -44,7 +43,6 @@ class ScoreWebAdapter(
     private val fetchMyPercentInGradeUseCase: FetchMyPercentInGradeUseCase,
     private val fetchScoresByDgProjectIdUseCase: FetchScoresByDgProjectIdUseCase,
     private val appendMyScoreWithFileUseCase: AppendMyScoreWithFileUseCase,
-    private val appendMyScoreWithEvidenceUseCase: AppendMyScoreWithEvidenceUseCase,
     private val appendMyScoreWithValueUseCase: AppendMyScoreWithValueUseCase,
     private val appendMyScoreOnlyUseCase: AppendMyScoreOnlyUseCase,
     private val submitProjectParticipationUseCase: SubmitProjectParticipationUseCase,
@@ -105,12 +103,6 @@ class ScoreWebAdapter(
         @Argument categoryType: CategoryType,
         @Argument input: ScoreWithValueAndFileInput,
     ): Score = appendMyScoreWithFileUseCase.execute(categoryType, input.value, input.fileId)
-
-    @MutationMapping
-    fun addScoreWithEvidence(
-        @Argument categoryType: CategoryType,
-        @Argument input: ScoreWithValueInput,
-    ): Score = appendMyScoreWithEvidenceUseCase.execute(categoryType, input.value)
 
     @MutationMapping
     fun addScoreWithValue(
