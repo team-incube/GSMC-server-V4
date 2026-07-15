@@ -46,6 +46,8 @@ dependencies {
     kapt(Libs.LOMBOK)
 
     runtimeOnly(Libs.MYSQL_CONNECTOR)
+    implementation(Libs.FLYWAY_CORE)
+    implementation(Libs.FLYWAY_MYSQL)
 
     testImplementation(Libs.SPRING_BOOT_TEST)
     testImplementation(Libs.KOTLIN_TEST_JUNIT5)
