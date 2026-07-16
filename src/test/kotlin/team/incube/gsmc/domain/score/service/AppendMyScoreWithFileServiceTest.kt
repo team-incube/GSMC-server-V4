@@ -90,7 +90,7 @@ class AppendMyScoreWithFileServiceTest :
                     every { appendScoreSupport.resolveCategory(CategoryType.CERTIFICATE, EvidenceType.FILE) } returns
                         cat
                     every { filePersistencePort.findById(10L) } returns file(10L)
-                    every { appendScoreSupport.parseScoreValue("850") } returns 850
+                    every { appendScoreSupport.parseScoreValue("850", cat) } returns 850
                     every { appendScoreSupport.findOrCreateScore(userId, cat) } returns freshScore(cat)
                     val savedSlot = slot<Score>()
                     every { scorePersistencePort.save(capture(savedSlot)) } answers
@@ -124,7 +124,7 @@ class AppendMyScoreWithFileServiceTest :
 
                     result.activityName shouldBe "정보처리기사"
                     result.scoreValue shouldBe null
-                    verify(exactly = 0) { appendScoreSupport.parseScoreValue(any()) }
+                    verify(exactly = 0) { appendScoreSupport.parseScoreValue(any(), any()) }
                 }
             }
         }
@@ -178,7 +178,7 @@ class AppendMyScoreWithFileServiceTest :
                     every { appendScoreSupport.resolveCategory(CategoryType.CERTIFICATE, EvidenceType.FILE) } returns
                         cat
                     every { filePersistencePort.findById(20L) } returns file(20L)
-                    every { appendScoreSupport.parseScoreValue("900") } returns 900
+                    every { appendScoreSupport.parseScoreValue("900", cat) } returns 900
                     every { appendScoreSupport.findOrCreateScore(userId, cat) } returns existing
                     every { filePersistencePort.unlinkFromScore(15L) } just runs
                     every { scorePersistencePort.save(any()) } answers { firstArg() }
@@ -211,7 +211,7 @@ class AppendMyScoreWithFileServiceTest :
                     every { appendScoreSupport.resolveCategory(CategoryType.CERTIFICATE, EvidenceType.FILE) } returns
                         cat
                     every { filePersistencePort.findById(20L) } returns file(20L)
-                    every { appendScoreSupport.parseScoreValue("900") } returns 900
+                    every { appendScoreSupport.parseScoreValue("900", cat) } returns 900
                     every { appendScoreSupport.findOrCreateScore(userId, cat) } returns existing
                     every { scorePersistencePort.save(any()) } answers { firstArg() }
 

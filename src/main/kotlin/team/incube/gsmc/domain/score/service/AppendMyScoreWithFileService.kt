@@ -44,7 +44,7 @@ class AppendMyScoreWithFileService(
             if (category.calculationType ==
                 ScoreCalculationType.SCORE_BASED
             ) {
-                appendScoreSupport.parseScoreValue(value)
+                appendScoreSupport.parseScoreValue(value, category)
             } else {
                 null
             }

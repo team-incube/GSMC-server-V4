@@ -55,4 +55,7 @@ class CategoryJpaEntity(
     @Enumerated(EnumType.STRING)
     @Column(name = "calculation_type", nullable = false, length = 20)
     val calculationType: ScoreCalculationType,
+    /** 원점수를 인정점수로 환산할 때 나눌 값, 환산이 필요 없으면 1 */
+    @Column(name = "conversion_divisor", nullable = false)
+    val conversionDivisor: Int = 1,
 )

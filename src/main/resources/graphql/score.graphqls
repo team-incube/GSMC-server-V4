@@ -68,7 +68,6 @@ input SubmitProjectParticipationInput {
 
 type Mutation {
     addScoreWithFile(categoryType: CategoryType!, input: ScoreWithValueAndFileInput!): Score!
-    addScoreWithEvidence(categoryType: CategoryType!, input: ScoreWithValueInput!): Score!
     addScoreWithValue(categoryType: CategoryType!, input: ScoreWithValueInput!): Score!
     addScoreOnly(categoryType: CategoryType!): Score!
     submitProjectParticipation(dgProjectId: ID!, input: SubmitProjectParticipationInput!): Score!

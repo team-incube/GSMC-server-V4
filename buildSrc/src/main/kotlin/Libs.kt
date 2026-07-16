@@ -16,6 +16,8 @@ object Libs {
 
     // Database
     const val MYSQL_CONNECTOR = "com.mysql:mysql-connector-j"
+    const val FLYWAY_CORE = "org.flywaydb:flyway-core"
+    const val FLYWAY_MYSQL = "org.flywaydb:flyway-mysql"
 
     // QueryDSL
     const val QUERYDSL_JPA = "io.github.openfeign.querydsl:querydsl-jpa:6.10.1"

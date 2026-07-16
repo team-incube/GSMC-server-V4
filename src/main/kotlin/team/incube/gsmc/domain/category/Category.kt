@@ -15,6 +15,7 @@ package team.incube.gsmc.domain.category
  * @param evidenceType 증빙 자료 제출 방식
  * @param categoryType 카테고리 유형
  * @param calculationType 점수 집계 방식
+ * @param conversionDivisor 원점수를 인정점수로 환산할 때 나눌 값 (예: TOPCIT/TOEIC=100, 뉴로우스쿨=20), 환산이 필요 없으면 1
  * @see EvidenceType
  * @see CategoryType
  * @see ScoreCalculationType
@@ -29,4 +30,5 @@ data class Category(
     val evidenceType: EvidenceType,
     val categoryType: CategoryType,
     val calculationType: ScoreCalculationType,
+    val conversionDivisor: Int = 1,
 )

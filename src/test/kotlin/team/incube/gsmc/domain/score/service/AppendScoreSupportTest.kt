@@ -33,16 +33,20 @@ class AppendScoreSupportTest :
             evidenceType: EvidenceType,
             calculationType: ScoreCalculationType,
             isAccumulated: Boolean = false,
+            categoryType: CategoryType = CategoryType.CERTIFICATE,
+            categoryMaximumValue: Int = 14,
+            conversionDivisor: Int = 1,
         ) = Category(
             categoryId = 1,
             weight = 1,
             categoryEnglishName = "CERTIFICATE",
             categoryKoreanName = "자격증",
-            categoryMaximumValue = 14,
+            categoryMaximumValue = categoryMaximumValue,
             isAccumulated = isAccumulated,
             evidenceType = evidenceType,
-            categoryType = CategoryType.CERTIFICATE,
+            categoryType = categoryType,
             calculationType = calculationType,
+            conversionDivisor = conversionDivisor,
         )
 
         Given("resolveCategory") {
@@ -79,6 +83,26 @@ class AppendScoreSupportTest :
                     every { categoryPersistencePort.findByCategoryType(CategoryType.CERTIFICATE) } returns cat
 
                     support.resolveCategory(CategoryType.CERTIFICATE, EvidenceType.FILE) shouldBe cat
+                }
+            }
+
+            When("JLPT로 조회하면") {
+                Then("TOEIC과 같은 category_tb 행을 캐노니컬 매핑으로 조회한다") {
+                    val cat =
+                        category(
+                            EvidenceType.FILE,
+                            ScoreCalculationType.SCORE_BASED,
+                            categoryType = CategoryType.TOEIC,
+                            categoryMaximumValue = 10,
+                            conversionDivisor = 100,
+                        )
+                    every { categoryPersistencePort.findByCategoryType(CategoryType.TOEIC) } returns cat
+
+                    val result = support.resolveCategory(CategoryType.JLPT, EvidenceType.FILE)
+
+                    result shouldBe cat
+                    verify(exactly = 1) { categoryPersistencePort.findByCategoryType(CategoryType.TOEIC) }
+                    verify(exactly = 0) { categoryPersistencePort.findByCategoryType(CategoryType.JLPT) }
                 }
             }
         }
@@ -124,22 +148,52 @@ class AppendScoreSupportTest :
         }
 
         Given("parseScoreValue") {
-            When("숫자 문자열이 주어지면") {
-                Then("정수로 파싱한다") {
-                    support.parseScoreValue("850") shouldBe 850
+            When("변환이 필요 없는 카테고리에 숫자 문자열이 주어지면") {
+                Then("정수로 파싱한 값을 그대로 반환한다") {
+                    val cat = category(EvidenceType.FILE, ScoreCalculationType.COUNT_BASED)
+                    support.parseScoreValue("850", cat) shouldBe 850
+                }
+            }
+
+            When("TOPCIT처럼 conversionDivisor가 있는 카테고리에 원점수가 주어지면") {
+                Then("나눈 뒤 반올림한 값으로 변환한다") {
+                    val cat =
+                        category(
+                            EvidenceType.FILE,
+                            ScoreCalculationType.SCORE_BASED,
+                            categoryType = CategoryType.TOPCIT,
+                            categoryMaximumValue = 10,
+                            conversionDivisor = 100,
+                        )
+                    support.parseScoreValue("850", cat) shouldBe 9
+                }
+            }
+
+            When("교과성적처럼 등급 역매핑 카테고리에 등급이 주어지면") {
+                Then("(categoryMaximumValue+1)-등급으로 변환한다") {
+                    val cat =
+                        category(
+                            EvidenceType.UNREQUIRED,
+                            ScoreCalculationType.SCORE_BASED,
+                            categoryType = CategoryType.ACADEMIC_GRADE,
+                            categoryMaximumValue = 9,
+                        )
+                    support.parseScoreValue("3", cat) shouldBe 7
                 }
             }
 
             When("null이 주어지면") {
                 Then("INVALID_SCORE_VALUE 예외가 발생한다") {
-                    val exception = shouldThrow<GsmcException> { support.parseScoreValue(null) }
+                    val cat = category(EvidenceType.FILE, ScoreCalculationType.COUNT_BASED)
+                    val exception = shouldThrow<GsmcException> { support.parseScoreValue(null, cat) }
                     exception.errorCode shouldBe ErrorCode.INVALID_SCORE_VALUE
                 }
             }
 
             When("숫자가 아닌 문자열이 주어지면") {
                 Then("INVALID_SCORE_VALUE 예외가 발생한다") {
-                    val exception = shouldThrow<GsmcException> { support.parseScoreValue("전국 1위") }
+                    val cat = category(EvidenceType.FILE, ScoreCalculationType.COUNT_BASED)
+                    val exception = shouldThrow<GsmcException> { support.parseScoreValue("전국 1위", cat) }
                     exception.errorCode shouldBe ErrorCode.INVALID_SCORE_VALUE
                 }
             }
