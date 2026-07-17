@@ -1,7 +1,7 @@
 package team.incube.gsmc.domain.score.service
 
 import team.incube.gsmc.domain.score.Percentile
-import team.incube.gsmc.domain.score.ScoreCalculator
+import team.incube.gsmc.domain.score.ScoreAggregator
 import team.incube.gsmc.domain.score.port.`in`.FetchMyPercentInClassUseCase
 import team.incube.gsmc.domain.score.port.out.MemberPersistencePort
 import team.incube.gsmc.domain.score.port.out.ScorePersistencePort
@@ -41,9 +41,9 @@ class FetchMyPercentInClassService(
         val scoresByUserId = scorePersistencePort.findAllByUserIdIn(classmateIds.toList()).groupBy { it.userId }
         val totalScoreByUserId =
             classmateIds.associateWith { id ->
-                ScoreCalculator.totalScoreOf(scoresByUserId[id] ?: emptyList(), includeApprovedOnly)
+                ScoreAggregator.totalScoreOf(scoresByUserId[id] ?: emptyList(), includeApprovedOnly)
             }
 
-        return ScoreCalculator.percentileOf(userId, totalScoreByUserId)
+        return ScoreAggregator.percentileOf(userId, totalScoreByUserId)
     }
 }

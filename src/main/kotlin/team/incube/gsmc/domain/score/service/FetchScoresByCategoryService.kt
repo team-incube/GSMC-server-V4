@@ -1,6 +1,6 @@
 package team.incube.gsmc.domain.score.service
 
-import team.incube.gsmc.domain.score.ScoreCalculator
+import team.incube.gsmc.domain.score.ScoreAggregator
 import team.incube.gsmc.domain.score.ScoreCategoryGroup
 import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.score.port.`in`.FetchScoresByCategoryUseCase
@@ -33,6 +33,6 @@ class FetchScoresByCategoryService(
         memberPersistencePort.findByUserId(memberId) ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
 
         val scores = scorePersistencePort.findAllByUserId(memberId)
-        return ScoreCalculator.categoryGroups(scores, status)
+        return ScoreAggregator.categoryGroups(scores, status)
     }
 }

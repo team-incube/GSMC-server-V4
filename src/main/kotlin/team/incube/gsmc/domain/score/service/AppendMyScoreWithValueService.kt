@@ -5,7 +5,7 @@ import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.category.ScoreCalculationType
 import team.incube.gsmc.domain.score.Score
 import team.incube.gsmc.domain.score.ScoreStatus
-import team.incube.gsmc.domain.score.ScoreValueConverter
+import team.incube.gsmc.domain.score.converter.ScoreValueConverterRegistry
 import team.incube.gsmc.domain.score.port.`in`.AppendMyScoreWithValueUseCase
 import team.incube.gsmc.domain.score.port.out.MemberPersistencePort
 import team.incube.gsmc.domain.score.port.out.ScorePersistencePort
@@ -41,7 +41,7 @@ class AppendMyScoreWithValueService(
                 memberPersistencePort.findByUserId(userId)?.userGrade
                     ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
             val rawValue = value?.trim()?.toDoubleOrNull() ?: throw GsmcException(ErrorCode.INVALID_SCORE_VALUE)
-            ScoreValueConverter.validateAcademicGradeRange(studentGrade, rawValue)
+            ScoreValueConverterRegistry.resolve(categoryType).validate(rawValue, studentGrade)
         }
 
         val scoreValue = appendScoreSupport.parseScoreValue(value, category)
