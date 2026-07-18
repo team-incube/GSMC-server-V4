@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.graphql.server.WebGraphQlInterceptor
 import org.springframework.graphql.server.WebGraphQlRequest
 import org.springframework.graphql.server.WebGraphQlResponse
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -24,10 +25,13 @@ class GraphQlLatencyDiscordInterceptor(
         chain: WebGraphQlInterceptor.Chain,
     ): Mono<WebGraphQlResponse> {
         val start = System.currentTimeMillis()
+        // GraphQL 실행은 다른 스레드로 넘어갈 수 있어 doOnNext 안에서 SecurityContextHolder를 읽으면
+        // ThreadLocal이 비어 요청자 정보를 잃을 수 있다. 원 요청 스레드에서 동기적으로 미리 캡처한다.
+        val authentication = SecurityContextHolder.getContext().authentication
         return chain
             .next(request)
             .doOnNext { response ->
-                runCatching { report(request, response, System.currentTimeMillis() - start) }
+                runCatching { report(request, response, System.currentTimeMillis() - start, authentication) }
                     .onFailure { logger.warn("GraphQL 응답속도 Discord 알림 실패: {}", it.message) }
             }
     }
@@ -36,6 +40,7 @@ class GraphQlLatencyDiscordInterceptor(
         request: WebGraphQlRequest,
         response: WebGraphQlResponse,
         elapsedMs: Long,
+        authentication: Authentication?,
     ) {
         val hasErrors = response.errors.isNotEmpty()
         val color =
@@ -50,7 +55,7 @@ class GraphQlLatencyDiscordInterceptor(
         val fields =
             buildList {
                 add(DiscordEmbed.Field("응답시간", "${elapsedMs}ms", inline = true))
-                add(DiscordEmbed.Field("요청자", requesterInfo(), inline = true))
+                add(DiscordEmbed.Field("요청자", requesterInfo(authentication), inline = true))
                 add(DiscordEmbed.Field("쿼리", truncate(request.document), inline = false))
                 if (request.variables.isNotEmpty()) {
                     add(DiscordEmbed.Field("변수", truncate(maskSensitive(request.variables).toString()), inline = false))
@@ -72,14 +77,24 @@ class GraphQlLatencyDiscordInterceptor(
         )
     }
 
-    private fun requesterInfo(): String {
-        val principal = SecurityContextHolder.getContext().authentication?.principal
+    private fun requesterInfo(authentication: Authentication?): String {
+        val principal = authentication?.principal
         return if (principal is CustomUserDetails) "${principal.userId} (${principal.userRole})" else "익명"
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun maskSensitive(variables: Map<String, Any?>): Map<String, Any?> =
-        variables.mapValues { (key, value) ->
-            if (SENSITIVE_KEY_PATTERN.containsMatchIn(key)) "***" else value
+        maskValue(variables) as Map<String, Any?>
+
+    private fun maskValue(value: Any?): Any? =
+        when (value) {
+            is Map<*, *> ->
+                value.entries.associate { (key, nested) ->
+                    val keyName = key.toString()
+                    keyName to if (SENSITIVE_KEY_PATTERN.containsMatchIn(keyName)) "***" else maskValue(nested)
+                }
+            is List<*> -> value.map { maskValue(it) }
+            else -> value
         }
 
     private fun truncate(text: String): String = if (text.length > 900) text.take(900) + "..." else text

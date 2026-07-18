@@ -57,4 +57,4 @@ datagsm:
 
 discord:
   webhook:
-    graphql-latency-url: ${DISCORD_GRAPHQL_LATENCY_WEBHOOK_URL}
+    graphql-latency-url: ${DISCORD_GRAPHQL_LATENCY_WEBHOOK_URL:}

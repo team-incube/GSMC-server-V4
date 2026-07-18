@@ -38,5 +38,17 @@ class DiscordWebhookClientTest :
                     client.sendAsync("https://discord.example/webhook", DiscordEmbed(title = "test", color = 0))
                 }
             }
+
+            When("webhookUrl이 비어있으면") {
+                Then("RestClient를 호출하지 않고 조기 반환한다") {
+                    val restClient = mockk<RestClient>(relaxed = true)
+                    val client = DiscordWebhookClient(restClient)
+
+                    client.sendAsync("", DiscordEmbed(title = "test", color = 0))
+                    client.sendAsync("   ", DiscordEmbed(title = "test", color = 0))
+
+                    verify(exactly = 0) { restClient.post() }
+                }
+            }
         }
     })

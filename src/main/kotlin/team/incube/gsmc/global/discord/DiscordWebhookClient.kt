@@ -17,6 +17,7 @@ class DiscordWebhookClient(
         webhookUrl: String,
         embed: DiscordEmbed,
     ) {
+        if (webhookUrl.isBlank()) return
         Mono
             .fromRunnable<Unit> { send(webhookUrl, embed) }
             .subscribeOn(Schedulers.boundedElastic())

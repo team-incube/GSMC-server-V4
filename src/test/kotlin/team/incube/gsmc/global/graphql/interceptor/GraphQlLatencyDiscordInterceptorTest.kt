@@ -89,6 +89,30 @@ class GraphQlLatencyDiscordInterceptorTest :
                 }
             }
 
+            When("변수가 input 객체로 중첩되어 password 키를 포함하면") {
+                Then("중첩된 값까지 재귀적으로 마스킹되어 전달된다") {
+                    val discordWebhookClient = mockk<DiscordWebhookClient>(relaxed = true)
+                    val interceptor =
+                        GraphQlLatencyDiscordInterceptor(discordWebhookClient, "https://discord.example/webhook")
+                    val embedSlot = slot<DiscordEmbed>()
+                    val req =
+                        request(
+                            variables =
+                                mapOf(
+                                    "categoryType" to "TOEIC",
+                                    "input" to mapOf("password" to "hunter2", "value" to "8"),
+                                ),
+                        )
+
+                    interceptor.intercept(req, chainReturning(response())).block()
+
+                    verify { discordWebhookClient.sendAsync(any(), capture(embedSlot)) }
+                    val variablesField = embedSlot.captured.fields.first { it.name == "변수" }
+                    variablesField.value shouldContain "***"
+                    variablesField.value shouldNotContain "hunter2"
+                }
+            }
+
             When("쿼리 원문이 900자를 넘으면") {
                 Then("900자로 잘리고 말줄임표가 붙는다") {
                     val discordWebhookClient = mockk<DiscordWebhookClient>(relaxed = true)
