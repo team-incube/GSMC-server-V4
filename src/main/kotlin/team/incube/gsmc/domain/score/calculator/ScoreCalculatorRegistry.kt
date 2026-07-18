@@ -7,5 +7,8 @@ object ScoreCalculatorRegistry {
     private val toeic = ToeicScoreCalculator()
 
     fun resolve(categoryType: CategoryType): ScoreCalculator =
-        if (categoryType == CategoryType.TOEIC || categoryType == CategoryType.JLPT) toeic else default
+        when (categoryType) {
+            CategoryType.TOEIC, CategoryType.JLPT -> toeic
+            else -> default
+        }
 }

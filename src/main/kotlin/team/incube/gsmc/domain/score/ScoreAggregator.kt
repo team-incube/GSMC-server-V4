@@ -11,6 +11,7 @@ object ScoreAggregator {
     ): List<ScoreCategoryGroup> {
         val approvedByCategory = allScores.filter { it.scoreStatus == ScoreStatus.APPROVED }.groupBy { it.category }
         val displayScores = if (statusFilter != null) allScores.filter { it.scoreStatus == statusFilter } else allScores
+        val displayByCategory = displayScores.groupBy { it.category }
 
         val categories = allScores.map { it.category }.distinct()
 
@@ -27,7 +28,7 @@ object ScoreAggregator {
                     categoryEnglishName = category.categoryEnglishName,
                     categoryKoreanName = category.categoryKoreanName,
                     recognizedScore = recognized,
-                    scores = displayScores.filter { it.category == category },
+                    scores = displayByCategory[category].orEmpty(),
                 )
             }
     }
