@@ -1,6 +1,6 @@
 package team.incube.gsmc.domain.score.service
 
-import team.incube.gsmc.domain.score.ScoreCalculator
+import team.incube.gsmc.domain.score.ScoreAggregator
 import team.incube.gsmc.domain.score.TotalScore
 import team.incube.gsmc.domain.score.port.`in`.FetchMyTotalScoreUseCase
 import team.incube.gsmc.domain.score.port.out.ScorePersistencePort
@@ -10,7 +10,7 @@ import team.incube.gsmc.global.util.MemberUtil
 
 /**
  * 내 총점 조회 유스케이스 구현 클래스입니다.
- * [FetchMyTotalScoreUseCase]를 구현하며, [ScoreCalculator.totalScoreOf]로 총점을 계산합니다.
+ * [FetchMyTotalScoreUseCase]를 구현하며, [ScoreAggregator.totalScoreOf]로 총점을 계산합니다.
  */
 @Port(direction = PortDirection.INBOUND)
 class FetchMyTotalScoreService(
@@ -20,6 +20,6 @@ class FetchMyTotalScoreService(
     override fun execute(includeApprovedOnly: Boolean): TotalScore {
         val userId = memberUtil.getCurrentUserId()
         val scores = scorePersistencePort.findAllByUserId(userId)
-        return TotalScore(ScoreCalculator.totalScoreOf(scores, includeApprovedOnly))
+        return TotalScore(ScoreAggregator.totalScoreOf(scores, includeApprovedOnly))
     }
 }

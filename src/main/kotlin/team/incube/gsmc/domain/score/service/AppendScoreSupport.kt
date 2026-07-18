@@ -8,7 +8,7 @@ import team.incube.gsmc.domain.category.ScoreCalculationType
 import team.incube.gsmc.domain.category.port.out.CategoryPersistencePort
 import team.incube.gsmc.domain.score.Score
 import team.incube.gsmc.domain.score.ScoreStatus
-import team.incube.gsmc.domain.score.ScoreValueConverter
+import team.incube.gsmc.domain.score.converter.ScoreValueConverterRegistry
 import team.incube.gsmc.domain.score.port.out.ScorePersistencePort
 import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
@@ -68,7 +68,7 @@ class AppendScoreSupport(
         category: Category,
     ): Int {
         val raw = value?.trim()?.toDoubleOrNull() ?: throw GsmcException(ErrorCode.INVALID_SCORE_VALUE)
-        return ScoreValueConverter.convert(category, raw)
+        return ScoreValueConverterRegistry.resolve(category.categoryType).convert(category, raw)
     }
 
     /**

@@ -1,6 +1,6 @@
 package team.incube.gsmc.domain.score.service
 
-import team.incube.gsmc.domain.score.ScoreCalculator
+import team.incube.gsmc.domain.score.ScoreAggregator
 import team.incube.gsmc.domain.score.TotalScore
 import team.incube.gsmc.domain.score.port.`in`.FetchTotalScoreUseCase
 import team.incube.gsmc.domain.score.port.out.MemberPersistencePort
@@ -32,6 +32,6 @@ class FetchTotalScoreService(
         memberPersistencePort.findByUserId(memberId) ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
 
         val scores = scorePersistencePort.findAllByUserId(memberId)
-        return TotalScore(ScoreCalculator.totalScoreOf(scores, includeApprovedOnly))
+        return TotalScore(ScoreAggregator.totalScoreOf(scores, includeApprovedOnly))
     }
 }

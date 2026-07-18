@@ -9,7 +9,7 @@ import team.incube.gsmc.domain.category.EvidenceType
 import team.incube.gsmc.domain.category.ScoreCalculationType
 import java.time.LocalDateTime
 
-class ScoreCalculatorTest :
+class ScoreAggregatorTest :
     BehaviorSpec({
         val userId = 1L
 
@@ -68,7 +68,7 @@ class ScoreCalculatorTest :
                             score(academyCategory, ScoreStatus.APPROVED),
                         )
 
-                    val groups = ScoreCalculator.categoryGroups(scores, statusFilter = null)
+                    val groups = ScoreAggregator.categoryGroups(scores, statusFilter = null)
                     val toeicGroup = groups.first { it.categoryType == CategoryType.TOEIC }
 
                     toeicGroup.recognizedScore shouldBe 9
@@ -83,7 +83,7 @@ class ScoreCalculatorTest :
                             score(academyCategory, ScoreStatus.APPROVED),
                         )
 
-                    val total = ScoreCalculator.totalScoreOf(scores, includeApprovedOnly = true)
+                    val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true)
 
                     total shouldBe 10
                 }
@@ -97,7 +97,7 @@ class ScoreCalculatorTest :
                             score(academyCategory, ScoreStatus.PENDING),
                         )
 
-                    val groups = ScoreCalculator.categoryGroups(scores, statusFilter = null)
+                    val groups = ScoreAggregator.categoryGroups(scores, statusFilter = null)
                     val toeicGroup = groups.first { it.categoryType == CategoryType.TOEIC }
 
                     toeicGroup.recognizedScore shouldBe 8
@@ -108,7 +108,7 @@ class ScoreCalculatorTest :
                 Then("TOEIC 인정점수는 변환값 그대로다") {
                     val scores = listOf(score(toeicCategory, ScoreStatus.APPROVED, scoreValue = 8))
 
-                    val total = ScoreCalculator.totalScoreOf(scores, includeApprovedOnly = true)
+                    val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true)
 
                     total shouldBe 8
                 }
@@ -121,7 +121,7 @@ class ScoreCalculatorTest :
                         score(academyCategory, ScoreStatus.APPROVED),
                     )
 
-                val groups = ScoreCalculator.categoryGroups(scores, statusFilter = null)
+                val groups = ScoreAggregator.categoryGroups(scores, statusFilter = null)
 
                 groups shouldHaveSize 1
                 groups.none { it.categoryType == CategoryType.TOEIC_ACADEMY } shouldBe true
@@ -134,7 +134,7 @@ class ScoreCalculatorTest :
                         score(academyCategory, ScoreStatus.APPROVED),
                     )
 
-                val total = ScoreCalculator.totalScoreOf(scores, includeApprovedOnly = true)
+                val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true)
 
                 total shouldBe 9
             }
