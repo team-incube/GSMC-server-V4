@@ -7,6 +7,9 @@ import kotlin.math.roundToInt
 object ScoreAggregator {
     private const val FIRST_GRADE = 1
 
+    private val EXCLUDED_FOR_FIRST_GRADE = setOf(CategoryType.TOEIC_ACADEMY)
+    private val EXCLUDED_FOR_UPPER_GRADE = setOf(CategoryType.TOEIC_ACADEMY, CategoryType.NEWRROW_SCHOOL)
+
     /**
      * 총점/카테고리 집계에서 제외할 카테고리 유형을 반환한다.
      * TOEIC_ACADEMY는 가산점 전용이라 항상 제외되고, NEWRROW_SCHOOL(뉴로우스쿨참여)은
@@ -14,12 +17,7 @@ object ScoreAggregator {
      * 학년 제약을 적용하지 않는다.
      */
     private fun excludedCategoryTypesFor(userGrade: Int?): Set<CategoryType> =
-        buildSet {
-            add(CategoryType.TOEIC_ACADEMY)
-            if (userGrade != null && userGrade != FIRST_GRADE) {
-                add(CategoryType.NEWRROW_SCHOOL)
-            }
-        }
+        if (userGrade != null && userGrade != FIRST_GRADE) EXCLUDED_FOR_UPPER_GRADE else EXCLUDED_FOR_FIRST_GRADE
 
     fun categoryGroups(
         allScores: List<Score>,
