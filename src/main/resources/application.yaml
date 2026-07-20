@@ -54,3 +54,7 @@ datagsm:
   openapi:
     base-url: ${DATAGSM_OPENAPI_BASE_URL:https://openapi.datagsm.kr}
     api-key: ${DATAGSM_OPENAPI_KEY}
+
+discord:
+  webhook:
+    graphql-latency-url: ${DISCORD_GRAPHQL_LATENCY_WEBHOOK_URL:}
