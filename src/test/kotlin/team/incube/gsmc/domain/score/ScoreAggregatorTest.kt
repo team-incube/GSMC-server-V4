@@ -68,7 +68,7 @@ class ScoreAggregatorTest :
                             score(academyCategory, ScoreStatus.APPROVED),
                         )
 
-                    val groups = ScoreAggregator.categoryGroups(scores, statusFilter = null)
+                    val groups = ScoreAggregator.categoryGroups(scores, statusFilter = null, userGrade = 1)
                     val toeicGroup = groups.first { it.categoryType == CategoryType.TOEIC }
 
                     toeicGroup.recognizedScore shouldBe 9
@@ -83,7 +83,7 @@ class ScoreAggregatorTest :
                             score(academyCategory, ScoreStatus.APPROVED),
                         )
 
-                    val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true)
+                    val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true, userGrade = 1)
 
                     total shouldBe 10
                 }
@@ -97,7 +97,7 @@ class ScoreAggregatorTest :
                             score(academyCategory, ScoreStatus.PENDING),
                         )
 
-                    val groups = ScoreAggregator.categoryGroups(scores, statusFilter = null)
+                    val groups = ScoreAggregator.categoryGroups(scores, statusFilter = null, userGrade = 1)
                     val toeicGroup = groups.first { it.categoryType == CategoryType.TOEIC }
 
                     toeicGroup.recognizedScore shouldBe 8
@@ -108,7 +108,7 @@ class ScoreAggregatorTest :
                 Then("TOEIC 인정점수는 변환값 그대로다") {
                     val scores = listOf(score(toeicCategory, ScoreStatus.APPROVED, scoreValue = 8))
 
-                    val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true)
+                    val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true, userGrade = 1)
 
                     total shouldBe 8
                 }
@@ -121,7 +121,7 @@ class ScoreAggregatorTest :
                         score(academyCategory, ScoreStatus.APPROVED),
                     )
 
-                val groups = ScoreAggregator.categoryGroups(scores, statusFilter = null)
+                val groups = ScoreAggregator.categoryGroups(scores, statusFilter = null, userGrade = 1)
 
                 groups shouldHaveSize 1
                 groups.none { it.categoryType == CategoryType.TOEIC_ACADEMY } shouldBe true
@@ -134,9 +134,65 @@ class ScoreAggregatorTest :
                         score(academyCategory, ScoreStatus.APPROVED),
                     )
 
-                val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true)
+                val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true, userGrade = 1)
 
                 total shouldBe 9
+            }
+        }
+
+        Given("뉴로우스쿨참여는 1학년만 인정된다") {
+            val newrrowSchoolCategory =
+                Category(
+                    categoryId = 3,
+                    weight = 1,
+                    categoryEnglishName = "Newrrow School",
+                    categoryKoreanName = "뉴로우스쿨참여",
+                    categoryMaximumValue = 5,
+                    isAccumulated = false,
+                    evidenceType = EvidenceType.FILE,
+                    categoryType = CategoryType.NEWRROW_SCHOOL,
+                    calculationType = ScoreCalculationType.SCORE_BASED,
+                    conversionDivisor = 20,
+                )
+
+            When("1학년이 뉴로우스쿨참여 점수를 받으면") {
+                Then("총점에 그대로 반영된다") {
+                    val scores = listOf(score(newrrowSchoolCategory, ScoreStatus.APPROVED, scoreValue = 5))
+
+                    val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true, userGrade = 1)
+
+                    total shouldBe 5
+                }
+            }
+
+            When("2학년이 뉴로우스쿨참여 점수를 받으면") {
+                Then("총점 집계에서 제외된다") {
+                    val scores = listOf(score(newrrowSchoolCategory, ScoreStatus.APPROVED, scoreValue = 5))
+
+                    val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true, userGrade = 2)
+
+                    total shouldBe 0
+                }
+            }
+
+            When("3학년이 뉴로우스쿨참여 점수를 받으면") {
+                Then("categoryGroups()가 반환하는 목록에도 포함되지 않는다") {
+                    val scores = listOf(score(newrrowSchoolCategory, ScoreStatus.APPROVED, scoreValue = 5))
+
+                    val groups = ScoreAggregator.categoryGroups(scores, statusFilter = null, userGrade = 3)
+
+                    groups.none { it.categoryType == CategoryType.NEWRROW_SCHOOL } shouldBe true
+                }
+            }
+
+            When("userGrade가 null(교사 등)이면") {
+                Then("뉴로우스쿨참여도 그대로 인정된다") {
+                    val scores = listOf(score(newrrowSchoolCategory, ScoreStatus.APPROVED, scoreValue = 5))
+
+                    val total = ScoreAggregator.totalScoreOf(scores, includeApprovedOnly = true, userGrade = null)
+
+                    total shouldBe 5
+                }
             }
         }
     })

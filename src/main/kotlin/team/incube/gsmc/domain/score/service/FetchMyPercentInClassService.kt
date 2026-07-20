@@ -41,7 +41,7 @@ class FetchMyPercentInClassService(
         val scoresByUserId = scorePersistencePort.findAllByUserIdIn(classmateIds.toList()).groupBy { it.userId }
         val totalScoreByUserId =
             classmateIds.associateWith { id ->
-                ScoreAggregator.totalScoreOf(scoresByUserId[id] ?: emptyList(), includeApprovedOnly)
+                ScoreAggregator.totalScoreOf(scoresByUserId[id] ?: emptyList(), includeApprovedOnly, userGrade)
             }
 
         return ScoreAggregator.percentileOf(userId, totalScoreByUserId)
