@@ -29,9 +29,9 @@ class FetchTotalScoreService(
         if (!memberUtil.getCurrentUserRole().isTeacherOrAbove()) {
             throw GsmcException(ErrorCode.FORBIDDEN)
         }
-        memberPersistencePort.findByUserId(memberId) ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
+        val member = memberPersistencePort.findByUserId(memberId) ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
 
         val scores = scorePersistencePort.findAllByUserId(memberId)
-        return TotalScore(ScoreAggregator.totalScoreOf(scores, includeApprovedOnly))
+        return TotalScore(ScoreAggregator.totalScoreOf(scores, includeApprovedOnly, member.userGrade))
     }
 }
