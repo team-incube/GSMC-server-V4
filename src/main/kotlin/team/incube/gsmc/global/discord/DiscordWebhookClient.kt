@@ -48,5 +48,6 @@ class DiscordWebhookClient(
                 fields.map {
                     mapOf("name" to it.name, "value" to it.value, "inline" to it.inline)
                 },
+            "timestamp" to timestamp,
         )
 }

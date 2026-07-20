@@ -5,6 +5,7 @@ data class DiscordEmbed(
     val description: String? = null,
     val color: Int,
     val fields: List<Field> = emptyList(),
+    val timestamp: String? = null,
 ) {
     data class Field(
         val name: String,

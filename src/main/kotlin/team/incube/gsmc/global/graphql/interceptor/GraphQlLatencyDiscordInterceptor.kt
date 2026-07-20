@@ -9,14 +9,19 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
+import team.incube.gsmc.domain.auth.port.out.UserPersistencePort
 import team.incube.gsmc.global.auth.CustomUserDetails
 import team.incube.gsmc.global.discord.DiscordEmbed
 import team.incube.gsmc.global.discord.DiscordWebhookClient
+import java.time.Instant
 
 @Component
 class GraphQlLatencyDiscordInterceptor(
     private val discordWebhookClient: DiscordWebhookClient,
+    private val userPersistencePort: UserPersistencePort,
     @param:Value("\${discord.webhook.graphql-latency-url}") private val webhookUrl: String,
+    @param:Value("\${spring.application.name}") private val applicationName: String,
+    @param:Value("\${spring.profiles.active:local}") private val activeProfile: String,
 ) : WebGraphQlInterceptor {
     private val logger = LoggerFactory.getLogger(GraphQlLatencyDiscordInterceptor::class.java)
 
@@ -43,6 +48,7 @@ class GraphQlLatencyDiscordInterceptor(
         authentication: Authentication?,
     ) {
         val hasErrors = response.errors.isNotEmpty()
+        val isSlow = elapsedMs >= 700
         val color =
             when {
                 hasErrors -> DiscordEmbed.COLOR_RED
@@ -51,20 +57,43 @@ class GraphQlLatencyDiscordInterceptor(
                 elapsedMs < 1000 -> DiscordEmbed.COLOR_ORANGE
                 else -> DiscordEmbed.COLOR_RED
             }
+        val emoji =
+            when {
+                hasErrors -> "🚨"
+                isSlow -> "🐢"
+                elapsedMs < 300 -> "🟢"
+                else -> "🟡"
+            }
+        val statusText =
+            if (hasErrors) {
+                "GraphQL 에러"
+            } else if (isSlow) {
+                "느린 응답"
+            } else {
+                "GraphQL 요청"
+            }
 
         val fields =
             buildList {
+                add(DiscordEmbed.Field("서비스", applicationName, inline = true))
+                add(DiscordEmbed.Field("환경", activeProfile, inline = true))
                 add(DiscordEmbed.Field("응답시간", "${elapsedMs}ms", inline = true))
                 add(DiscordEmbed.Field("요청자", requesterInfo(authentication), inline = true))
-                add(DiscordEmbed.Field("쿼리", truncate(request.document), inline = false))
+                add(DiscordEmbed.Field("쿼리", codeBlock(truncate(request.document), "graphql"), inline = false))
                 if (request.variables.isNotEmpty()) {
-                    add(DiscordEmbed.Field("변수", truncate(maskSensitive(request.variables).toString()), inline = false))
+                    add(
+                        DiscordEmbed.Field(
+                            "변수",
+                            codeBlock(truncate(maskSensitive(request.variables).toString()), "json"),
+                            inline = false,
+                        ),
+                    )
                 }
                 if (hasErrors) {
                     add(
                         DiscordEmbed.Field(
                             "에러",
-                            truncate(response.errors.joinToString { it.message.orEmpty() }),
+                            codeBlock(truncate(response.errors.joinToString { it.message.orEmpty() })),
                             inline = false,
                         ),
                     )
@@ -73,13 +102,38 @@ class GraphQlLatencyDiscordInterceptor(
 
         discordWebhookClient.sendAsync(
             webhookUrl,
-            DiscordEmbed(title = "GraphQL 요청", color = color, fields = fields),
+            DiscordEmbed(
+                title = "$emoji [$activeProfile] $applicationName — $statusText",
+                description =
+                    if (hasErrors) {
+                        "`${truncate(
+                            response.errors
+                                .first()
+                                .message
+                                .orEmpty(),
+                        )}`"
+                    } else {
+                        null
+                    },
+                color = color,
+                fields = fields,
+                timestamp = Instant.now().toString(),
+            ),
         )
     }
 
+    private fun codeBlock(
+        text: String,
+        language: String = "",
+    ): String = "```$language\n$text\n```"
+
     private fun requesterInfo(authentication: Authentication?): String {
         val principal = authentication?.principal
-        return if (principal is CustomUserDetails) "${principal.userId} (${principal.userRole})" else "익명"
+        if (principal !is CustomUserDetails) return "익명"
+        val userName =
+            runCatching { userPersistencePort.findByUserId(principal.userId)?.userName }
+                .getOrNull() ?: principal.userId.toString()
+        return "$userName (${principal.userRole})"
     }
 
     @Suppress("UNCHECKED_CAST")
