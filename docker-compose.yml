@@ -21,9 +21,18 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${RDB_PASSWORD}
       MYSQL_DATABASE: ${RDB_SCHEMA}
+      MYSQL_USER: ${RDB_USERNAME}
+      MYSQL_PASSWORD: ${RDB_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
       - ./db/mysql/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${RDB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
 
 volumes:
   mysql_data:
