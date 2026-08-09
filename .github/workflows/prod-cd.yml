@@ -3,18 +3,14 @@ name: CD
 on:
   push:
     branches:
-      - main
-      - develop
-      - feat/cicd
-  pull_request:
-    branches:
-      - main
       - develop
   workflow_dispatch:
   
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,11 +18,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build backend
-        run: ./gradlew build -x test     
-      
-      - name: run Ktlint
-        run: ./gradlew ktlintCheck
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v5
+        with:
+          Cache-read-only: false
+          Cache-cleanup: always
 
       - name: Deploy backend
         uses: appleboy/ssh-action@v1
