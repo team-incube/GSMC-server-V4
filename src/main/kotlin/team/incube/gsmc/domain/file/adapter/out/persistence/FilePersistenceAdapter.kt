@@ -5,9 +5,11 @@ import team.incube.gsmc.domain.evidence.adapter.out.persistence.entity.EvidenceJ
 import team.incube.gsmc.domain.file.File
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.FileJpaEntity
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.toDomain
+import team.incube.gsmc.domain.file.adapter.out.persistence.entity.toEntity
 import team.incube.gsmc.domain.file.adapter.out.persistence.repository.FileJpaRepository
 import team.incube.gsmc.domain.file.port.out.FilePersistencePort
 import team.incube.gsmc.domain.score.adapter.out.persistence.entity.ScoreJpaEntity
+import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.adapter.Adapter
 
@@ -25,6 +27,18 @@ class FilePersistenceAdapter(
 
     override fun findAllByEvidenceId(evidenceId: Long): List<File> =
         fileJpaRepository.findAllByEvidenceEvidenceId(evidenceId).map { it.toDomain() }
+
+    override fun findAllByUserId(userId: Long): List<File> =
+        fileJpaRepository.findAllByUserUserId(userId).map { it.toDomain() }
+
+    override fun save(file: File): File {
+        val user = entityManager.getReference(UserJpaEntity::class.java, file.userId)
+        return fileJpaRepository.save(file.toEntity(user)).toDomain()
+    }
+
+    override fun deleteById(fileId: Long) {
+        fileJpaRepository.deleteById(fileId)
+    }
 
     override fun linkToEvidence(
         fileId: Long,

@@ -34,6 +34,9 @@ object Libs {
     // GraphQL Extended Scalars
     const val GRAPHQL_EXTENDED_SCALARS = "com.graphql-java:graphql-java-extended-scalars:24.0"
 
+    // AWS SDK
+    const val AWS_SDK_S3 = "software.amazon.awssdk:s3:2.29.52"
+
     // Util
     const val LOMBOK = "org.projectlombok:lombok"
 

@@ -23,6 +23,30 @@ interface FilePersistencePort {
     fun findAllByEvidenceId(evidenceId: Long): List<File>
 
     /**
+     * 특정 사용자가 업로드한 모든 파일을 조회한다.
+     *
+     * @param userId 조회할 사용자 ID
+     * @return 해당 사용자가 업로드한 파일 목록
+     */
+    fun findAllByUserId(userId: Long): List<File>
+
+    /**
+     * 파일을 신규 저장한다. 업로드 직후 아직 어떤 점수 요청/근거 자료와도 연결되지 않은
+     * 미연결 상태로 저장된다.
+     *
+     * @param file 저장할 파일 도메인 객체(`fileId`는 무시되고 신규 ID가 채번된다)
+     * @return 채번된 ID가 포함된 저장 결과
+     */
+    fun save(file: File): File
+
+    /**
+     * ID로 파일을 삭제한다.
+     *
+     * @param fileId 삭제할 파일 ID
+     */
+    fun deleteById(fileId: Long)
+
+    /**
      * 파일을 근거 자료에 연결한다(evidence FK 갈아끼움).
      *
      * @param fileId 연결할 파일 ID

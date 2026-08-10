@@ -16,3 +16,20 @@ input ConfirmFileUploadInput {
     fileKey: String!
     originalFileName: String!
 }
+
+type PresignedUploadUrlPayload {
+    presignedUrl: String!
+    fileKey: String!
+    expiresAt: String!
+}
+
+extend type Query {
+    myFiles: [File!]!
+    file(fileId: ID!): File!
+}
+
+extend type Mutation {
+    deleteFile(fileId: ID!): Boolean!
+    confirmFileUpload(input: ConfirmFileUploadInput!): File!
+    createPresignedUploadUrl(input: CreatePresignedUploadUrlInput!): PresignedUploadUrlPayload!
+}

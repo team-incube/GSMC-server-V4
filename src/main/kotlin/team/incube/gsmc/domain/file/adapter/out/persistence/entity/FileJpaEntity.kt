@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
 import team.incube.gsmc.domain.evidence.adapter.out.persistence.entity.EvidenceJpaEntity
 import team.incube.gsmc.domain.score.adapter.out.persistence.entity.ScoreJpaEntity
@@ -18,7 +17,8 @@ import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
  * 업로드 파일 엔티티
  *
  * 학생이 점수 요청 또는 근거 자료 제출 시 첨부한 파일 정보를 저장한다.
- * [score]와 [evidence] 중 적어도 하나는 반드시 연결되어야 한다.
+ * 업로드 직후에는 [score]/[evidence]가 모두 null인 미연결 상태로 존재할 수 있으며,
+ * 이후 점수 요청 또는 근거 자료 생성 시 연결된다.
  */
 @Entity
 @Table(name = "file_tb")
@@ -40,7 +40,7 @@ class FileJpaEntity(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evidence_id", nullable = true)
     val evidence: EvidenceJpaEntity?,
-    /** 파일 접근 URI */
+    /** 오브젝트 스토리지(S3) 객체 key */
     @Column(name = "file_uri", nullable = false, length = 255)
     val fileUri: String,
     /** 사용자가 업로드한 원본 파일명 */
@@ -49,9 +49,4 @@ class FileJpaEntity(
     /** 서버에 저장된 파일명 */
     @Column(name = "file_stored_name", nullable = false, length = 255)
     val fileStoredName: String,
-) {
-    @PrePersist
-    fun validate() {
-        require(score != null || evidence != null) { "score 또는 evidence 중 하나는 반드시 존재해야 합니다." }
-    }
-}
+)
