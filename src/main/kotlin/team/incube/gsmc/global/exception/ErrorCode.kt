@@ -34,6 +34,7 @@ enum class ErrorCode(
     INVALID_REJECTION_REASON(HttpStatus.BAD_REQUEST, "거절 사유는 1자 이상 500자 이하여야 합니다.", "BAD_REQUEST"),
     INVALID_FILE_SIZE(HttpStatus.BAD_REQUEST, "파일 크기는 20MB를 초과할 수 없습니다.", "BAD_REQUEST"),
     S3_OBJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "S3에서 파일을 찾을 수 없습니다.", "NOT_FOUND"),
+    FILE_ALREADY_CONFIRMED(HttpStatus.CONFLICT, "이미 업로드 확인이 완료된 파일입니다.", "CONFLICT"),
 
     // 프로젝트 참여
     DATAGSM_PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "DataGSM 프로젝트를 찾을 수 없습니다.", "NOT_FOUND"),

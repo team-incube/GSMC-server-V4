@@ -15,8 +15,9 @@ private const val MAX_FILE_SIZE_BYTES = 20L * 1024 * 1024
 
 /**
  * 파일 업로드 확인 유스케이스 구현 클래스입니다.
- * [ConfirmFileUploadUseCase]를 구현하며, 오브젝트 스토리지에서 실제 객체 존재/크기를 검증한 뒤
- * 미연결 상태의 파일 메타데이터를 저장합니다.
+ * [ConfirmFileUploadUseCase]를 구현하며, 동일 key로 이미 confirm된 파일이 있는지, 오브젝트
+ * 스토리지에서 실제 객체 존재/크기를 검증한 뒤 미연결 상태의 파일 메타데이터를 저장합니다.
+ * `file_uri` 컬럼의 유니크 제약이 동시 요청에 대한 최후 방어선 역할을 합니다.
  */
 @Port(direction = PortDirection.INBOUND)
 class ConfirmFileUploadService(
@@ -29,6 +30,8 @@ class ConfirmFileUploadService(
         fileKey: String,
         originalFileName: String,
     ): File {
+        if (filePersistencePort.findByFileKey(fileKey) != null) throw GsmcException(ErrorCode.FILE_ALREADY_CONFIRMED)
+
         val objectSize = fileStoragePort.getObjectSize(fileKey) ?: throw GsmcException(ErrorCode.S3_OBJECT_NOT_FOUND)
         if (objectSize > MAX_FILE_SIZE_BYTES) throw GsmcException(ErrorCode.INVALID_FILE_SIZE)
 
