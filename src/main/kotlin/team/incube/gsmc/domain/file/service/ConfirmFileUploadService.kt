@@ -2,6 +2,7 @@ package team.incube.gsmc.domain.file.service
 
 import org.springframework.transaction.annotation.Transactional
 import team.incube.gsmc.domain.file.File
+import team.incube.gsmc.domain.file.MAX_FILE_SIZE_BYTES
 import team.incube.gsmc.domain.file.port.`in`.ConfirmFileUploadUseCase
 import team.incube.gsmc.domain.file.port.out.FilePersistencePort
 import team.incube.gsmc.domain.file.port.out.FileStoragePort
@@ -10,8 +11,6 @@ import team.incube.gsmc.global.annotation.port.Port
 import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
 import team.incube.gsmc.global.util.MemberUtil
-
-private const val MAX_FILE_SIZE_BYTES = 20L * 1024 * 1024
 
 /**
  * 파일 업로드 확인 유스케이스 구현 클래스입니다.

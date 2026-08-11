@@ -1,5 +1,6 @@
 package team.incube.gsmc.domain.file.service
 
+import team.incube.gsmc.domain.file.MAX_FILE_SIZE_BYTES
 import team.incube.gsmc.domain.file.PresignedUpload
 import team.incube.gsmc.domain.file.port.`in`.CreatePresignedUploadUrlUseCase
 import team.incube.gsmc.domain.file.port.out.FileStoragePort
@@ -8,8 +9,6 @@ import team.incube.gsmc.global.annotation.port.Port
 import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
 import java.util.UUID
-
-private const val MAX_FILE_SIZE_BYTES = 20L * 1024 * 1024
 
 /**
  * 파일 업로드용 presigned URL 발급 유스케이스 구현 클래스입니다.

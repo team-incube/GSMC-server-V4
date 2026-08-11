@@ -1,5 +1,8 @@
 package team.incube.gsmc.domain.file
 
+/** 업로드 파일의 최대 허용 크기(byte). presigned URL 발급, 업로드 확인 양쪽에서 공통으로 사용한다. */
+const val MAX_FILE_SIZE_BYTES = 20L * 1024 * 1024
+
 /**
  * 업로드 파일 도메인 모델
  *
