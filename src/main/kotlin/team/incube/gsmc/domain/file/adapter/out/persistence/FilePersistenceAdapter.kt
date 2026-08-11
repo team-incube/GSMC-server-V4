@@ -77,7 +77,7 @@ class FilePersistenceAdapter(
             user = user,
             score = score,
             evidence = evidence,
-            fileUri = fileUri,
+            fileKey = fileKey,
             fileOriginalName = fileOriginalName,
             fileStoredName = fileStoredName,
         )

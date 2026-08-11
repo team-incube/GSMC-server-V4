@@ -36,7 +36,7 @@ class ConfirmFileUploadService(
             File(
                 fileId = 0,
                 userId = memberUtil.getCurrentUserId(),
-                fileUri = fileKey,
+                fileKey = fileKey,
                 fileOriginalName = originalFileName,
                 fileStoredName = fileKey.substringAfterLast('/'),
             )

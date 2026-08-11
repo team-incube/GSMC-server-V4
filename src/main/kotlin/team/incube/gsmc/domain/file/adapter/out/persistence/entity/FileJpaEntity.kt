@@ -41,8 +41,8 @@ class FileJpaEntity(
     @JoinColumn(name = "evidence_id", nullable = true)
     val evidence: EvidenceJpaEntity?,
     /** 오브젝트 스토리지(S3) 객체 key */
-    @Column(name = "file_uri", nullable = false, length = 255)
-    val fileUri: String,
+    @Column(name = "file_uri", nullable = false, unique = true, length = 255)
+    val fileKey: String,
     /** 사용자가 업로드한 원본 파일명 */
     @Column(name = "file_original_name", nullable = false, length = 255)
     val fileOriginalName: String,

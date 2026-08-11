@@ -16,7 +16,7 @@ import team.incube.gsmc.domain.file.port.`in`.RemoveFileUseCase
 /**
  * 파일 조회/삭제 및 업로드 확정 GraphQL Query·Mutation 리졸버입니다.
  * 각 Query/Mutation을 대응하는 UseCase에 위임하는 것 외의 비즈니스 로직은 갖지 않습니다.
- * `File.fileUri` 필드는 별도 필드 리졸버로 처리해, `Score.file`처럼 다른 도메인이 반환하는
+ * `File.fileUrl` 필드는 별도 필드 리졸버로 처리해, `Score.file`처럼 다른 도메인이 반환하는
  * `File`에도 동일하게 presigned URL이 적용되도록 합니다.
  */
 @Controller
@@ -54,6 +54,6 @@ class FileWebAdapter(
             .execute(input.fileName, input.fileSize, input.contentType)
             .toPayload()
 
-    @SchemaMapping(typeName = "File", field = "fileUri")
-    fun fileUri(file: File): String = generateFileAccessUrlUseCase.execute(file.fileUri)
+    @SchemaMapping(typeName = "File", field = "fileUrl")
+    fun fileUrl(file: File): String = generateFileAccessUrlUseCase.execute(file.fileKey)
 }

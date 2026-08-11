@@ -1,7 +1,7 @@
 type File {
     fileId: ID!
     userId: ID!
-    fileUri: String
+    fileUrl: String
     fileOriginalName: String
     fileStoredName: String
 }

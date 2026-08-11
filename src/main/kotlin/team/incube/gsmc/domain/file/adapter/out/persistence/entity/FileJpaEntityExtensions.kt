@@ -13,7 +13,7 @@ fun FileJpaEntity.toDomain(): File =
     File(
         fileId = fileId,
         userId = user.userId,
-        fileUri = fileUri,
+        fileKey = fileKey,
         fileOriginalName = fileOriginalName,
         fileStoredName = fileStoredName,
     )
@@ -34,7 +34,7 @@ fun File.toEntity(user: UserJpaEntity): FileJpaEntity =
         user = user,
         score = null,
         evidence = null,
-        fileUri = fileUri,
+        fileKey = fileKey,
         fileOriginalName = fileOriginalName,
         fileStoredName = fileStoredName,
     )
