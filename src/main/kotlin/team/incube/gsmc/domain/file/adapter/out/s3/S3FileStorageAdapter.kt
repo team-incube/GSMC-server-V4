@@ -31,6 +31,7 @@ class S3FileStorageAdapter(
     override fun createPresignedUploadUrl(
         key: String,
         contentType: String,
+        fileSize: Long,
     ): PresignedUpload {
         val putObjectRequest =
             PutObjectRequest
@@ -38,6 +39,7 @@ class S3FileStorageAdapter(
                 .bucket(s3Properties.bucket)
                 .key(key)
                 .contentType(contentType)
+                .contentLength(fileSize)
                 .build()
         val presignRequest =
             PutObjectPresignRequest

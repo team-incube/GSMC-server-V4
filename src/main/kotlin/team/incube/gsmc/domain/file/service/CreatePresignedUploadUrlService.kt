@@ -27,6 +27,6 @@ class CreatePresignedUploadUrlService(
         if (fileSize > MAX_FILE_SIZE_BYTES) throw GsmcException(ErrorCode.INVALID_FILE_SIZE)
 
         val key = "file/${UUID.randomUUID()}_$fileName"
-        return fileStoragePort.createPresignedUploadUrl(key, contentType)
+        return fileStoragePort.createPresignedUploadUrl(key, contentType, fileSize)
     }
 }

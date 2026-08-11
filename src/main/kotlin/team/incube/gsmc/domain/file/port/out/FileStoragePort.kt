@@ -8,14 +8,18 @@ import team.incube.gsmc.domain.file.PresignedUpload
 interface FileStoragePort {
     /**
      * 업로드용 presigned URL을 발급한다. 클라이언트는 이 URL로 오브젝트 스토리지에 직접 PUT한다.
+     * [fileSize]가 서명에 포함되어, 클라이언트는 반드시 이 값과 일치하는 Content-Length로만
+     * 업로드할 수 있다.
      *
      * @param key 업로드될 객체의 key
      * @param contentType 업로드될 파일의 MIME 타입
+     * @param fileSize 업로드될 파일의 크기(byte)
      * @return presigned URL과 만료 시각
      */
     fun createPresignedUploadUrl(
         key: String,
         contentType: String,
+        fileSize: Long,
     ): PresignedUpload
 
     /**
