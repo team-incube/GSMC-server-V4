@@ -2,6 +2,7 @@ package team.incube.gsmc.domain.file.adapter.out.persistence.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.FileJpaEntity
+import team.incube.gsmc.domain.score.ScoreStatus
 
 /**
  * 업로드 파일에 대한 JPA 기반 저장소 인터페이스입니다.
@@ -30,4 +31,16 @@ interface FileJpaRepository : JpaRepository<FileJpaEntity, Long> {
      * @return 해당 사용자가 업로드한 파일 엔티티 목록
      */
     fun findAllByUserUserId(userId: Long): List<FileJpaEntity>
+
+    /**
+     * 특정 파일이 주어진 상태의 점수 요청에 연결되어 있는지 확인한다.
+     *
+     * @param fileId 확인할 파일 ID
+     * @param scoreStatus 확인할 점수 요청 심사 상태
+     * @return 연결되어 있으면 true
+     */
+    fun existsByFileIdAndScoreScoreStatus(
+        fileId: Long,
+        scoreStatus: ScoreStatus,
+    ): Boolean
 }

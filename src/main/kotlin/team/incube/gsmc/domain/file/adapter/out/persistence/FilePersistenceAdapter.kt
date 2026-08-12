@@ -8,6 +8,7 @@ import team.incube.gsmc.domain.file.adapter.out.persistence.entity.toDomain
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.toEntity
 import team.incube.gsmc.domain.file.adapter.out.persistence.repository.FileJpaRepository
 import team.incube.gsmc.domain.file.port.out.FilePersistencePort
+import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.score.adapter.out.persistence.entity.ScoreJpaEntity
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
 import team.incube.gsmc.global.annotation.PortDirection
@@ -69,6 +70,9 @@ class FilePersistenceAdapter(
         val entity = fileJpaRepository.findById(fileId).orElse(null) ?: return
         fileJpaRepository.save(entity.copy(score = null))
     }
+
+    override fun isLinkedToApprovedScore(fileId: Long): Boolean =
+        fileJpaRepository.existsByFileIdAndScoreScoreStatus(fileId, ScoreStatus.APPROVED)
 
     private fun FileJpaEntity.copy(
         score: ScoreJpaEntity? = this.score,
