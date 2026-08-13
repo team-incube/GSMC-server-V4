@@ -151,7 +151,7 @@ class FetchMyPercentInGradeServiceTest :
             }
 
             When("조회 대상의 학년이 존재하지 않으면") {
-                Then("학생은 userGrade가 null일 수 없습니다.를 반환한다") {
+                Then("학생은 userGrade가 null일 수 없습니다. 예외가 발생한다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberUtil.getCurrentUserRole() } returns UserRole.STUDENT
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1L, null, UserRole.STUDENT)
