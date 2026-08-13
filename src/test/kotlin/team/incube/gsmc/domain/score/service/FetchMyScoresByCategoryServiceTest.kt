@@ -45,21 +45,23 @@ class FetchMyScoresByCategoryServiceTest :
                 calculationType = ScoreCalculationType.COUNT_BASED,
             )
 
-        fun scoreOf(status: ScoreStatus, categoryType: CategoryType) =
-            Score(
-                scoreId = 0,
-                userId = 1L,
-                category = categoryOf(categoryType),
-                evidence = null,
-                file = null,
-                scoreStatus = status,
-                activityName = null,
-                scoreValue = null,
-                rejectionReason = null,
-                dgProjectId = null,
-                createdAt = LocalDateTime.now(),
-                updatedAt = LocalDateTime.now(),
-            )
+        fun scoreOf(
+            status: ScoreStatus,
+            categoryType: CategoryType,
+        ) = Score(
+            scoreId = 0,
+            userId = 1L,
+            category = categoryOf(categoryType),
+            evidence = null,
+            file = null,
+            scoreStatus = status,
+            activityName = null,
+            scoreValue = null,
+            rejectionReason = null,
+            dgProjectId = null,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now(),
+        )
 
         fun userOf(userGrade: Int? = 1) =
             User(
@@ -72,9 +74,9 @@ class FetchMyScoresByCategoryServiceTest :
                 userRole = UserRole.STUDENT,
             )
 
-        Given("본인이 여러 카테고리의 점수를 가지고 있을 때"){
-            When("status 없이 조회하면"){
-                Then("카테고리 개수만큼 그룹이 반환된다"){
+        Given("본인이 여러 카테고리의 점수를 가지고 있을 때") {
+            When("status 없이 조회하면") {
+                Then("카테고리 개수만큼 그룹이 반환된다") {
                     val scores =
                         listOf(
                             scoreOf(ScoreStatus.APPROVED, CategoryType.TOEIC),
@@ -89,11 +91,15 @@ class FetchMyScoresByCategoryServiceTest :
 
                     result shouldHaveSize 3
                     result.map { it.categoryType } shouldContainExactlyInAnyOrder
-                        listOf(CategoryType.TOEIC, CategoryType.JLPT, CategoryType.ACADEMIC_GRADE) //실제 가지고 있는 카테고리들인지 확인
+                        listOf(
+                            CategoryType.TOEIC,
+                            CategoryType.JLPT,
+                            CategoryType.ACADEMIC_GRADE,
+                        ) // 실제 가지고 있는 카테고리들인지 확인
                 }
             }
-            When("status = ScoreStatus.PENDING 등으로 조회하면"){
-                Then("반환된 그룹의 scores 필드가 필터링되어 있다"){
+            When("status = ScoreStatus.PENDING 등으로 조회하면") {
+                Then("반환된 그룹의 scores 필드가 필터링되어 있다") {
                     val scores =
                         listOf(
                             scoreOf(ScoreStatus.APPROVED, CategoryType.TOEIC),
@@ -109,14 +115,13 @@ class FetchMyScoresByCategoryServiceTest :
 
                     result shouldHaveSize 3
                     result.flatMap { it.scores }.all { it.scoreStatus == ScoreStatus.PENDING } shouldBe true
-
                 }
             }
         }
 
-        Given("내 카테고리별 점수를 조회할 때"){
-            When("회원이 존재하지 않으면"){
-                Then("GsmcException(ErrorCode.USER_NOT_FOUND) 발생"){
+        Given("내 카테고리별 점수를 조회할 때") {
+            When("회원이 존재하지 않으면") {
+                Then("GsmcException(ErrorCode.USER_NOT_FOUND) 발생") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberPersistencePort.findByUserId(1L) } returns null
 
@@ -125,8 +130,8 @@ class FetchMyScoresByCategoryServiceTest :
                 }
             }
 
-            When("점수가 하나도 없으면"){
-                Then("빈 리스트를 반환한다"){
+            When("점수가 하나도 없으면") {
+                Then("빈 리스트를 반환한다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberPersistencePort.findByUserId(1L) } returns userOf()
                     every { scorePersistencePort.findAllByUserId(1L) } returns listOf()
@@ -137,15 +142,15 @@ class FetchMyScoresByCategoryServiceTest :
             }
         }
 
-        Given("뉴로우참여 점수를 가진 유저를 조회할 때"){
+        Given("뉴로우참여 점수를 가진 유저를 조회할 때") {
             val scores =
                 listOf(
                     scoreOf(ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(ScoreStatus.APPROVED, CategoryType.JLPT),
                     scoreOf(ScoreStatus.APPROVED, CategoryType.NEWRROW_SCHOOL),
                 )
-            When("1학년이면"){
-                Then("뉴로우 참여 카테고리가 결과에 포함된다"){
+            When("1학년이면") {
+                Then("뉴로우 참여 카테고리가 결과에 포함된다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1)
                     every { scorePersistencePort.findAllByUserId(1L) } returns scores
@@ -157,8 +162,8 @@ class FetchMyScoresByCategoryServiceTest :
                 }
             }
 
-            When("2학년 이상이면"){
-                Then("뉴로우 참여 카테고리가 결과에서 제외된다"){
+            When("2학년 이상이면") {
+                Then("뉴로우 참여 카테고리가 결과에서 제외된다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(2)
                     every { scorePersistencePort.findAllByUserId(1L) } returns scores

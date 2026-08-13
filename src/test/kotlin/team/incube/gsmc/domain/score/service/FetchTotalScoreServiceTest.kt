@@ -2,7 +2,6 @@ package team.incube.gsmc.domain.score.service
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
-import io.kotest.core.spec.style.behaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -34,7 +33,7 @@ class FetchTotalScoreServiceTest :
 
         fun totalScoreOf(value: Int) =
             TotalScore(
-                totalScore = value
+                totalScore = value,
             )
 
         fun categoryOf(categoryType: CategoryType) =
@@ -50,43 +49,46 @@ class FetchTotalScoreServiceTest :
                 calculationType = ScoreCalculationType.COUNT_BASED,
             )
 
-        fun scoreOf(status: ScoreStatus, categoryType: CategoryType) =
-            Score(
-                scoreId = 0,
-                userId = 1L,
-                category = categoryOf(categoryType),
-                evidence = null,
-                file = null,
-                scoreStatus = status,
-                activityName = null,
-                scoreValue = null,
-                rejectionReason = null,
-                dgProjectId = null,
-                createdAt = LocalDateTime.now(),
-                updatedAt = LocalDateTime.now(),
-            )
+        fun scoreOf(
+            status: ScoreStatus,
+            categoryType: CategoryType,
+        ) = Score(
+            scoreId = 0,
+            userId = 1L,
+            category = categoryOf(categoryType),
+            evidence = null,
+            file = null,
+            scoreStatus = status,
+            activityName = null,
+            scoreValue = null,
+            rejectionReason = null,
+            dgProjectId = null,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now(),
+        )
 
+        fun userOf(
+            userGrade: Int?,
+            userRole: UserRole,
+        ) = User(
+            userId = 10L,
+            userName = "강민우",
+            userEmail = "absc123@gmail.com",
+            userGrade = userGrade,
+            userClassNumber = null,
+            userNumber = null,
+            userRole = userRole,
+        )
 
-        fun userOf(userGrade: Int?, userRole: UserRole) =
-            User(
-                userId = 10L,
-                userName = "강민우",
-                userEmail = "absc123@gmail.com",
-                userGrade = userGrade,
-                userClassNumber = null,
-                userNumber = null,
-                userRole = userRole,
-            )
-
-        Given("특정 사용자의 총점을 조회할 때"){
+        Given("특정 사용자의 총점을 조회할 때") {
             val scores =
                 listOf(
                     scoreOf(ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(ScoreStatus.APPROVED, CategoryType.JLPT),
                     scoreOf(ScoreStatus.PENDING, CategoryType.ACADEMIC_GRADE),
                 )
-            When("권한이 선생님 이상이고 허가된 점수만 조회하면"){
-                Then("허가된 점수들의 총점이 반환된다"){
+            When("권한이 선생님 이상이고 허가된 점수만 조회하면") {
+                Then("허가된 점수들의 총점이 반환된다") {
                     every { memberUtil.getCurrentUserRole() } returns UserRole.TEACHER
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1, UserRole.STUDENT)
                     every { scorePersistencePort.findAllByUserId(1L) } returns scores
@@ -109,8 +111,8 @@ class FetchTotalScoreServiceTest :
                 }
             }
 
-            When("권한이 학생이면"){
-                Then("FORBIDDEN에러가 발생한다"){
+            When("권한이 학생이면") {
+                Then("FORBIDDEN에러가 발생한다") {
                     every { memberUtil.getCurrentUserRole() } returns UserRole.STUDENT
 
                     val exception = shouldThrow<GsmcException> { service.execute(1L, false) }
@@ -118,8 +120,8 @@ class FetchTotalScoreServiceTest :
                 }
             }
 
-            When("사용자가 존재 하지 않으면"){
-                Then("USER_NOT_FOUND에러가 발생한다"){
+            When("사용자가 존재 하지 않으면") {
+                Then("USER_NOT_FOUND에러가 발생한다") {
                     every { memberUtil.getCurrentUserRole() } returns UserRole.TEACHER
                     every { memberPersistencePort.findByUserId(1L) } returns null
 
@@ -128,8 +130,8 @@ class FetchTotalScoreServiceTest :
                 }
             }
 
-            When("점수가 존재 하지 않으면"){
-                Then("총점 0이 반환된다"){
+            When("점수가 존재 하지 않으면") {
+                Then("총점 0이 반환된다") {
                     every { memberUtil.getCurrentUserRole() } returns UserRole.TEACHER
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1, UserRole.STUDENT)
                     every { scorePersistencePort.findAllByUserId(1L) } returns emptyList()
@@ -138,7 +140,6 @@ class FetchTotalScoreServiceTest :
 
                     result shouldBe totalScoreOf(0)
                 }
-
             }
         }
     })

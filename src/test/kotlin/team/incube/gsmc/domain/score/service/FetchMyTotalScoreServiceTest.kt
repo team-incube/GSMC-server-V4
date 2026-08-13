@@ -33,7 +33,7 @@ class FetchMyTotalScoreServiceTest :
 
         fun totalScoreOf(value: Int) =
             TotalScore(
-                totalScore = value
+                totalScore = value,
             )
 
         fun categoryOf(categoryType: CategoryType) =
@@ -49,22 +49,23 @@ class FetchMyTotalScoreServiceTest :
                 calculationType = ScoreCalculationType.COUNT_BASED,
             )
 
-        fun scoreOf(status: ScoreStatus, categoryType: CategoryType) =
-            Score(
-                scoreId = 0,
-                userId = 1L,
-                category = categoryOf(categoryType),
-                evidence = null,
-                file = null,
-                scoreStatus = status,
-                activityName = null,
-                scoreValue = null,
-                rejectionReason = null,
-                dgProjectId = null,
-                createdAt = LocalDateTime.now(),
-                updatedAt = LocalDateTime.now(),
-            )
-
+        fun scoreOf(
+            status: ScoreStatus,
+            categoryType: CategoryType,
+        ) = Score(
+            scoreId = 0,
+            userId = 1L,
+            category = categoryOf(categoryType),
+            evidence = null,
+            file = null,
+            scoreStatus = status,
+            activityName = null,
+            scoreValue = null,
+            rejectionReason = null,
+            dgProjectId = null,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now(),
+        )
 
         fun userOf(userGrade: Int?) =
             User(
@@ -77,15 +78,15 @@ class FetchMyTotalScoreServiceTest :
                 userRole = UserRole.STUDENT,
             )
 
-        Given("내 총점을 조회할 때"){
+        Given("내 총점을 조회할 때") {
             val scores =
                 listOf(
                     scoreOf(ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(ScoreStatus.APPROVED, CategoryType.JLPT),
                     scoreOf(ScoreStatus.PENDING, CategoryType.ACADEMIC_GRADE),
                 )
-            When("허가된 점수만 조회하면"){
-                Then("허가된 점수만 포함된 총점이 반환된다"){
+            When("허가된 점수만 조회하면") {
+                Then("허가된 점수만 포함된 총점이 반환된다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1)
                     every { scorePersistencePort.findAllByUserId(1L) } returns scores
@@ -96,8 +97,8 @@ class FetchMyTotalScoreServiceTest :
                 }
             }
 
-            When("허가되지 않은 점수도 포함하여 조회하면"){
-                Then("허가되지 않은 점수를 포함한 총점이 반환된다"){
+            When("허가되지 않은 점수도 포함하여 조회하면") {
+                Then("허가되지 않은 점수를 포함한 총점이 반환된다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1)
                     every { scorePersistencePort.findAllByUserId(1L) } returns scores
@@ -108,8 +109,8 @@ class FetchMyTotalScoreServiceTest :
                 }
             }
 
-            When("사용자가 존재하지 않으면"){
-                Then("USER_NOT_FOUND 예외가 발생한다"){
+            When("사용자가 존재하지 않으면") {
+                Then("USER_NOT_FOUND 예외가 발생한다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberPersistencePort.findByUserId(1L) } returns null
 
@@ -118,8 +119,8 @@ class FetchMyTotalScoreServiceTest :
                 }
             }
 
-            When("점수가 존재하지 않으면"){
-                Then("총점이 0이 반환된다"){
+            When("점수가 존재하지 않으면") {
+                Then("총점이 0이 반환된다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1)
                     every { scorePersistencePort.findAllByUserId(1L) } returns emptyList()
@@ -131,15 +132,15 @@ class FetchMyTotalScoreServiceTest :
             }
         }
 
-        Given("학년에 따른 내 총점을 조회할 때"){
+        Given("학년에 따른 내 총점을 조회할 때") {
             val scores =
                 listOf(
                     scoreOf(ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(ScoreStatus.APPROVED, CategoryType.JLPT),
                     scoreOf(ScoreStatus.APPROVED, CategoryType.NEWRROW_SCHOOL),
                 )
-            When("2학년 이상이면"){
-                Then("뉴로우가 제외된다"){
+            When("2학년 이상이면") {
+                Then("뉴로우가 제외된다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(2)
                     every { scorePersistencePort.findAllByUserId(1L) } returns scores
@@ -150,8 +151,8 @@ class FetchMyTotalScoreServiceTest :
                 }
             }
 
-            When("1학년이면"){
-                Then("뉴로우가 포함된다"){
+            When("1학년이면") {
+                Then("뉴로우가 포함된다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1)
                     every { scorePersistencePort.findAllByUserId(1L) } returns scores

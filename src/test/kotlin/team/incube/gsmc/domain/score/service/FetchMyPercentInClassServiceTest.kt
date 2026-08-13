@@ -31,11 +31,13 @@ class FetchMyPercentInClassServiceTest :
 
         beforeEach { clearAllMocks() }
 
-        fun percentileOf(topPercentile: Int, bottomPercentile: Int) =
-            Percentile(
-                topPercentile = topPercentile,
-                bottomPercentile = bottomPercentile,
-            )
+        fun percentileOf(
+            topPercentile: Int,
+            bottomPercentile: Int,
+        ) = Percentile(
+            topPercentile = topPercentile,
+            bottomPercentile = bottomPercentile,
+        )
 
         fun categoryOf(categoryType: CategoryType) =
             Category(
@@ -50,35 +52,41 @@ class FetchMyPercentInClassServiceTest :
                 calculationType = ScoreCalculationType.COUNT_BASED,
             )
 
-        fun scoreOf(userId: Long, status: ScoreStatus, categoryType: CategoryType) =
-            Score(
-                scoreId = 0,
-                userId = userId,
-                category = categoryOf(categoryType),
-                evidence = null,
-                file = null,
-                scoreStatus = status,
-                activityName = null,
-                scoreValue = null,
-                rejectionReason = null,
-                dgProjectId = null,
-                createdAt = LocalDateTime.now(),
-                updatedAt = LocalDateTime.now(),
-            )
+        fun scoreOf(
+            userId: Long,
+            status: ScoreStatus,
+            categoryType: CategoryType,
+        ) = Score(
+            scoreId = 0,
+            userId = userId,
+            category = categoryOf(categoryType),
+            evidence = null,
+            file = null,
+            scoreStatus = status,
+            activityName = null,
+            scoreValue = null,
+            rejectionReason = null,
+            dgProjectId = null,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now(),
+        )
 
+        fun userOf(
+            userId: Long,
+            userGrade: Int?,
+            userRole: UserRole,
+            userClassNumber: Int?,
+        ) = User(
+            userId = userId,
+            userName = "강민우",
+            userEmail = "absc123@gmail.com",
+            userGrade = userGrade,
+            userClassNumber = userClassNumber,
+            userNumber = null,
+            userRole = userRole,
+        )
 
-        fun userOf(userId: Long, userGrade: Int?, userRole: UserRole, userClassNumber: Int?) =
-            User(
-                userId = userId,
-                userName = "강민우",
-                userEmail = "absc123@gmail.com",
-                userGrade = userGrade,
-                userClassNumber = userClassNumber,
-                userNumber = null,
-                userRole = userRole,
-            )
-
-        Given("학급 내 백분위를 조회할 때"){
+        Given("학급 내 백분위를 조회할 때") {
             val classmates =
                 listOf(
                     userOf(2L, 2, UserRole.STUDENT, 3),
@@ -88,27 +96,28 @@ class FetchMyPercentInClassServiceTest :
 
             val allScores =
                 listOf(
-                    scoreOf(1L, ScoreStatus.APPROVED, CategoryType.TOEIC),   // 나: 총점 2
+                    scoreOf(1L, ScoreStatus.APPROVED, CategoryType.TOEIC), // 나: 총점 2
                     scoreOf(1L, ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(1L, ScoreStatus.PENDING, CategoryType.ACADEMIC_GRADE),
                     scoreOf(1L, ScoreStatus.PENDING, CategoryType.ACADEMIC_GRADE),
                     scoreOf(1L, ScoreStatus.PENDING, CategoryType.ACADEMIC_GRADE),
-                    scoreOf(2L, ScoreStatus.APPROVED, CategoryType.TOEIC),   // 친구2: 총점 1
-                    scoreOf(3L, ScoreStatus.APPROVED, CategoryType.TOEIC),   // 친구3: 총점 4
+                    scoreOf(2L, ScoreStatus.APPROVED, CategoryType.TOEIC), // 친구2: 총점 1
+                    scoreOf(3L, ScoreStatus.APPROVED, CategoryType.TOEIC), // 친구3: 총점 4
                     scoreOf(3L, ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(3L, ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(3L, ScoreStatus.APPROVED, CategoryType.TOEIC),
-                    scoreOf(4L, ScoreStatus.APPROVED, CategoryType.TOEIC),   // 친구4: 총점 3
+                    scoreOf(4L, ScoreStatus.APPROVED, CategoryType.TOEIC), // 친구4: 총점 3
                     scoreOf(4L, ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(4L, ScoreStatus.APPROVED, CategoryType.TOEIC),
                 )
-            When("허가된 점수만 포함하면"){
-                Then("허가된 점수만 포함한 총점의 학급 내 백분위가 반환된다"){
+            When("허가된 점수만 포함하면") {
+                Then("허가된 점수만 포함한 총점의 학급 내 백분위가 반환된다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberUtil.getCurrentUserRole() } returns UserRole.STUDENT
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1L, 2, UserRole.STUDENT, 3)
                     every { scorePersistencePort.findAllByUserIdIn(any()) } returns allScores
-                    every { memberPersistencePort.findAllStudentsByUserGradeAndUserClassNumber(2, 3) } returns classmates
+                    every { memberPersistencePort.findAllStudentsByUserGradeAndUserClassNumber(2, 3) } returns
+                        classmates
 
                     val result = service.execute(true)
 
@@ -116,13 +125,14 @@ class FetchMyPercentInClassServiceTest :
                 }
             }
 
-            When("허가되지 않은 점수도 포함하면"){
-                Then("허가되지 않은 점수도 포함한 총점의 학급 내 백분위가 반환된다"){
+            When("허가되지 않은 점수도 포함하면") {
+                Then("허가되지 않은 점수도 포함한 총점의 학급 내 백분위가 반환된다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberUtil.getCurrentUserRole() } returns UserRole.STUDENT
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1L, 2, UserRole.STUDENT, 3)
                     every { scorePersistencePort.findAllByUserIdIn(any()) } returns allScores
-                    every { memberPersistencePort.findAllStudentsByUserGradeAndUserClassNumber(2, 3) } returns classmates
+                    every { memberPersistencePort.findAllStudentsByUserGradeAndUserClassNumber(2, 3) } returns
+                        classmates
 
                     val result = service.execute(false)
 
@@ -130,8 +140,8 @@ class FetchMyPercentInClassServiceTest :
                 }
             }
 
-            When("조회 대상 회원이 존재하지 않으면"){
-                Then("USER_NOT_FOUND 예외가 발생한다"){
+            When("조회 대상 회원이 존재하지 않으면") {
+                Then("USER_NOT_FOUND 예외가 발생한다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberUtil.getCurrentUserRole() } returns UserRole.STUDENT
                     every { memberPersistencePort.findByUserId(1L) } returns null
@@ -141,8 +151,8 @@ class FetchMyPercentInClassServiceTest :
                 }
             }
 
-            When("학년이 존재하지 않으면"){
-                Then("학생은 userGrade가 null일 수 없습니다.를 반환한다"){
+            When("학년이 존재하지 않으면") {
+                Then("학생은 userGrade가 null일 수 없습니다.를 반환한다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberUtil.getCurrentUserRole() } returns UserRole.STUDENT
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1L, null, UserRole.STUDENT, 3)
@@ -151,8 +161,8 @@ class FetchMyPercentInClassServiceTest :
                     exception.message shouldBe "학생은 userGrade가 null일 수 없습니다."
                 }
             }
-            When("학급 번호가 존재하지 않으면"){
-                Then("학생은 userClassNumber가 null일 수 없습니다.를 반환한다"){
+            When("학급 번호가 존재하지 않으면") {
+                Then("학생은 userClassNumber가 null일 수 없습니다.를 반환한다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberUtil.getCurrentUserRole() } returns UserRole.STUDENT
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1L, 2, UserRole.STUDENT, null)
@@ -163,7 +173,7 @@ class FetchMyPercentInClassServiceTest :
             }
         }
 
-        Given("권한 별로 학급 내 백분위를 조회할 때"){
+        Given("권한 별로 학급 내 백분위를 조회할 때") {
             val classmates =
                 listOf(
                     userOf(2L, 2, UserRole.STUDENT, 3),
@@ -173,28 +183,29 @@ class FetchMyPercentInClassServiceTest :
 
             val allScores =
                 listOf(
-                    scoreOf(1L, ScoreStatus.APPROVED, CategoryType.TOEIC),   // 나: 총점 2
+                    scoreOf(1L, ScoreStatus.APPROVED, CategoryType.TOEIC), // 나: 총점 2
                     scoreOf(1L, ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(1L, ScoreStatus.PENDING, CategoryType.ACADEMIC_GRADE),
                     scoreOf(1L, ScoreStatus.PENDING, CategoryType.ACADEMIC_GRADE),
                     scoreOf(1L, ScoreStatus.PENDING, CategoryType.ACADEMIC_GRADE),
-                    scoreOf(2L, ScoreStatus.APPROVED, CategoryType.TOEIC),   // 친구2: 총점 1
-                    scoreOf(3L, ScoreStatus.APPROVED, CategoryType.TOEIC),   // 친구3: 총점 4
+                    scoreOf(2L, ScoreStatus.APPROVED, CategoryType.TOEIC), // 친구2: 총점 1
+                    scoreOf(3L, ScoreStatus.APPROVED, CategoryType.TOEIC), // 친구3: 총점 4
                     scoreOf(3L, ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(3L, ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(3L, ScoreStatus.APPROVED, CategoryType.TOEIC),
-                    scoreOf(4L, ScoreStatus.APPROVED, CategoryType.TOEIC),   // 친구4: 총점 3
+                    scoreOf(4L, ScoreStatus.APPROVED, CategoryType.TOEIC), // 친구4: 총점 3
                     scoreOf(4L, ScoreStatus.APPROVED, CategoryType.TOEIC),
                     scoreOf(4L, ScoreStatus.APPROVED, CategoryType.TOEIC),
                 )
 
-            When("학생이면"){
-                Then("학급 내 백분위가 반환된다"){
+            When("학생이면") {
+                Then("학급 내 백분위가 반환된다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberUtil.getCurrentUserRole() } returns UserRole.STUDENT
                     every { memberPersistencePort.findByUserId(1L) } returns userOf(1L, 2, UserRole.STUDENT, 3)
                     every { scorePersistencePort.findAllByUserIdIn(any()) } returns allScores
-                    every { memberPersistencePort.findAllStudentsByUserGradeAndUserClassNumber(2, 3) } returns classmates
+                    every { memberPersistencePort.findAllStudentsByUserGradeAndUserClassNumber(2, 3) } returns
+                        classmates
 
                     val result = service.execute(true)
 
@@ -202,8 +213,8 @@ class FetchMyPercentInClassServiceTest :
                 }
             }
 
-            When("학생이 아니면"){
-                Then("FORBIDDEN 예외가 발생한다"){
+            When("학생이 아니면") {
+                Then("FORBIDDEN 예외가 발생한다") {
                     every { memberUtil.getCurrentUserId() } returns 1L
                     every { memberUtil.getCurrentUserRole() } returns UserRole.TEACHER
 
