@@ -16,12 +16,14 @@ class GsmcExceptionResolver : DataFetcherExceptionResolverAdapter() {
         env: DataFetchingEnvironment,
     ): GraphQLError? =
         when (ex) {
-            is GsmcException ->
+            is GsmcException -> {
                 GraphqlErrorBuilder
                     .newError(env)
                     .message(ex.errorCode.message)
                     .extensions(mapOf("code" to ex.errorCode.code))
                     .build()
+            }
+
             else -> {
                 log.error("Unexpected exception occurred during GraphQL execution", ex)
                 GraphqlErrorBuilder

@@ -142,13 +142,20 @@ class GraphQlLatencyDiscordInterceptor(
 
     private fun maskValue(value: Any?): Any? =
         when (value) {
-            is Map<*, *> ->
+            is Map<*, *> -> {
                 value.entries.associate { (key, nested) ->
                     val keyName = key.toString()
                     keyName to if (SENSITIVE_KEY_PATTERN.containsMatchIn(keyName)) "***" else maskValue(nested)
                 }
-            is List<*> -> value.map { maskValue(it) }
-            else -> value
+            }
+
+            is List<*> -> {
+                value.map { maskValue(it) }
+            }
+
+            else -> {
+                value
+            }
         }
 
     private fun truncate(text: String): String = if (text.length > 900) text.take(900) + "..." else text

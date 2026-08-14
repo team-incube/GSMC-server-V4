@@ -32,25 +32,39 @@ object DateTimeScalar {
                         locale: Locale,
                     ): String =
                         when (dataFetcherResult) {
-                            is OffsetDateTime -> dataFetcherResult.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-                            is ZonedDateTime ->
+                            is OffsetDateTime -> {
+                                dataFetcherResult.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                            }
+
+                            is ZonedDateTime -> {
                                 dataFetcherResult.toOffsetDateTime().format(
                                     DateTimeFormatter.ISO_OFFSET_DATE_TIME,
                                 )
-                            is Instant ->
+                            }
+
+                            is Instant -> {
                                 dataFetcherResult
                                     .atOffset(
                                         ZoneOffset.UTC,
                                     ).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-                            is LocalDateTime ->
+                            }
+
+                            is LocalDateTime -> {
                                 dataFetcherResult
                                     .atZone(ZoneId.of("Asia/Seoul"))
                                     .toOffsetDateTime()
                                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-                            is String -> dataFetcherResult
-                            else -> throw CoercingSerializeException(
-                                "DateTime으로 직렬화할 수 없는 타입: ${dataFetcherResult::class}",
-                            )
+                            }
+
+                            is String -> {
+                                dataFetcherResult
+                            }
+
+                            else -> {
+                                throw CoercingSerializeException(
+                                    "DateTime으로 직렬화할 수 없는 타입: ${dataFetcherResult::class}",
+                                )
+                            }
                         }
 
                     override fun parseValue(
@@ -59,10 +73,14 @@ object DateTimeScalar {
                         locale: Locale,
                     ): OffsetDateTime =
                         when (input) {
-                            is String ->
+                            is String -> {
                                 runCatching { OffsetDateTime.parse(input, DateTimeFormatter.ISO_OFFSET_DATE_TIME) }
                                     .getOrElse { throw CoercingParseValueException("유효하지 않은 DateTime 값: $input") }
-                            else -> throw CoercingParseValueException("DateTime으로 파싱할 수 없는 타입: ${input::class}")
+                            }
+
+                            else -> {
+                                throw CoercingParseValueException("DateTime으로 파싱할 수 없는 타입: ${input::class}")
+                            }
                         }
 
                     override fun parseLiteral(
@@ -72,7 +90,7 @@ object DateTimeScalar {
                         locale: Locale,
                     ): OffsetDateTime =
                         when (input) {
-                            is StringValue ->
+                            is StringValue -> {
                                 runCatching {
                                     OffsetDateTime.parse(input.value, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                                 }.getOrElse {
@@ -80,7 +98,11 @@ object DateTimeScalar {
                                         "유효하지 않은 DateTime 리터럴: ${input.value}",
                                     )
                                 }
-                            else -> throw CoercingParseLiteralException("DateTime으로 파싱할 수 없는 리터럴 타입: ${input::class}")
+                            }
+
+                            else -> {
+                                throw CoercingParseLiteralException("DateTime으로 파싱할 수 없는 리터럴 타입: ${input::class}")
+                            }
                         }
                 },
             ).build()
