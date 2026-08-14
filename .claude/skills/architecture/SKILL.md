@@ -2,7 +2,6 @@
 name: architecture
 description: Hexagonal architecture structure and rules for this project. Use this when creating new files or features to place them in the correct layer.
 ---
-```
 
 ## Dependency Direction
 ```
@@ -20,21 +19,21 @@ adapter/in → port/in → service → port/out → adapter/out
 - Pure Kotlin class. No JPA annotations, no Spring annotations.
 - Must not know about JPA, Redis, or any infrastructure.
 
-### application/port/in/
+### port/in/
 - UseCase interface. Defines what the application can do.
-- Called by `adapter/in`.
+- Called by `adapter/in` or web adapters.
 
-### application/port/out/
+### port/out/
 - Persistence port interface. Defines what the application needs from outside.
 - Called by `service`. Implemented by `adapter/out`.
 
-### application/service/
+### service/
 - Implements UseCase. Contains business logic.
-- Only knows `port/out` interface — never knows JPA directly.
+- Only knows `port/out` interfaces; never knows JPA directly.
 - `@Transactional` goes here.
 
-### adapter/in/
-- GraphQL controller (`@MutationMapping`, `@QueryMapping`).
+### adapter/in/ or adapter/web/
+- GraphQL/Web adapter (`@MutationMapping`, `@QueryMapping`, or controller endpoint).
 - Calls UseCase only. No business logic here.
 
 ### adapter/out/persistence/
