@@ -19,7 +19,7 @@ abstract class ScoreCalculator {
         category: Category,
     ): Int =
         when (category.calculationType) {
-            ScoreCalculationType.COUNT_BASED ->
+            ScoreCalculationType.COUNT_BASED -> {
                 if (category.isAccumulated) {
                     scoresInCategory.size
                 } else if (scoresInCategory.isNotEmpty()) {
@@ -27,12 +27,15 @@ abstract class ScoreCalculator {
                 } else {
                     0
                 }
-            ScoreCalculationType.SCORE_BASED ->
+            }
+
+            ScoreCalculationType.SCORE_BASED -> {
                 if (category.isAccumulated) {
                     scoresInCategory.sumOf { it.scoreValue ?: 0 }
                 } else {
                     scoresInCategory.maxByOrNull { it.updatedAt }?.scoreValue ?: 0
                 }
+            }
         }
 
     protected open fun bonusScore(
