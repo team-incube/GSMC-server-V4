@@ -15,7 +15,7 @@ A web service that digitalizes the student competency evaluation system at Gwang
 ## Tech Stack
 
 - Language: Kotlin
-- Framework: Spring Boot 4.0.5
+- Framework: Spring Boot 4.1.0
 - Database: MySQL (JPA + QueryDSL)
 - Cache: Redis
 - Build Tool: Gradle (Kotlin DSL)
