@@ -7,4 +7,4 @@ import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
  * 프로젝트 도메인에서 사용하는 사용자 정보 JPA 저장소 인터페이스입니다.
  * [team.incube.gsmc.domain.project.adapter.out.persistence.ProjectMemberPersistenceAdapter]에서 사용됩니다.
  */
-interface UserJpaRepository : JpaRepository<UserJpaEntity, Long>
+interface ProjectUserJpaRepository : JpaRepository<UserJpaEntity, Long>
