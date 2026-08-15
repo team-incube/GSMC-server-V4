@@ -5,9 +5,12 @@ import team.incube.gsmc.domain.evidence.adapter.out.persistence.entity.EvidenceJ
 import team.incube.gsmc.domain.file.File
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.FileJpaEntity
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.toDomain
+import team.incube.gsmc.domain.file.adapter.out.persistence.entity.toEntity
 import team.incube.gsmc.domain.file.adapter.out.persistence.repository.FileJpaRepository
 import team.incube.gsmc.domain.file.port.out.FilePersistencePort
+import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.score.adapter.out.persistence.entity.ScoreJpaEntity
+import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.adapter.Adapter
 
@@ -23,8 +26,22 @@ class FilePersistenceAdapter(
 ) : FilePersistencePort {
     override fun findById(fileId: Long): File? = fileJpaRepository.findById(fileId).orElse(null)?.toDomain()
 
+    override fun findByFileKey(fileKey: String): File? = fileJpaRepository.findByFileKey(fileKey)?.toDomain()
+
     override fun findAllByEvidenceId(evidenceId: Long): List<File> =
         fileJpaRepository.findAllByEvidenceEvidenceId(evidenceId).map { it.toDomain() }
+
+    override fun findAllByUserId(userId: Long): List<File> =
+        fileJpaRepository.findAllByUserUserId(userId).map { it.toDomain() }
+
+    override fun save(file: File): File {
+        val user = entityManager.getReference(UserJpaEntity::class.java, file.userId)
+        return fileJpaRepository.save(file.toEntity(user)).toDomain()
+    }
+
+    override fun deleteById(fileId: Long) {
+        fileJpaRepository.deleteById(fileId)
+    }
 
     override fun linkToEvidence(
         fileId: Long,
@@ -54,6 +71,9 @@ class FilePersistenceAdapter(
         fileJpaRepository.save(entity.copy(score = null))
     }
 
+    override fun isLinkedToApprovedScore(fileId: Long): Boolean =
+        fileJpaRepository.existsByFileIdAndScoreScoreStatus(fileId, ScoreStatus.APPROVED)
+
     private fun FileJpaEntity.copy(
         score: ScoreJpaEntity? = this.score,
         evidence: EvidenceJpaEntity? = this.evidence,
@@ -63,7 +83,7 @@ class FilePersistenceAdapter(
             user = user,
             score = score,
             evidence = evidence,
-            fileUri = fileUri,
+            fileKey = fileKey,
             fileOriginalName = fileOriginalName,
             fileStoredName = fileStoredName,
         )

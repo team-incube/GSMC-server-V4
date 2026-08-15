@@ -61,7 +61,7 @@ class AppendMyScoreWithFileServiceTest :
         ) = File(
             fileId = fileId,
             userId = ownerId,
-            fileUri = "https://example.com/$fileId",
+            fileKey = "https://example.com/$fileId",
             fileOriginalName = "cert.png",
             fileStoredName = "stored-$fileId.png",
         )

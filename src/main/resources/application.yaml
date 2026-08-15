@@ -55,6 +55,13 @@ datagsm:
     base-url: ${DATAGSM_OPENAPI_BASE_URL:https://openapi.datagsm.kr}
     api-key: ${DATAGSM_OPENAPI_KEY}
 
+aws:
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+    region: ${AWS_S3_REGION}
+    access-key: ${AWS_S3_ACCESS_KEY}
+    secret-key: ${AWS_S3_SECRET_KEY}
+
 discord:
   webhook:
     graphql-latency-url: ${DISCORD_GRAPHQL_LATENCY_WEBHOOK_URL:}
