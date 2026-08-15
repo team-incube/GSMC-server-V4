@@ -8,7 +8,7 @@ import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
  * 점수 도메인에서 사용하는 사용자 정보 JPA 저장소 인터페이스입니다.
  * [MemberPersistenceAdapter][team.incube.gsmc.domain.score.adapter.out.persistence.MemberPersistenceAdapter]에서 사용됩니다.
  */
-interface UserJpaRepository : JpaRepository<UserJpaEntity, Long> {
+interface ScoreUserJpaRepository : JpaRepository<UserJpaEntity, Long> {
     /**
      * 특정 역할, 학년의 사용자를 조회한다.
      *
