@@ -19,3 +19,25 @@ input PatchMemberRoleInput {
     email: String!
     role: UserRole!
 }
+
+type MemberPayload {
+    id: ID!
+    name: String!
+    email: String!
+    grade: Int
+    classNumber: Int
+    number: Int
+    role: UserRole!
+}
+
+type SearchMemberPayload {
+    members: [MemberPayload!]!
+    totalPages: Int!
+    totalElements: Int!
+}
+
+extend type Query {
+    member(memberId: ID!): MemberPayload!
+    myMember: MemberPayload!
+    searchMembers(input: SearchMemberInput!): SearchMemberPayload!
+}
