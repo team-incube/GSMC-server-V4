@@ -26,7 +26,7 @@ class SearchMembersService(
         number: Int?,
         limit: Int,
         page: Int,
-        sortDirection: SortDirection,
+        sort: SortDirection,
     ): MemberSearchResult {
         if (limit <= 0) throw GsmcException(ErrorCode.INVALID_PAGE_SIZE)
 
@@ -40,7 +40,7 @@ class SearchMembersService(
                 number,
                 limit,
                 page,
-                sortDirection,
+                sort,
             )
         val totalElements = memberPersistencePort.countBySearchCondition(email, name, role, grade, classNumber, number)
         val totalPages = ((totalElements + limit - 1) / limit).toInt()

@@ -12,7 +12,7 @@ input SearchMemberInput {
     number: Int
     limit: Int = 100
     page: Int = 0
-    sortDirection: SortDirection = ASC
+    sort: SortDirection = ASC
 }
 
 input PatchMemberRoleInput {

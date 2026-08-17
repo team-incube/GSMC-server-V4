@@ -21,7 +21,7 @@ interface SearchMembersUseCase {
      * @param number 조회할 사용자 번호
      * @param limit 페이지 크기
      * @param page 페이지 번호
-     * @param sortDirection 조회할 때 정렬 기준
+     * @param sort 조회할 때 정렬 기준
      * @return 사용자 목록
      */
     fun execute(
@@ -33,6 +33,6 @@ interface SearchMembersUseCase {
         number: Int?,
         limit: Int,
         page: Int,
-        sortDirection: SortDirection,
+        sort: SortDirection,
     ): MemberSearchResult
 }

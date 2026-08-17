@@ -12,5 +12,5 @@ data class SearchMemberInput(
     val number: Int?,
     val limit: Int = 100,
     val page: Int = 0,
-    val sortDirection: SortDirection = SortDirection.ASC,
+    val sort: SortDirection = SortDirection.ASC,
 )

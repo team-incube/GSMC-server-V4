@@ -39,6 +39,6 @@ class MemberWebAdapter(
                 input.number,
                 input.limit,
                 input.page,
-                input.sortDirection,
+                input.sort,
             ).toPayload()
 }
