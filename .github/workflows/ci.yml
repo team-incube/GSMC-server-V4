@@ -126,6 +126,36 @@ jobs:
             fi
           fi
 
+  close-linked-issues:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Close Issues Linked in PR Body
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BODY: ${{ github.event.pull_request.body }}
+
+        run: |
+          ISSUE_NUMBERS=$(echo "$BODY" \
+            | grep -oiP '(close[sd]?|fix(e[sd])?|resolve[sd]?)\s*:?\s*#\K[0-9]+' \
+            | sort -u)
+
+          if [ -z "$ISSUE_NUMBERS" ]; then
+            echo "PR 본문에 연결된 이슈가 없습니다."
+            exit 0
+          fi
+
+          for NUM in $ISSUE_NUMBERS; do
+            echo "Closing issue #$NUM"
+            gh issue close "$NUM" --repo "$REPO" --reason completed || true
+          done
+
   build-and-test:
     runs-on: ubuntu-latest
     if: github.event.action != 'closed'
