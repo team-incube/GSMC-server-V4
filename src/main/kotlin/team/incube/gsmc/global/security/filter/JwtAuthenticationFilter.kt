@@ -25,13 +25,11 @@ class JwtAuthenticationFilter(
                 SecurityContextHolder.getContext().authentication =
                     UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
                 MDC.put(MDC_USER_ID_KEY, userId.toString())
-                MDC.put(MDC_USER_ROLE_KEY, role.name)
             }
         try {
             filterChain.doFilter(request, response)
         } finally {
             MDC.remove(MDC_USER_ID_KEY)
-            MDC.remove(MDC_USER_ROLE_KEY)
         }
     }
 
@@ -43,6 +41,5 @@ class JwtAuthenticationFilter(
 
     companion object {
         private const val MDC_USER_ID_KEY = "userId"
-        private const val MDC_USER_ROLE_KEY = "userRole"
     }
 }
