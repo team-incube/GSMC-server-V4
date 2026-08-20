@@ -1,5 +1,6 @@
 package team.incube.gsmc.domain.alert.service
 
+import org.springframework.transaction.annotation.Transactional
 import team.incube.gsmc.domain.alert.Alert
 import team.incube.gsmc.domain.alert.port.`in`.FetchMyAlertsUseCase
 import team.incube.gsmc.domain.alert.port.out.AlertPersistencePort
@@ -16,6 +17,7 @@ class FetchMyAlertsService(
     private val alertPersistencePort: AlertPersistencePort,
     private val memberUtil: MemberUtil,
 ) : FetchMyAlertsUseCase {
+    @Transactional(readOnly = true)
     override fun execute(): List<Alert> {
         val userId = memberUtil.getCurrentUserId()
         return alertPersistencePort.findAllByUserIdOrderByCreatedAtDesc(userId)
