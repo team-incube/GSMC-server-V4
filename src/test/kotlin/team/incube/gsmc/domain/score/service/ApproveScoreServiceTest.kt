@@ -5,10 +5,13 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import team.incube.gsmc.domain.alert.Alert
 import team.incube.gsmc.domain.alert.AlertType
+import team.incube.gsmc.domain.alert.port.out.AlertEventPublisherPort
 import team.incube.gsmc.domain.alert.port.out.AlertPersistencePort
 import team.incube.gsmc.domain.category.Category
 import team.incube.gsmc.domain.category.CategoryType
@@ -27,8 +30,10 @@ class ApproveScoreServiceTest :
     BehaviorSpec({
         val scorePersistencePort = mockk<ScorePersistencePort>()
         val alertPersistencePort = mockk<AlertPersistencePort>()
+        val alertEventPublisherPort = mockk<AlertEventPublisherPort>()
         val memberUtil = mockk<MemberUtil>()
-        val service = ApproveScoreService(scorePersistencePort, alertPersistencePort, memberUtil)
+        val service =
+            ApproveScoreService(scorePersistencePort, alertPersistencePort, alertEventPublisherPort, memberUtil)
 
         beforeEach { clearAllMocks() }
 
@@ -65,7 +70,8 @@ class ApproveScoreServiceTest :
                     every { memberUtil.getCurrentUserRole() } returns UserRole.TEACHER
                     every { scorePersistencePort.findById(1L) } returns score(ScoreStatus.PENDING)
                     every { scorePersistencePort.save(any()) } answers { firstArg() }
-                    every { alertPersistencePort.save(any()) } answers { firstArg() }
+                    every { alertPersistencePort.save(any()) } answers { firstArg<Alert>().copy(alertId = 100L) }
+                    every { alertEventPublisherPort.publish(any()) } just runs
 
                     val result = service.execute(1L)
 
@@ -88,6 +94,9 @@ class ApproveScoreServiceTest :
                             },
                         )
                     }
+                    verify(exactly = 1) {
+                        alertEventPublisherPort.publish(match<Alert> { it.alertId == 100L })
+                    }
                 }
             }
 
@@ -102,6 +111,7 @@ class ApproveScoreServiceTest :
                     result shouldBe true
                     verify(exactly = 1) { scorePersistencePort.save(any()) }
                     verify(exactly = 0) { alertPersistencePort.save(any()) }
+                    verify(exactly = 0) { alertEventPublisherPort.publish(any()) }
                 }
             }
 
@@ -114,6 +124,7 @@ class ApproveScoreServiceTest :
 
                     exception.errorCode shouldBe ErrorCode.SCORE_NOT_FOUND
                     verify(exactly = 0) { alertPersistencePort.save(any()) }
+                    verify(exactly = 0) { alertEventPublisherPort.publish(any()) }
                 }
             }
         }
