@@ -27,7 +27,7 @@ enum class ErrorCode(
     DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "데이터 제약 조건을 위반했습니다.", "DUPLICATE_RESOURCE"),
     INVALID_SCHOOL_INFO(
         HttpStatus.BAD_REQUEST,
-        "학적 정보(학년, 반, 번호)가 올바르지 않습니다. 학생은 모두 입력해야 하며, 그 외에는 모두 비우거나 모두 입력해야 합니다.",
+        "학적 정보(학년, 반, 번호)가 올바르지 않습니다.",
         "BAD_REQUEST",
     ),
 
