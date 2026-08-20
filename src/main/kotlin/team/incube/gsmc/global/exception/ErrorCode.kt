@@ -25,7 +25,6 @@ enum class ErrorCode(
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.", "NOT_FOUND"),
     INVALID_PAGE_SIZE(HttpStatus.BAD_REQUEST, "페이지 크기는 1 이상이어야 합니다.", "BAD_REQUEST"),
     DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "데이터 제약 조건을 위반했습니다.", "DUPLICATE_RESOURCE"),
-    INVALID_SCHOOL_INFO(HttpStatus.BAD_REQUEST, "학적 정보(학년·반·번호)가 올바르지 않습니다.", "BAD_REQUEST"),
 
     // 점수
     SCORE_NOT_FOUND(HttpStatus.NOT_FOUND, "점수를 찾을 수 없습니다.", "NOT_FOUND"),
@@ -46,4 +45,7 @@ enum class ErrorCode(
     NOT_A_DATAGSM_PROJECT_PARTICIPANT(HttpStatus.BAD_REQUEST, "해당 프로젝트의 참여자가 아닙니다.", "BAD_REQUEST"),
     INVALID_PROJECT_PARTICIPANT_COUNT(HttpStatus.BAD_REQUEST, "프로젝트 참여자는 2인 이상이어야 합니다.", "BAD_REQUEST"),
     PROJECT_PARTICIPATION_ALREADY_SUBMITTED(HttpStatus.CONFLICT, "이미 제출하거나 심사 중인 프로젝트입니다.", "CONFLICT"),
+
+    // 개발자
+    INVALID_SCHOOL_INFO(HttpStatus.BAD_REQUEST, "학적 정보(학년·반·번호)가 올바르지 않습니다.", "BAD_REQUEST"),
 }

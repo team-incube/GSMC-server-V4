@@ -10,7 +10,6 @@ import team.incube.gsmc.domain.user.User
 import team.incube.gsmc.domain.user.UserRole
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.QUserJpaEntity.userJpaEntity
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.toDomain
-import team.incube.gsmc.domain.user.adapter.out.persistence.entity.toEntity
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.adapter.Adapter
 
@@ -60,17 +59,6 @@ class MemberPersistenceAdapter(
             .limit(limit.toLong())
             .fetch()
             .map { it.toDomain() }
-
-    override fun findBySchoolInfo(
-        grade: Int,
-        classNumber: Int,
-        number: Int,
-    ): User? =
-        memberUserJpaRepository
-            .findByUserGradeAndUserClassNumberAndUserNumber(grade, classNumber, number)
-            ?.toDomain()
-
-    override fun save(user: User): User = memberUserJpaRepository.save(user.toEntity()).toDomain()
 
     /**
      * 정렬 방향에 따라 학년 → 반 → 번호 순 정렬 조건을 만든다. null 값(교사)은 항상 뒤로 보낸다.

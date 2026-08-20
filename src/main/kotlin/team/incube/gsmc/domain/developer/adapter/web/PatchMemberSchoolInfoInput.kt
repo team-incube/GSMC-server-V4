@@ -1,4 +1,4 @@
-package team.incube.gsmc.domain.member.adapter.web
+package team.incube.gsmc.domain.developer.adapter.web
 
 /**
  * 회원 학적정보(학년/반/번호) 변경 Mutation의 GraphQL 요청 DTO입니다.

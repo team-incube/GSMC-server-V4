@@ -1,0 +1,10 @@
+input PatchMemberSchoolInfoInput {
+    memberId: ID!
+    grade: Int
+    classNumber: Int
+    number: Int
+}
+
+extend type Mutation {
+    patchMemberSchoolInfo(input: PatchMemberSchoolInfoInput!): Boolean!
+}

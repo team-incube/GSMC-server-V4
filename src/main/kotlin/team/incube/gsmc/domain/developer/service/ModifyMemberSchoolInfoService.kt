@@ -1,8 +1,8 @@
-package team.incube.gsmc.domain.member.service
+package team.incube.gsmc.domain.developer.service
 
 import org.springframework.transaction.annotation.Transactional
-import team.incube.gsmc.domain.member.port.`in`.ModifyMemberSchoolInfoUseCase
-import team.incube.gsmc.domain.member.port.out.MemberPersistencePort
+import team.incube.gsmc.domain.developer.port.`in`.ModifyMemberSchoolInfoUseCase
+import team.incube.gsmc.domain.developer.port.out.DeveloperPersistencePort
 import team.incube.gsmc.domain.user.UserRole
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.port.Port
@@ -20,7 +20,7 @@ import team.incube.gsmc.global.util.MemberUtil
  */
 @Port(direction = PortDirection.INBOUND)
 class ModifyMemberSchoolInfoService(
-    private val memberPersistencePort: MemberPersistencePort,
+    private val developerPersistencePort: DeveloperPersistencePort,
     private val memberUtil: MemberUtil,
 ) : ModifyMemberSchoolInfoUseCase {
     @Transactional
@@ -34,18 +34,18 @@ class ModifyMemberSchoolInfoService(
             throw GsmcException(ErrorCode.FORBIDDEN)
         }
 
-        val member = memberPersistencePort.findByMemberId(memberId) ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
+        val member = developerPersistencePort.findByMemberId(memberId) ?: throw GsmcException(ErrorCode.USER_NOT_FOUND)
 
         validateSchoolInfo(member.userRole, grade, classNumber, number)
 
         if (grade != null && classNumber != null && number != null) {
-            val duplicated = memberPersistencePort.findBySchoolInfo(grade, classNumber, number)
+            val duplicated = developerPersistencePort.findBySchoolInfo(grade, classNumber, number)
             if (duplicated != null && duplicated.userId != memberId) {
                 throw GsmcException(ErrorCode.DUPLICATE_RESOURCE)
             }
         }
 
-        memberPersistencePort.save(
+        developerPersistencePort.save(
             member.copy(
                 userGrade = grade,
                 userClassNumber = classNumber,

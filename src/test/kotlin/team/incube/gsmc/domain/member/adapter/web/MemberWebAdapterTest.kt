@@ -10,7 +10,6 @@ import team.incube.gsmc.domain.member.MemberSearchResult
 import team.incube.gsmc.domain.member.SortDirection
 import team.incube.gsmc.domain.member.port.`in`.FetchMemberUseCase
 import team.incube.gsmc.domain.member.port.`in`.FetchMyMemberUseCase
-import team.incube.gsmc.domain.member.port.`in`.ModifyMemberSchoolInfoUseCase
 import team.incube.gsmc.domain.member.port.`in`.SearchMembersUseCase
 import team.incube.gsmc.domain.user.User
 import team.incube.gsmc.domain.user.UserRole
@@ -20,13 +19,11 @@ class MemberWebAdapterTest :
         val fetchMemberUseCase = mockk<FetchMemberUseCase>()
         val fetchMyMemberUseCase = mockk<FetchMyMemberUseCase>()
         val searchMembersUseCase = mockk<SearchMembersUseCase>()
-        val modifyMemberSchoolInfoUseCase = mockk<ModifyMemberSchoolInfoUseCase>()
         val webAdapter =
             MemberWebAdapter(
                 fetchMemberUseCase = fetchMemberUseCase,
                 fetchMyMemberUseCase = fetchMyMemberUseCase,
                 searchMembersUseCase = searchMembersUseCase,
-                modifyMemberSchoolInfoUseCase = modifyMemberSchoolInfoUseCase,
             )
 
         beforeEach { clearAllMocks() }
@@ -95,20 +92,6 @@ class MemberWebAdapterTest :
                     verify(exactly = 1) {
                         searchMembersUseCase.execute(null, "홍길동", UserRole.STUDENT, 1, 2, 10, 50, 0, SortDirection.ASC)
                     }
-                }
-            }
-        }
-
-        Given("patchMemberSchoolInfo 뮤테이션을 호출할 때") {
-            When("변경할 학적정보를 담은 input을 전달하면") {
-                Then("ModifyMemberSchoolInfoUseCase에 값을 그대로 위임한 결과를 반환한다") {
-                    val input = PatchMemberSchoolInfoInput(memberId = 10L, grade = 2, classNumber = 3, number = 15)
-                    every { modifyMemberSchoolInfoUseCase.execute(10L, 2, 3, 15) } returns true
-
-                    val result = webAdapter.patchMemberSchoolInfo(input)
-
-                    result shouldBe true
-                    verify(exactly = 1) { modifyMemberSchoolInfoUseCase.execute(10L, 2, 3, 15) }
                 }
             }
         }

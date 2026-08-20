@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:package-name")
 
-package team.incube.gsmc.domain.member.port.`in`
+package team.incube.gsmc.domain.developer.port.`in`
 
 /**
  * 회원 학적정보(학년/반/번호) 변경 유스케이스 인터페이스입니다.
