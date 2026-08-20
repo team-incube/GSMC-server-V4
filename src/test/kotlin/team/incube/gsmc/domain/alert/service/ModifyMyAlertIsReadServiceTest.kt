@@ -52,7 +52,7 @@ class ModifyMyAlertIsReadServiceTest :
                 }
             }
 
-            When("이미 읽은 알림까지 다시 읽음 처리해도") {
+            When("이미 읽은 알림까지 다시 읽음 처리하면") {
                 Then("같은 결과로 멱등적으로 처리된다") {
                     every { memberUtil.getCurrentUserId() } returns 10L
                     every { alertPersistencePort.findById(5L) } returns alert(5L, 10L)
