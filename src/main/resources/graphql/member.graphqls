@@ -20,6 +20,13 @@ input PatchMemberRoleInput {
     role: UserRole!
 }
 
+input PatchMemberSchoolInfoInput {
+    memberId: ID!
+    grade: Int
+    classNumber: Int
+    number: Int
+}
+
 type MemberPayload {
     id: ID!
     name: String!
@@ -40,4 +47,8 @@ extend type Query {
     member(memberId: ID!): MemberPayload!
     myMember: MemberPayload!
     searchMembers(input: SearchMemberInput!): SearchMemberPayload!
+}
+
+extend type Mutation {
+    patchMemberSchoolInfo(input: PatchMemberSchoolInfoInput!): Boolean!
 }

@@ -25,6 +25,11 @@ enum class ErrorCode(
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.", "NOT_FOUND"),
     INVALID_PAGE_SIZE(HttpStatus.BAD_REQUEST, "페이지 크기는 1 이상이어야 합니다.", "BAD_REQUEST"),
     DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "데이터 제약 조건을 위반했습니다.", "DUPLICATE_RESOURCE"),
+    INVALID_SCHOOL_INFO(
+        HttpStatus.BAD_REQUEST,
+        "학적 정보(학년, 반, 번호)가 올바르지 않습니다. 학생은 모두 입력해야 하며, 그 외에는 모두 비우거나 모두 입력해야 합니다.",
+        "BAD_REQUEST",
+    ),
 
     // 점수
     SCORE_NOT_FOUND(HttpStatus.NOT_FOUND, "점수를 찾을 수 없습니다.", "NOT_FOUND"),
