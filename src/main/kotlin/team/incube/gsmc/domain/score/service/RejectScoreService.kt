@@ -2,6 +2,7 @@ package team.incube.gsmc.domain.score.service
 
 import org.springframework.transaction.annotation.Transactional
 import team.incube.gsmc.domain.alert.Alert
+import team.incube.gsmc.domain.alert.port.out.AlertEventPublisherPort
 import team.incube.gsmc.domain.alert.port.out.AlertPersistencePort
 import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.score.port.`in`.RejectScoreUseCase
@@ -20,12 +21,15 @@ private const val MAX_REJECTION_REASON_LENGTH = 500
  * [RejectScoreUseCase]를 구현하며, 교사(TEACHER) 이상만 호출을 허용합니다. `rejectionReason`은
  * `score_tb.rejection_reason` 컬럼 길이(500자)를 초과하면 DB 예외 대신 명확한 에러로 미리 막는다.
  * 알림은 이미 `REJECTED`인 점수를 다시 거절할 때 중복 생성되지 않도록 실제로 상태가 바뀐 경우에만
- * 저장하며, 상태 변경과 알림 저장은 같은 트랜잭션으로 묶여 둘 중 하나만 반영되는 일이 없습니다.
+ * 저장하며, 상태 변경과 알림 저장은 같은 트랜잭션으로 묶여 둘 중 하나만 반영되는 일이 없습니다. 알림
+ * 저장 직후 [AlertEventPublisherPort]로 SSE 실시간 전달을 요청하지만, 실제 전송은 이 트랜잭션이
+ * Commit된 이후에만 이뤄진다.
  */
 @Port(direction = PortDirection.INBOUND)
 class RejectScoreService(
     private val scorePersistencePort: ScorePersistencePort,
     private val alertPersistencePort: AlertPersistencePort,
+    private val alertEventPublisherPort: AlertEventPublisherPort,
     private val memberUtil: MemberUtil,
 ) : RejectScoreUseCase {
     @Transactional
@@ -45,14 +49,16 @@ class RejectScoreService(
         scorePersistencePort.save(score.copy(scoreStatus = ScoreStatus.REJECTED, rejectionReason = rejectionReason))
 
         if (!alreadyRejected) {
-            alertPersistencePort.save(
-                Alert.rejected(
-                    userId = score.userId,
-                    scoreId = score.scoreId,
-                    categoryName = score.category.categoryKoreanName,
-                    rejectionReason = rejectionReason,
-                ),
-            )
+            val savedAlert =
+                alertPersistencePort.save(
+                    Alert.rejected(
+                        userId = score.userId,
+                        scoreId = score.scoreId,
+                        categoryName = score.category.categoryKoreanName,
+                        rejectionReason = rejectionReason,
+                    ),
+                )
+            alertEventPublisherPort.publish(savedAlert)
         }
 
         return true
