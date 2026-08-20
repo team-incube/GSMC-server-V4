@@ -2,6 +2,7 @@ package team.incube.gsmc.domain.member.adapter.web
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -27,6 +28,8 @@ class MemberWebAdapterTest :
                 searchMembersUseCase = searchMembersUseCase,
                 modifyMemberSchoolInfoUseCase = modifyMemberSchoolInfoUseCase,
             )
+
+        beforeEach { clearAllMocks() }
 
         fun member(memberId: Long) =
             User(
