@@ -60,8 +60,13 @@ class AlertEmitterRegistry(
 
     override fun findAllByUserId(userId: Long): List<SseEmitter> = emittersByUserId[userId]?.toList() ?: emptyList()
 
-    /** 장시간 유휴 연결이 Proxy·클라이언트에 의해 끊기지 않도록 주기적으로 Heartbeat를 전송한다. */
-    @Scheduled(fixedRateString = "#{alertSseProperties.heartbeatInterval}")
+    /**
+     * 장시간 유휴 연결이 Proxy·클라이언트에 의해 끊기지 않도록 주기적으로 Heartbeat를 전송한다.
+     * `@ConfigurationProperties` 빈은 `@Component`가 아니라 이름이 `alertSseProperties`가 아닌
+     * `sse-team.incube.gsmc.domain.alert.adapter.sse.AlertSseProperties` 형태로 등록되므로,
+     * 빈을 참조하는 `#{...}` 대신 프로퍼티 플레이스홀더 `${...}`를 사용한다.
+     */
+    @Scheduled(fixedRateString = "\${sse.heartbeat-interval}")
     fun sendHeartbeat() {
         emittersByUserId.forEach { (userId, emitters) ->
             emitters.toList().forEach { emitter ->
