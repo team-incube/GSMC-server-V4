@@ -10,6 +10,7 @@ import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
 import team.incube.gsmc.global.util.MemberUtil
 
+/** 현재 사용자가 소유한 증빙자료의 내용과 파일 연결을 수정하는 서비스입니다. */
 @Port(direction = PortDirection.INBOUND)
 class ModifyEvidenceService(
     private val evidencePersistencePort: EvidencePersistencePort,

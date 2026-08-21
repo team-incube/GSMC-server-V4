@@ -11,6 +11,7 @@ import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
 import team.incube.gsmc.global.util.MemberUtil
 
+/** 기존 점수에 사용자의 증빙자료를 연결하여 제출하는 서비스입니다. */
 @Port(direction = PortDirection.INBOUND)
 class AppendEvidenceService(
     private val evidencePersistencePort: EvidencePersistencePort,

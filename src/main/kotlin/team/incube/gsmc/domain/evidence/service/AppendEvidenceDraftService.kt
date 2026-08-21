@@ -8,6 +8,7 @@ import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.port.Port
 import team.incube.gsmc.global.util.MemberUtil
 
+/** 현재 사용자의 증빙자료 임시저장을 생성하거나 기존 임시저장을 갱신하는 서비스입니다. */
 @Port(direction = PortDirection.INBOUND)
 class AppendEvidenceDraftService(
     private val evidencePersistencePort: EvidencePersistencePort,

@@ -11,6 +11,7 @@ import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
 import team.incube.gsmc.global.util.MemberUtil
 
+/** 현재 사용자가 소유한 증빙자료를 연관관계와 함께 삭제하는 서비스입니다. */
 @Port(direction = PortDirection.INBOUND)
 class RemoveEvidenceService(
     private val evidencePersistencePort: EvidencePersistencePort,

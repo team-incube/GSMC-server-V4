@@ -14,6 +14,7 @@ private const val MAX_CONTENT_LENGTH = 2000
 private const val MAX_DRAFT_TITLE_LENGTH = 255
 private const val MAX_DRAFT_CONTENT_LENGTH = 65_535
 
+/** Evidence 서비스에서 공통으로 사용하는 입력값 검증과 파일 연결 기능을 제공합니다. */
 @Component
 class EvidenceServiceSupport(
     private val filePersistencePort: FilePersistencePort,
