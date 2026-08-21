@@ -10,7 +10,11 @@ import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
 import team.incube.gsmc.global.util.MemberUtil
 
-/** 현재 사용자가 소유한 증빙자료의 내용과 파일 연결을 수정하는 서비스입니다. */
+/**
+ * 증빙자료 수정 유스케이스 구현 클래스입니다.
+ * [ModifyEvidenceUseCase]를 구현하며, 현재 사용자가 소유한 자료의 제목·내용·파일 연결을 부분 수정합니다.
+ * 전달되지 않은 값은 유지하고, 파일 목록이 전달되면 기존 연결과 비교하여 추가·유지·해제합니다.
+ */
 @Port(direction = PortDirection.INBOUND)
 class ModifyEvidenceService(
     private val evidencePersistencePort: EvidencePersistencePort,

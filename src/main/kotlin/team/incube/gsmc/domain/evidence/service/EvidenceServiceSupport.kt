@@ -14,7 +14,11 @@ private const val MAX_CONTENT_LENGTH = 2000
 private const val MAX_DRAFT_TITLE_LENGTH = 255
 private const val MAX_DRAFT_CONTENT_LENGTH = 65_535
 
-/** Evidence 서비스에서 공통으로 사용하는 입력값 검증과 파일 연결 기능을 제공합니다. */
+/**
+ * Evidence 서비스에서 공통으로 사용하는 지원 기능을 제공합니다.
+ * 최종 제출 및 임시저장 입력값을 검증하고, 파일을 배치 조회하여 소유권과 연결 가능 여부를 확인합니다.
+ * Evidence와 File 사이의 연결을 요청 목록 기준으로 추가·유지·해제하는 기능도 담당합니다.
+ */
 @Component
 class EvidenceServiceSupport(
     private val filePersistencePort: FilePersistencePort,

@@ -10,7 +10,11 @@ import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
 import team.incube.gsmc.global.util.MemberUtil
 
-/** 현재 사용자가 소유한 제출 완료 증빙자료를 단건 조회하는 서비스입니다. */
+/**
+ * 증빙자료 단건 조회 유스케이스 구현 클래스입니다.
+ * [FetchEvidenceUseCase]를 구현하며, 현재 사용자가 소유한 제출 완료 자료만 조회합니다.
+ * 임시저장 자료나 타인 자료는 존재 여부가 노출되지 않도록 동일한 [ErrorCode.EVIDENCE_NOT_FOUND]로 처리합니다.
+ */
 @Port(direction = PortDirection.INBOUND)
 class FetchEvidenceService(
     private val evidencePersistencePort: EvidencePersistencePort,

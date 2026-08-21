@@ -8,7 +8,11 @@ import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.port.Port
 import team.incube.gsmc.global.util.MemberUtil
 
-/** 현재 사용자의 제출 완료 증빙자료 목록을 최신순으로 조회하는 서비스입니다. */
+/**
+ * 내 증빙자료 목록 조회 유스케이스 구현 클래스입니다.
+ * [FetchMyEvidencesUseCase]를 구현하며, 현재 사용자의 제출 완료 자료를 최신 생성순으로 조회합니다.
+ * 자료 목록과 파일 연결은 사용자 범위로 조회하고 파일을 배치로 묶어 반환합니다.
+ */
 @Port(direction = PortDirection.INBOUND)
 class FetchMyEvidencesService(
     private val evidencePersistencePort: EvidencePersistencePort,
