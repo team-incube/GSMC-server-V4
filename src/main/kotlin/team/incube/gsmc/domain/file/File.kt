@@ -22,4 +22,12 @@ data class File(
     val fileKey: String,
     val fileOriginalName: String,
     val fileStoredName: String,
-)
+    val scoreId: Long? = null,
+    val evidenceId: Long? = null,
+) {
+    val id: Long
+        get() = fileId
+
+    val originalName: String
+        get() = fileOriginalName
+}

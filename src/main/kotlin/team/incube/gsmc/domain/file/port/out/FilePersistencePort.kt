@@ -14,6 +14,8 @@ interface FilePersistencePort {
      */
     fun findById(fileId: Long): File?
 
+    fun findAllByIdIn(fileIds: Collection<Long>): List<File>
+
     /**
      * 오브젝트 스토리지 key로 파일을 조회한다.
      *
@@ -29,6 +31,8 @@ interface FilePersistencePort {
      * @return 해당 근거 자료에 연결된 파일 목록
      */
     fun findAllByEvidenceId(evidenceId: Long): List<File>
+
+    fun findAllByEvidenceIdIn(evidenceIds: Collection<Long>): List<File>
 
     /**
      * 특정 사용자가 업로드한 모든 파일을 조회한다.
@@ -71,6 +75,8 @@ interface FilePersistencePort {
      * @param fileId 연결을 해제할 파일 ID
      */
     fun unlinkFromEvidence(fileId: Long)
+
+    fun unlinkAllFromEvidence(evidenceId: Long)
 
     /**
      * 파일을 점수 요청에 직접 연결한다(score FK 갈아끼움). [team.incube.gsmc.domain.category.EvidenceType.FILE]

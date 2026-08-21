@@ -1,6 +1,9 @@
 type File {
     fileId: ID!
     userId: ID!
+    id: ID!
+    originalName: String!
+    uri: String!
     fileUrl: String
     fileOriginalName: String
     fileStoredName: String
