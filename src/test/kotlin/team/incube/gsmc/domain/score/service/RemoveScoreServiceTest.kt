@@ -9,6 +9,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import team.incube.gsmc.domain.alert.port.out.AlertPersistencePort
 import team.incube.gsmc.domain.category.Category
 import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.category.EvidenceType
@@ -28,8 +29,9 @@ class RemoveScoreServiceTest :
     BehaviorSpec({
         val scorePersistencePort = mockk<ScorePersistencePort>()
         val filePersistencePort = mockk<FilePersistencePort>()
+        val alertPersistencePort = mockk<AlertPersistencePort>()
         val memberUtil = mockk<MemberUtil>()
-        val service = RemoveScoreService(scorePersistencePort, filePersistencePort, memberUtil)
+        val service = RemoveScoreService(scorePersistencePort, filePersistencePort, alertPersistencePort, memberUtil)
 
         beforeEach { clearAllMocks() }
 
@@ -62,14 +64,16 @@ class RemoveScoreServiceTest :
 
         Given("교사 이상 권한으로") {
             When("이미 승인된 점수를 삭제해도") {
-                Then("상태와 무관하게 삭제된다") {
+                Then("상태와 무관하게 삭제되고, 이 점수를 참조하는 알림의 연결을 해제한다") {
                     every { memberUtil.getCurrentUserRole() } returns UserRole.TEACHER
                     every { scorePersistencePort.findById(1L) } returns approvedScore()
+                    every { alertPersistencePort.unlinkAllByScoreId(1L) } just runs
                     every { scorePersistencePort.deleteById(1L) } just runs
 
                     val result = service.execute(1L)
 
                     result shouldBe true
+                    verify(exactly = 1) { alertPersistencePort.unlinkAllByScoreId(1L) }
                     verify(exactly = 1) { scorePersistencePort.deleteById(1L) }
                     verify(exactly = 0) { filePersistencePort.unlinkFromScore(any()) }
                 }
@@ -81,12 +85,14 @@ class RemoveScoreServiceTest :
                     every { memberUtil.getCurrentUserRole() } returns UserRole.TEACHER
                     every { scorePersistencePort.findById(1L) } returns approvedScore(file)
                     every { filePersistencePort.unlinkFromScore(15L) } just runs
+                    every { alertPersistencePort.unlinkAllByScoreId(1L) } just runs
                     every { scorePersistencePort.deleteById(1L) } just runs
 
                     val result = service.execute(1L)
 
                     result shouldBe true
                     verify(exactly = 1) { filePersistencePort.unlinkFromScore(15L) }
+                    verify(exactly = 1) { alertPersistencePort.unlinkAllByScoreId(1L) }
                     verify(exactly = 1) { scorePersistencePort.deleteById(1L) }
                 }
             }
@@ -100,6 +106,7 @@ class RemoveScoreServiceTest :
 
                     exception.errorCode shouldBe ErrorCode.SCORE_NOT_FOUND
                     verify(exactly = 0) { scorePersistencePort.deleteById(any()) }
+                    verify(exactly = 0) { alertPersistencePort.unlinkAllByScoreId(any()) }
                 }
             }
         }
