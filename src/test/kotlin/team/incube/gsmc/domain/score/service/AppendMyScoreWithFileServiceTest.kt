@@ -29,16 +29,21 @@ class AppendMyScoreWithFileServiceTest :
         val appendScoreSupport = mockk<AppendScoreSupport>()
         val scorePersistencePort = mockk<ScorePersistencePort>()
         val filePersistencePort = mockk<FilePersistencePort>()
+        val scoreTotalCacheInvalidator = mockk<ScoreTotalCacheInvalidator>()
         val memberUtil = mockk<MemberUtil>()
         val service =
             AppendMyScoreWithFileService(
                 appendScoreSupport = appendScoreSupport,
                 scorePersistencePort = scorePersistencePort,
                 filePersistencePort = filePersistencePort,
+                scoreTotalCacheInvalidator = scoreTotalCacheInvalidator,
                 memberUtil = memberUtil,
             )
 
-        beforeEach { clearAllMocks() }
+        beforeEach {
+            clearAllMocks()
+            every { scoreTotalCacheInvalidator.invalidate(any()) } just runs
+        }
 
         val userId = 1L
 

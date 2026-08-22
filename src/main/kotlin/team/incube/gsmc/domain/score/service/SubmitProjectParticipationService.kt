@@ -27,7 +27,8 @@ private const val MINIMUM_PARTICIPANT_COUNT = 2
  * 프로젝트 참여 개인 제출 유스케이스 구현 클래스입니다.
  * [SubmitProjectParticipationUseCase]를 구현하며, 학생(STUDENT)만 호출을 허용합니다. 제출 시점에
  * DataGSM을 재조회해 프로젝트 상태·참여자 여부·참여자 수를 검증하고, 기존 `REJECTED` 제출이 있으면
- * 그 근거 자료를 갈아끼워 재사용한다(§8.4 패턴을 dgProjectId 스코프로 확장).
+ * 그 근거 자료를 갈아끼워 재사용한다(§8.4 패턴을 dgProjectId 스코프로 확장). PENDING 상태로
+ * 저장되므로 해당 학생의 반/학년 백분위 캐시([ScoreTotalCacheInvalidator])를 무효화한다.
  */
 @Port(direction = PortDirection.INBOUND)
 class SubmitProjectParticipationService(
@@ -37,6 +38,7 @@ class SubmitProjectParticipationService(
     private val evidencePersistencePort: EvidencePersistencePort,
     private val filePersistencePort: FilePersistencePort,
     private val memberPersistencePort: MemberPersistencePort,
+    private val scoreTotalCacheInvalidator: ScoreTotalCacheInvalidator,
     private val memberUtil: MemberUtil,
 ) : SubmitProjectParticipationUseCase {
     @Transactional
@@ -128,14 +130,17 @@ class SubmitProjectParticipationService(
                 updatedAt = now,
             )
 
-        return scorePersistencePort.save(
-            base.copy(
-                evidence = evidence,
-                activityName = dgProject.name,
-                scoreStatus = ScoreStatus.PENDING,
-                rejectionReason = null,
-                dgProjectId = dgProjectId,
-            ),
-        )
+        val saved =
+            scorePersistencePort.save(
+                base.copy(
+                    evidence = evidence,
+                    activityName = dgProject.name,
+                    scoreStatus = ScoreStatus.PENDING,
+                    rejectionReason = null,
+                    dgProjectId = dgProjectId,
+                ),
+            )
+        scoreTotalCacheInvalidator.invalidate(userId)
+        return saved
     }
 }

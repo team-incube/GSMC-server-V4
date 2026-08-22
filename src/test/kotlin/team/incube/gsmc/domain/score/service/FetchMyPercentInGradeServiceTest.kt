@@ -5,7 +5,10 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.verify
 import team.incube.gsmc.domain.category.Category
 import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.category.EvidenceType
@@ -15,6 +18,7 @@ import team.incube.gsmc.domain.score.Score
 import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.score.port.out.MemberPersistencePort
 import team.incube.gsmc.domain.score.port.out.ScorePersistencePort
+import team.incube.gsmc.domain.score.port.out.ScoreTotalCachePort
 import team.incube.gsmc.domain.user.User
 import team.incube.gsmc.domain.user.UserRole
 import team.incube.gsmc.global.exception.ErrorCode
@@ -26,10 +30,16 @@ class FetchMyPercentInGradeServiceTest :
     BehaviorSpec({
         val scorePersistencePort = mockk<ScorePersistencePort>()
         val memberPersistencePort = mockk<MemberPersistencePort>()
+        val scoreTotalCachePort = mockk<ScoreTotalCachePort>()
         val memberUtil = mockk<MemberUtil>()
-        val service = FetchMyPercentInGradeService(scorePersistencePort, memberPersistencePort, memberUtil)
+        val service =
+            FetchMyPercentInGradeService(scorePersistencePort, memberPersistencePort, scoreTotalCachePort, memberUtil)
 
-        beforeEach { clearAllMocks() }
+        beforeEach {
+            clearAllMocks()
+            every { scoreTotalCachePort.findGradeTotals(any(), any()) } returns null
+            every { scoreTotalCachePort.saveGradeTotals(any(), any(), any()) } just runs
+        }
 
         fun percentileOf(
             topPercentile: Int,
@@ -207,6 +217,42 @@ class FetchMyPercentInGradeServiceTest :
 
                     val exception = shouldThrow<GsmcException> { service.execute(true) }
                     exception.errorCode shouldBe ErrorCode.FORBIDDEN
+                }
+            }
+        }
+
+        Given("학년 전체 총점이 이미 캐싱되어 있을 때") {
+            When("캐시에 내 userId가 포함되어 있으면") {
+                Then("점수를 다시 조회하지 않고 캐시된 값으로 백분위를 계산한다") {
+                    every { memberUtil.getCurrentUserId() } returns 1L
+                    every { memberUtil.getCurrentUserRole() } returns UserRole.STUDENT
+                    every { memberPersistencePort.findByUserId(1L) } returns userOf(1L, 2, UserRole.STUDENT)
+                    every { scoreTotalCachePort.findGradeTotals(2, true) } returns
+                        mapOf(1L to 2, 2L to 1, 3L to 4, 4L to 3)
+
+                    val result = service.execute(true)
+
+                    result shouldBe percentileOf(50, 75)
+                    verify(exactly = 0) { scorePersistencePort.findAllByUserIdIn(any()) }
+                    verify(exactly = 0) { memberPersistencePort.findAllStudentsByUserGrade(any()) }
+                }
+            }
+
+            When("캐시에 내 userId가 없으면") {
+                Then("캐시 미스로 간주하고 다시 계산한다") {
+                    val gradeMates = listOf(userOf(2L, 2, UserRole.STUDENT))
+                    val allScores = listOf(scoreOf(1L, ScoreStatus.APPROVED, CategoryType.TOEIC))
+
+                    every { memberUtil.getCurrentUserId() } returns 1L
+                    every { memberUtil.getCurrentUserRole() } returns UserRole.STUDENT
+                    every { memberPersistencePort.findByUserId(1L) } returns userOf(1L, 2, UserRole.STUDENT)
+                    every { scoreTotalCachePort.findGradeTotals(2, true) } returns mapOf(2L to 1)
+                    every { memberPersistencePort.findAllStudentsByUserGrade(2) } returns gradeMates
+                    every { scorePersistencePort.findAllByUserIdIn(any()) } returns allScores
+
+                    val result = service.execute(true)
+
+                    result shouldBe percentileOf(100, 50)
                 }
             }
         }
