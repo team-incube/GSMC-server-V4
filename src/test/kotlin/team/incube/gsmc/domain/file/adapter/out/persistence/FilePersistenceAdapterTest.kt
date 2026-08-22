@@ -98,6 +98,32 @@ class FilePersistenceAdapterTest :
             }
         }
 
+        Given("findAllByIdIn으로 배치 조회할 때") {
+            When("여러 파일 ID를 조회하면") {
+                Then("Repository를 한 번 호출하고 파일 목록을 반환한다") {
+                    every { fileJpaRepository.findAllByFileIdIn(setOf(10L, 11L)) } returns
+                        listOf(entity(10L), entity(11L))
+
+                    val result = adapter.findAllByIdIn(setOf(10L, 11L))
+
+                    result.map { it.fileId } shouldBe listOf(10L, 11L)
+                    verify(exactly = 1) { fileJpaRepository.findAllByFileIdIn(setOf(10L, 11L)) }
+                }
+            }
+        }
+
+        Given("unlinkAllFromEvidence로 연결을 해제할 때") {
+            When("Evidence ID를 전달하면") {
+                Then("일괄 해제를 Repository에 위임한다") {
+                    every { fileJpaRepository.unlinkAllFromEvidence(5L) } returns 2
+
+                    adapter.unlinkAllFromEvidence(5L)
+
+                    verify(exactly = 1) { fileJpaRepository.unlinkAllFromEvidence(5L) }
+                }
+            }
+        }
+
         Given("findAllByUserId로 조회할 때") {
             When("업로드한 파일이 여러 건 있으면") {
                 Then("모두 도메인 객체 목록으로 변환해 반환한다") {

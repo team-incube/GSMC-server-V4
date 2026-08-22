@@ -14,6 +14,10 @@ interface EvidencePersistencePort {
      */
     fun findById(evidenceId: Long): Evidence?
 
+    fun findAllByUserId(userId: Long): List<Evidence>
+
+    fun findDraftByUserId(userId: Long): Evidence?
+
     /**
      * 근거 자료를 저장한다. [evidence]의 evidenceId가 기존 근거 자료의 ID와 같으면 값을 갈아끼우고(update),
      * 0이면 새로 생성한다(insert).
@@ -22,4 +26,6 @@ interface EvidencePersistencePort {
      * @return 저장된 근거 자료 도메인 객체
      */
     fun save(evidence: Evidence): Evidence
+
+    fun deleteById(evidenceId: Long)
 }
