@@ -41,6 +41,9 @@ class EvidenceJpaEntity(
     /** 근거 자료 내용 */
     @Column(name = "evidence_content", nullable = false, columnDefinition = "TEXT")
     val evidenceContent: String,
+    /** 임시저장 여부 */
+    @Column(name = "is_draft", nullable = false)
+    val isDraft: Boolean = false,
 ) {
     /** 최초 등록 일시 */
     @CreatedDate

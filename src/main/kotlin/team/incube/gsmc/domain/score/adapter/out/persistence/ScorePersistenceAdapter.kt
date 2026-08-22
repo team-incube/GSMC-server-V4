@@ -173,6 +173,10 @@ class ScorePersistenceAdapter(
         scoreJpaRepository.deleteById(scoreId)
     }
 
+    override fun unlinkEvidence(evidenceId: Long) {
+        scoreJpaRepository.unlinkEvidence(evidenceId)
+    }
+
     private fun findFileByScoreId(scoreId: Long) =
         queryFactory
             .selectFrom(fileJpaEntity)

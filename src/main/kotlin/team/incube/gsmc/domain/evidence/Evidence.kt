@@ -1,5 +1,6 @@
 package team.incube.gsmc.domain.evidence
 
+import team.incube.gsmc.domain.file.File
 import java.time.LocalDateTime
 
 /**
@@ -22,4 +23,18 @@ data class Evidence(
     val evidenceContent: String,
     val evidenceCreatedAt: LocalDateTime?,
     val evidenceUpdatedAt: LocalDateTime?,
-)
+    val isDraft: Boolean = false,
+    val files: List<File> = emptyList(),
+) {
+    val title: String
+        get() = evidenceTitle
+
+    val content: String
+        get() = evidenceContent
+
+    val createdAt: LocalDateTime?
+        get() = evidenceCreatedAt
+
+    val updatedAt: LocalDateTime?
+        get() = evidenceUpdatedAt
+}

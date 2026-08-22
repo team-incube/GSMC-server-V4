@@ -16,6 +16,8 @@ fun FileJpaEntity.toDomain(): File =
         fileKey = fileKey,
         fileOriginalName = fileOriginalName,
         fileStoredName = fileStoredName,
+        scoreId = score?.scoreId,
+        evidenceId = evidence?.evidenceId,
     )
 
 /**

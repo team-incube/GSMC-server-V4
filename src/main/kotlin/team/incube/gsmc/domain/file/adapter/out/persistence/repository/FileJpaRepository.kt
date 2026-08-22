@@ -1,6 +1,9 @@
 package team.incube.gsmc.domain.file.adapter.out.persistence.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.FileJpaEntity
 import team.incube.gsmc.domain.score.ScoreStatus
 
@@ -8,6 +11,8 @@ import team.incube.gsmc.domain.score.ScoreStatus
  * 업로드 파일에 대한 JPA 기반 저장소 인터페이스입니다.
  */
 interface FileJpaRepository : JpaRepository<FileJpaEntity, Long> {
+    fun findAllByFileIdIn(fileIds: Collection<Long>): List<FileJpaEntity>
+
     /**
      * 오브젝트 스토리지 key로 파일 엔티티를 조회한다.
      *
@@ -23,6 +28,8 @@ interface FileJpaRepository : JpaRepository<FileJpaEntity, Long> {
      * @return 해당 근거 자료에 연결된 파일 엔티티 목록
      */
     fun findAllByEvidenceEvidenceId(evidenceId: Long): List<FileJpaEntity>
+
+    fun findAllByEvidenceEvidenceIdIn(evidenceIds: Collection<Long>): List<FileJpaEntity>
 
     /**
      * 특정 사용자가 업로드한 모든 파일 엔티티를 조회한다.
@@ -43,4 +50,10 @@ interface FileJpaRepository : JpaRepository<FileJpaEntity, Long> {
         fileId: Long,
         scoreStatus: ScoreStatus,
     ): Boolean
+
+    @Modifying
+    @Query("update FileJpaEntity f set f.evidence = null where f.evidence.evidenceId = :evidenceId")
+    fun unlinkAllFromEvidence(
+        @Param("evidenceId") evidenceId: Long,
+    ): Int
 }
