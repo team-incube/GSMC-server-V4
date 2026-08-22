@@ -1,10 +1,12 @@
 package team.incube.gsmc.domain.score.service
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.springframework.core.task.TaskRejectedException
 import org.springframework.scheduling.TaskScheduler
 import team.incube.gsmc.domain.score.port.out.MemberPersistencePort
 import team.incube.gsmc.domain.score.port.out.ScoreTotalCachePort
@@ -123,6 +125,18 @@ class ScoreTotalCacheInvalidatorTest :
                     invalidator.invalidate(1L)
 
                     verify(exactly = 1) { taskScheduler.schedule(any(), any<Instant>()) }
+                }
+            }
+        }
+
+        Given("무효화 스케줄링 중 예외가 발생할 때") {
+            When("TaskScheduler가 스케줄을 거부하면(예: 셧다운 중)") {
+                Then("예외를 밖으로 던지지 않고 삼킨다") {
+                    every { memberPersistencePort.findByUserId(1L) } returns studentOf(1L, 2, 3)
+                    every { taskScheduler.schedule(any(), any<Instant>()) } throws
+                        TaskRejectedException("scheduler is shutting down")
+
+                    shouldNotThrowAny { invalidator.invalidate(1L) }
                 }
             }
         }

@@ -1,5 +1,6 @@
 package team.incube.gsmc.domain.score.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 import team.incube.gsmc.domain.score.port.out.MemberPersistencePort
@@ -21,6 +22,11 @@ import java.util.concurrent.ScheduledFuture
  * 예약하지 않고 이미 예약된 한 번의 무효화에 묶는다(디바운스). [TaskScheduler]는 단일 인스턴스
  * 기준으로 동작하므로, 이 서비스가 여러 인스턴스로 스케일아웃되면 인스턴스별로 최대 1회씩 무효화될
  * 수 있으나 여전히 요청당 1회보다는 훨씬 적고, 5분 TTL이 최종 안전장치로 남아있다.
+ *
+ * 캐시 무효화는 순수 성능 최적화이고 5분 TTL이 최종 안전장치로 남아있으므로, 무효화 도중 예외(예:
+ * TaskScheduler가 셧다운 중이라 스케줄을 거부하는 경우)가 나더라도 로그만 남기고 삼킨다. 이 메서드는
+ * 점수 승인/거절/삭제/추가 서비스의 `@Transactional` 메서드 안에서 호출되므로, 여기서 예외가
+ * 새어나가면 캐시 문제로 점수 상태 변경 자체가 롤백되는 것을 막기 위함이다.
  */
 @Component
 class ScoreTotalCacheInvalidator(
@@ -30,17 +36,20 @@ class ScoreTotalCacheInvalidator(
 ) {
     companion object {
         private val DEBOUNCE_DELAY: Duration = Duration.ofSeconds(5)
+        private val log = LoggerFactory.getLogger(ScoreTotalCacheInvalidator::class.java)
     }
 
     private val pendingGradeEvictions = ConcurrentHashMap<Int, ScheduledFuture<*>>()
     private val pendingClassEvictions = ConcurrentHashMap<String, ScheduledFuture<*>>()
 
     fun invalidate(userId: Long) {
-        val member = memberPersistencePort.findByUserId(userId) ?: return
-        val userGrade = member.userGrade ?: return
+        runCatching {
+            val member = memberPersistencePort.findByUserId(userId) ?: return@runCatching
+            val userGrade = member.userGrade ?: return@runCatching
 
-        debounceGradeEviction(userGrade)
-        member.userClassNumber?.let { debounceClassEviction(userGrade, it) }
+            debounceGradeEviction(userGrade)
+            member.userClassNumber?.let { debounceClassEviction(userGrade, it) }
+        }.onFailure { log.warn("반/학년 백분위 캐시 무효화 실패 (userId={})", userId, it) }
     }
 
     private fun debounceGradeEviction(userGrade: Int) {
