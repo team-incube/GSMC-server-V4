@@ -3,6 +3,7 @@ package team.incube.gsmc.global.security.filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.MDC
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
@@ -23,8 +24,13 @@ class JwtAuthenticationFilter(
                 val userDetails = CustomUserDetails(userId, role)
                 SecurityContextHolder.getContext().authentication =
                     UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+                MDC.put(MDC_USER_ID_KEY, userId.toString())
             }
-        filterChain.doFilter(request, response)
+        try {
+            filterChain.doFilter(request, response)
+        } finally {
+            MDC.remove(MDC_USER_ID_KEY)
+        }
     }
 
     private fun extractToken(request: HttpServletRequest): String? =
@@ -32,4 +38,8 @@ class JwtAuthenticationFilter(
             .getHeader("Authorization")
             ?.takeIf { it.startsWith("Bearer ") }
             ?.substring(7)
+
+    companion object {
+        private const val MDC_USER_ID_KEY = "userId"
+    }
 }

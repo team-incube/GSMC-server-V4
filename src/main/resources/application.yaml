@@ -28,6 +28,10 @@ spring:
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
+logging:
+  pattern:
+    level: "%5p [userId=%X{userId:-anonymous}]"
+
 sse:
   heartbeat-interval: 30000
   emitter-timeout: 1800000
