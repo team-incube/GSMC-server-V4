@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
  * 점수 변경 시점마다 무효화되지만, 무효화를 놓치는 경로에 대한 안전장치로 짧은 TTL을 함께 둔다.
  */
 @Adapter(direction = PortDirection.OUTBOUND)
-class ScoreTotalCacheRedisAdapter(
+class ScoreTotalCachePersistenceAdapter(
     private val redisTemplate: RedisTemplate<String, String>,
     private val objectMapper: ObjectMapper,
 ) : ScoreTotalCachePort {
