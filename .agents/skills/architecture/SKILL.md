@@ -59,3 +59,36 @@ fun {Domain}.toEntity() = {Domain}JpaEntity(...)
 | PersistenceAdapter | `{Domain}PersistenceAdapter` |
 | JpaEntity | `{Domain}JpaEntity` |
 | JpaRepository | `{Domain}JpaRepository` |
+
+## Developer-only APIs (`developer` domain)
+
+The `developer` domain contains administrator-only operations that modify
+**another member's** data. It is separate from the `member` domain, which
+handles operations a member performs on their own data.
+
+### Naming exception
+
+In the naming table above, `{Domain}` normally matches the package name.
+For `developer`, inbound ports and services are named after the **target**
+being operated on, not the package.
+
+| Layer | Correct | Wrong |
+|-------|---------|-------|
+| UseCase | `ModifyMemberSchoolInfoUseCase` | `ModifyDeveloperUseCase` |
+| Service | `ModifyMemberSchoolInfoService` | `ModifyDeveloperService` |
+| WebAdapter | `DeveloperWebAdapter` | `MemberWebAdapter` |
+| PersistencePort | `DeveloperPersistencePort` | `MemberPersistencePort` |
+
+Rule of thumb: **ports/services facing inward use the target (`Member`);
+adapters and outbound ports use the package (`Developer`).**
+
+### Rules
+
+- Verify the caller's role at the start of the service method.
+  `UserRole.ROOT` is required; throw `GsmcException(ErrorCode.FORBIDDEN)` otherwise.
+- Do **not** use the `My` keyword. `SecurityContextHolder` identifies the
+  *caller* here, not the target. `My` is reserved for self-service operations.
+- Look up the target explicitly and throw `GsmcException(ErrorCode.USER_NOT_FOUND)`
+  when absent. Unhandled exceptions fall through `GsmcExceptionResolver` as 500.
+- Validate uniqueness by querying first. Do not rely on DB unique constraints
+  alone — `DataIntegrityViolationException` is not a `GsmcException`.

@@ -39,6 +39,19 @@ throw GsmcException(ErrorCode.UNAUTHORIZED)
 through as a 500 response, so throw `GsmcException` explicitly instead of relying
 on DB constraints or framework exceptions.
 
+## Skill Documents
+
+This repository keeps two skill trees with the same rules:
+
+- `.claude/skills/` — read by Claude Code
+- `.agents/skills/` — read by Codex
+
+Both must be updated together when a rule changes. If they diverge,
+`.claude/skills/` is the reference.
+
+Some files exist in only one tree (`convention-validator`, `issue-parser` in
+`.agents/` only). Reconciling those is tracked separately.
+
 ## Architecture
 
 Hexagonal Architecture. See `.claude/skills/architecture/SKILL.md` for details.
