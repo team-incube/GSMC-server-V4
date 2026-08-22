@@ -13,7 +13,7 @@ import team.incube.gsmc.global.annotation.adapter.Adapter
  * [MemberPersistencePort]를 구현하며, [ScoreUserJpaRepository]를 통해 JPA에 실제 처리를 위임합니다.
  */
 @Adapter(direction = PortDirection.OUTBOUND)
-class MemberPersistenceAdapter(
+class ScoreMemberPersistenceAdapter(
     private val userJpaRepository: ScoreUserJpaRepository,
 ) : MemberPersistencePort {
     override fun findByUserId(userId: Long): User? = userJpaRepository.findById(userId).orElse(null)?.toDomain()
