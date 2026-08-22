@@ -23,10 +23,14 @@ import java.util.concurrent.ScheduledFuture
  * 기준으로 동작하므로, 이 서비스가 여러 인스턴스로 스케일아웃되면 인스턴스별로 최대 1회씩 무효화될
  * 수 있으나 여전히 요청당 1회보다는 훨씬 적고, 5분 TTL이 최종 안전장치로 남아있다.
  *
- * 캐시 무효화는 순수 성능 최적화이고 5분 TTL이 최종 안전장치로 남아있으므로, 무효화 도중 예외(예:
- * TaskScheduler가 셧다운 중이라 스케줄을 거부하는 경우)가 나더라도 로그만 남기고 삼킨다. 이 메서드는
- * 점수 승인/거절/삭제/추가 서비스의 `@Transactional` 메서드 안에서 호출되므로, 여기서 예외가
- * 새어나가면 캐시 문제로 점수 상태 변경 자체가 롤백되는 것을 막기 위함이다.
+ * 캐시 무효화는 순수 성능 최적화이고 5분 TTL이 최종 안전장치로 남아있으므로, 예외가 나더라도 로그만
+ * 남기고 삼킨다. [invalidate]가 던지는 예외(예: TaskScheduler가 셧다운 중이라 스케줄 자체를 거부하는
+ * 경우)를 삼키는 이유는, 이 메서드가 점수 승인/거절/삭제/추가 서비스의 `@Transactional` 메서드 안에서
+ * 호출되어 여기서 예외가 새어나가면 캐시 문제로 점수 상태 변경 자체가 롤백되기 때문이다. 예약된
+ * Runnable 내부(실제 [ScoreTotalCachePort] 무효화 호출)의 예외도 별도로 삼키는데, 그러지 않으면
+ * `pendingGradeEvictions`/`pendingClassEvictions`에서 해당 키가 제거되지 않아 그 학년/반의 무효화가
+ * 프로세스 재시작 전까지 영구히 멈추기 때문이다(Redis 순단 등으로 한 번 실행이 실패해도 다음 쓰기부터는
+ * 다시 정상적으로 디바운스·무효화되어야 한다).
  */
 @Component
 class ScoreTotalCacheInvalidator(
@@ -56,8 +60,13 @@ class ScoreTotalCacheInvalidator(
         pendingGradeEvictions.computeIfAbsent(userGrade) {
             taskScheduler.schedule(
                 {
-                    scoreTotalCachePort.evictGradeTotals(userGrade)
-                    pendingGradeEvictions.remove(userGrade)
+                    try {
+                        scoreTotalCachePort.evictGradeTotals(userGrade)
+                    } catch (e: Exception) {
+                        log.warn("학년 백분위 캐시 무효화 실행 실패 (userGrade={})", userGrade, e)
+                    } finally {
+                        pendingGradeEvictions.remove(userGrade)
+                    }
                 },
                 Instant.now().plus(DEBOUNCE_DELAY),
             )
@@ -72,8 +81,13 @@ class ScoreTotalCacheInvalidator(
         pendingClassEvictions.computeIfAbsent(key) {
             taskScheduler.schedule(
                 {
-                    scoreTotalCachePort.evictClassTotals(userGrade, userClassNumber)
-                    pendingClassEvictions.remove(key)
+                    try {
+                        scoreTotalCachePort.evictClassTotals(userGrade, userClassNumber)
+                    } catch (e: Exception) {
+                        log.warn("반 백분위 캐시 무효화 실행 실패 (userGrade={}, userClassNumber={})", userGrade, userClassNumber, e)
+                    } finally {
+                        pendingClassEvictions.remove(key)
+                    }
                 },
                 Instant.now().plus(DEBOUNCE_DELAY),
             )

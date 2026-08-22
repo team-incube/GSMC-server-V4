@@ -140,4 +140,23 @@ class ScoreTotalCacheInvalidatorTest :
                 }
             }
         }
+
+        Given("예약된 무효화 작업 실행 중 캐시 어댑터가 예외를 던질 때") {
+            When("디바운스 창이 지나 Runnable이 실행되면") {
+                Then("예외를 삼키고도 pending 상태에서 제거되어 다음 쓰기는 다시 정상 예약된다") {
+                    every { memberPersistencePort.findByUserId(1L) } returns studentOf(1L, 2, 3)
+                    every { scoreTotalCachePort.evictGradeTotals(2) } throws RuntimeException("redis timeout")
+                    every { scoreTotalCachePort.evictClassTotals(2, 3) } throws RuntimeException("redis timeout")
+                    val tasks = captureScheduledTasks()
+
+                    invalidator.invalidate(1L)
+
+                    shouldNotThrowAny { tasks.forEach { it.run() } }
+
+                    invalidator.invalidate(1L)
+
+                    verify(exactly = 4) { taskScheduler.schedule(any(), any<Instant>()) }
+                }
+            }
+        }
     })
