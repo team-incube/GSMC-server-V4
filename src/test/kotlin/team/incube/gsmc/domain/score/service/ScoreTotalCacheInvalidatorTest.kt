@@ -2,9 +2,11 @@ package team.incube.gsmc.domain.score.service
 
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.springframework.core.task.TaskRejectedException
 import org.springframework.scheduling.TaskScheduler
@@ -12,6 +14,7 @@ import team.incube.gsmc.domain.score.port.out.MemberPersistencePort
 import team.incube.gsmc.domain.score.port.out.ScoreTotalCachePort
 import team.incube.gsmc.domain.user.User
 import team.incube.gsmc.domain.user.UserRole
+import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ScheduledFuture
 
@@ -125,6 +128,24 @@ class ScoreTotalCacheInvalidatorTest :
                     invalidator.invalidate(1L)
 
                     verify(exactly = 1) { taskScheduler.schedule(any(), any<Instant>()) }
+                }
+            }
+        }
+
+        Given("점수 변경으로 무효화가 예약될 때") {
+            When("invalidate를 호출하면") {
+                Then("문서화된 eventual consistency 허용 범위(5초) 뒤로 스케줄된다") {
+                    every { memberPersistencePort.findByUserId(1L) } returns studentOf(1L, 2, 3)
+                    val scheduledAt = slot<Instant>()
+                    every { taskScheduler.schedule(any(), capture(scheduledAt)) } returns mockk<ScheduledFuture<*>>()
+
+                    val before = Instant.now()
+                    invalidator.invalidate(1L)
+                    val after = Instant.now()
+
+                    val delay = Duration.between(before, scheduledAt.captured)
+                    val maxDelay = Duration.between(before, after).plus(Duration.ofSeconds(5))
+                    (delay >= Duration.ofSeconds(5) && delay <= maxDelay) shouldBe true
                 }
             }
         }
