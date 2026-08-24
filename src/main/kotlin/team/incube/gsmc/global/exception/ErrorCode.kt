@@ -56,3 +56,4 @@ enum class ErrorCode(
     // 개발자
     INVALID_SCHOOL_INFO(HttpStatus.BAD_REQUEST, "학적 정보(학년·반·번호)가 올바르지 않습니다.", "BAD_REQUEST"),
     USER_HAS_RELATED_DATA(HttpStatus.CONFLICT, "관련 데이터가 있는 사용자는 삭제할 수 없습니다.", "CONFLICT"),
+}
