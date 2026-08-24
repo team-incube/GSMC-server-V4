@@ -6,28 +6,32 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import team.incube.gsmc.domain.developer.port.`in`.ModifyMemberRoleUseCase
 import team.incube.gsmc.domain.developer.port.`in`.ModifyMemberSchoolInfoUseCase
+import team.incube.gsmc.domain.user.UserRole
 
 class DeveloperWebAdapterTest :
     BehaviorSpec({
         val modifyMemberSchoolInfoUseCase = mockk<ModifyMemberSchoolInfoUseCase>()
+        val modifyMemberRoleUseCase = mockk<ModifyMemberRoleUseCase>()
         val webAdapter =
             DeveloperWebAdapter(
                 modifyMemberSchoolInfoUseCase = modifyMemberSchoolInfoUseCase,
+                modifyMemberRoleUseCase = modifyMemberRoleUseCase,
             )
 
         beforeEach { clearAllMocks() }
 
-        Given("patchMemberSchoolInfo 뮤테이션을 호출할 때") {
-            When("변경할 학적정보를 담은 input을 전달하면") {
-                Then("ModifyMemberSchoolInfoUseCase에 값을 그대로 위임한 결과를 반환한다") {
-                    val input = PatchMemberSchoolInfoInput(memberId = 10L, grade = 2, classNumber = 3, number = 15)
-                    every { modifyMemberSchoolInfoUseCase.execute(10L, 2, 3, 15) } returns true
+        Given("patchMemberRole 뮤테이션을 호출할 때") {
+            When("변경할 역할을 담은 input을 전달하면") {
+                Then("ModifyMemberRoleUseCase에 값을 그대로 위임한 결과를 반환한다") {
+                    val input = PatchMemberRoleInput(email = "student@gsm.hs.kr", role = UserRole.TEACHER)
+                    every { modifyMemberRoleUseCase.execute("student@gsm.hs.kr", UserRole.TEACHER) } returns true
 
-                    val result = webAdapter.patchMemberSchoolInfo(input)
+                    val result = webAdapter.patchMemberRole(input)
 
                     result shouldBe true
-                    verify(exactly = 1) { modifyMemberSchoolInfoUseCase.execute(10L, 2, 3, 15) }
+                    verify(exactly = 1) { modifyMemberRoleUseCase.execute("student@gsm.hs.kr", UserRole.TEACHER) }
                 }
             }
         }

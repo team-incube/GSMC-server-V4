@@ -27,4 +27,12 @@ interface DeveloperUserJpaRepository : JpaRepository<UserJpaEntity, Long> {
         userClassNumber: Int,
         userNumber: Int,
     ): UserJpaEntity?
+
+    /**
+     * 이메일로 사용자 엔티티를 조회한다.
+     *
+     * @param userEmail 조회할 이메일
+     * @return 해당 이메일을 가진 사용자 엔티티, 없으면 null
+     */
+    fun findByUserEmail(userEmail: String): UserJpaEntity?
 }

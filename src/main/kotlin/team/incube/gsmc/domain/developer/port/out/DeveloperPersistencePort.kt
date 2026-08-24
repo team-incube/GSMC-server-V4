@@ -37,4 +37,12 @@ interface DeveloperPersistencePort {
      * @return 저장된 사용자 도메인 객체
      */
     fun save(user: User): User
+
+    /**
+     * 이메일로 사용자를 조회한다.
+     *
+     * @param email 조회할 사용자의 이메일
+     * @return 해당 사용자, 없으면 null
+     */
+    fun findByEmail(email: String): User?
 }

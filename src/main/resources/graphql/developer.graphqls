@@ -7,4 +7,10 @@ input PatchMemberSchoolInfoInput {
 
 extend type Mutation {
     patchMemberSchoolInfo(input: PatchMemberSchoolInfoInput!): Boolean!
+    patchMemberRole(input: PatchMemberRoleInput!): Boolean!
+}
+
+input PatchMemberRoleInput {
+    email: String!
+    role: UserRole!
 }

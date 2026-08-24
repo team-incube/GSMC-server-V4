@@ -3,6 +3,7 @@ package team.incube.gsmc.domain.developer.adapter.out.persistence
 import team.incube.gsmc.domain.developer.adapter.out.persistence.repository.DeveloperUserJpaRepository
 import team.incube.gsmc.domain.developer.port.out.DeveloperPersistencePort
 import team.incube.gsmc.domain.user.User
+import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.toDomain
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.toEntity
 import team.incube.gsmc.global.annotation.PortDirection
@@ -26,6 +27,11 @@ class DeveloperPersistenceAdapter(
     ): User? =
         developerUserJpaRepository
             .findByUserGradeAndUserClassNumberAndUserNumber(grade, classNumber, number)
+            ?.toDomain()
+
+    override fun findByEmail(email: String): User? =
+        developerUserJpaRepository
+            .findByUserEmail(email)
             ?.toDomain()
 
     override fun save(user: User): User = developerUserJpaRepository.save(user.toEntity()).toDomain()
