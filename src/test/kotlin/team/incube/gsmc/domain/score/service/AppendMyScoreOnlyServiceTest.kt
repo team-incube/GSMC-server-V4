@@ -4,7 +4,9 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import team.incube.gsmc.domain.category.Category
 import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.category.EvidenceType
@@ -19,15 +21,20 @@ class AppendMyScoreOnlyServiceTest :
     BehaviorSpec({
         val appendScoreSupport = mockk<AppendScoreSupport>()
         val scorePersistencePort = mockk<ScorePersistencePort>()
+        val scoreTotalCacheInvalidator = mockk<ScoreTotalCacheInvalidator>()
         val memberUtil = mockk<MemberUtil>()
         val service =
             AppendMyScoreOnlyService(
                 appendScoreSupport = appendScoreSupport,
                 scorePersistencePort = scorePersistencePort,
+                scoreTotalCacheInvalidator = scoreTotalCacheInvalidator,
                 memberUtil = memberUtil,
             )
 
-        beforeEach { clearAllMocks() }
+        beforeEach {
+            clearAllMocks()
+            every { scoreTotalCacheInvalidator.invalidate(any()) } just runs
+        }
 
         val userId = 1L
         val category =

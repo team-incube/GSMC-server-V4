@@ -26,10 +26,22 @@ class FilePersistenceAdapter(
 ) : FilePersistencePort {
     override fun findById(fileId: Long): File? = fileJpaRepository.findById(fileId).orElse(null)?.toDomain()
 
+    override fun findAllByIdIn(fileIds: Collection<Long>): List<File> =
+        if (fileIds.isEmpty()) emptyList() else fileJpaRepository.findAllByFileIdIn(fileIds).map { it.toDomain() }
+
     override fun findByFileKey(fileKey: String): File? = fileJpaRepository.findByFileKey(fileKey)?.toDomain()
 
     override fun findAllByEvidenceId(evidenceId: Long): List<File> =
         fileJpaRepository.findAllByEvidenceEvidenceId(evidenceId).map { it.toDomain() }
+
+    override fun findAllByEvidenceIdIn(evidenceIds: Collection<Long>): List<File> =
+        if (evidenceIds.isEmpty()) {
+            emptyList()
+        } else {
+            fileJpaRepository.findAllByEvidenceEvidenceIdIn(evidenceIds).map {
+                it.toDomain()
+            }
+        }
 
     override fun findAllByUserId(userId: Long): List<File> =
         fileJpaRepository.findAllByUserUserId(userId).map { it.toDomain() }
@@ -55,6 +67,10 @@ class FilePersistenceAdapter(
     override fun unlinkFromEvidence(fileId: Long) {
         val entity = fileJpaRepository.findById(fileId).orElse(null) ?: return
         fileJpaRepository.save(entity.copy(evidence = null))
+    }
+
+    override fun unlinkAllFromEvidence(evidenceId: Long) {
+        fileJpaRepository.unlinkAllFromEvidence(evidenceId)
     }
 
     override fun linkToScore(

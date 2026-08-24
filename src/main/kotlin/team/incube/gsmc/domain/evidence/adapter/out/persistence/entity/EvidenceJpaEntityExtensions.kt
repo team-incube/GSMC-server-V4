@@ -17,6 +17,7 @@ fun EvidenceJpaEntity.toDomain(): Evidence =
         evidenceContent = evidenceContent,
         evidenceCreatedAt = evidenceCreatedAt,
         evidenceUpdatedAt = evidenceUpdatedAt,
+        isDraft = isDraft,
     )
 
 /**
@@ -34,4 +35,8 @@ fun Evidence.toEntity(user: UserJpaEntity): EvidenceJpaEntity =
         user = user,
         evidenceTitle = evidenceTitle,
         evidenceContent = evidenceContent,
-    )
+        isDraft = isDraft,
+    ).apply {
+        this.evidenceCreatedAt = this@toEntity.evidenceCreatedAt
+        this.evidenceUpdatedAt = this@toEntity.evidenceUpdatedAt
+    }

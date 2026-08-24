@@ -86,4 +86,6 @@ interface ScorePersistencePort {
      * @param scoreId 삭제할 점수 요청 ID
      */
     fun deleteById(scoreId: Long)
+
+    fun unlinkEvidence(evidenceId: Long)
 }

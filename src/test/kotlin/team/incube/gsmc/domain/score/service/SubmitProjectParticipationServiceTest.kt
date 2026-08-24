@@ -41,6 +41,7 @@ class SubmitProjectParticipationServiceTest :
         val evidencePersistencePort = mockk<EvidencePersistencePort>()
         val filePersistencePort = mockk<FilePersistencePort>()
         val memberPersistencePort = mockk<MemberPersistencePort>()
+        val scoreTotalCacheInvalidator = mockk<ScoreTotalCacheInvalidator>()
         val memberUtil = mockk<MemberUtil>()
         val service =
             SubmitProjectParticipationService(
@@ -50,10 +51,14 @@ class SubmitProjectParticipationServiceTest :
                 evidencePersistencePort = evidencePersistencePort,
                 filePersistencePort = filePersistencePort,
                 memberPersistencePort = memberPersistencePort,
+                scoreTotalCacheInvalidator = scoreTotalCacheInvalidator,
                 memberUtil = memberUtil,
             )
 
-        beforeEach { clearAllMocks() }
+        beforeEach {
+            clearAllMocks()
+            every { scoreTotalCacheInvalidator.invalidate(any()) } just runs
+        }
 
         val userId = 1L
         val dgProjectId = 100L

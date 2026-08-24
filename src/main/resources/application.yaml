@@ -28,12 +28,22 @@ spring:
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
+logging:
+  pattern:
+    level: "%5p [userId=%X{userId:-anonymous}]"
+
+sse:
+  heartbeat-interval: 30000
+  emitter-timeout: 1800000
+  max-connections-per-user: 5
+
 sdk:
   logging:
     enabled: true
     not-logging-urls:
       - "/graphiql/**"
       - "/graphql/**"
+      - "/api/alerts/stream"
   response:
     enabled: false
   swagger:

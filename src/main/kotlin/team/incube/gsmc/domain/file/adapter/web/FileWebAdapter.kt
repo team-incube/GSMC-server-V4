@@ -56,4 +56,7 @@ class FileWebAdapter(
 
     @SchemaMapping(typeName = "File", field = "fileUrl")
     fun fileUrl(file: File): String = generateFileAccessUrlUseCase.execute(file.fileKey)
+
+    @SchemaMapping(typeName = "File", field = "uri")
+    fun uri(file: File): String = generateFileAccessUrlUseCase.execute(file.fileKey)
 }
