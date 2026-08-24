@@ -5,6 +5,7 @@ import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.stereotype.Controller
 import team.incube.gsmc.domain.developer.port.`in`.ModifyMemberRoleUseCase
 import team.incube.gsmc.domain.developer.port.`in`.ModifyMemberSchoolInfoUseCase
+import team.incube.gsmc.domain.developer.port.`in`.RemoveMemberUseCase
 
 /**
  * 개발자 전용 GraphQL Mutation 리졸버입니다.
@@ -14,6 +15,7 @@ import team.incube.gsmc.domain.developer.port.`in`.ModifyMemberSchoolInfoUseCase
 class DeveloperWebAdapter(
     private val modifyMemberSchoolInfoUseCase: ModifyMemberSchoolInfoUseCase,
     private val modifyMemberRoleUseCase: ModifyMemberRoleUseCase,
+    private val removeMemberUseCase: RemoveMemberUseCase,
 ) {
     @MutationMapping
     fun patchMemberSchoolInfo(
@@ -24,4 +26,9 @@ class DeveloperWebAdapter(
     fun patchMemberRole(
         @Argument input: PatchMemberRoleInput,
     ): Boolean = modifyMemberRoleUseCase.execute(input.email, input.role)
+
+    @MutationMapping
+    fun deleteMember(
+        @Argument memberId: Long,
+    ): Boolean = removeMemberUseCase.execute(memberId)
 }

@@ -45,4 +45,19 @@ interface DeveloperPersistencePort {
      * @return 해당 사용자, 없으면 null
      */
     fun findByEmail(email: String): User?
+
+    /**
+     * 사용자에게 참조 데이터(근거 자료·점수·파일)가 하나라도 있는지 확인한다.
+     *
+     * @param memberId 확인할 사용자 ID
+     * @return 참조 데이터가 하나라도 있으면 true
+     */
+    fun hasRelatedData(memberId: Long): Boolean
+
+    /**
+     * 사용자를 삭제한다.
+     *
+     * @param user 삭제할 사용자 도메인 객체
+     */
+    fun delete(user: User)
 }

@@ -8,6 +8,7 @@ input PatchMemberSchoolInfoInput {
 extend type Mutation {
     patchMemberSchoolInfo(input: PatchMemberSchoolInfoInput!): Boolean!
     patchMemberRole(input: PatchMemberRoleInput!): Boolean!
+    deleteMember(memberId: ID!): Boolean!
 }
 
 input PatchMemberRoleInput {
