@@ -1,0 +1,23 @@
+language: ko
+tone: professional
+emoji: false
+minSeverity: nit
+maxInlineComments: 25
+
+exclude:
+  - 'gradlew'
+  - 'gradlew.bat'
+  - 'gradle/wrapper/**'
+  - '**/.gradle/**'
+  - '**/build/**'
+  - '**/generated/**'
+  - '**/kapt*/**'
+  - '**/ksp*/**'
+
+sandrone:
+  autoReview: true
+  autoReviewOnPush: false
+  summaryPlacement: new-comment
+  threadReply: true
+  emoji: false
+  maxReviewBatches: 4
