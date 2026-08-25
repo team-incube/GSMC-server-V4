@@ -1,5 +1,6 @@
 package team.incube.gsmc.domain.sheet.service
 
+import team.incube.gsmc.domain.score.ScoreAggregator
 import team.incube.gsmc.domain.sheet.ScoreSheetRow
 import team.incube.gsmc.domain.sheet.SheetStudent
 import team.incube.gsmc.domain.sheet.port.`in`.FetchClassScoreSheetUseCase
@@ -63,7 +64,7 @@ class FetchScoreSheetService(
                 .filter { it.role == UserRole.STUDENT }
                 .sortedWith(compareBy(SheetStudent::grade, SheetStudent::classNumber, SheetStudent::number))
         val totalScoreByUserId =
-            sheetScorePersistencePort.findApprovedTotalScoreByUserIds(eligibleStudents.map { it.userId })
+            sheetScorePersistencePort.findApprovedScoresByUserIds(eligibleStudents.map { it.userId })
         val rows =
             eligibleStudents.map { student ->
                 ScoreSheetRow(
@@ -71,7 +72,12 @@ class FetchScoreSheetService(
                     classNumber = student.classNumber,
                     number = student.number,
                     name = student.name,
-                    totalScore = totalScoreByUserId[student.userId] ?: 0,
+                    totalScore =
+                        ScoreAggregator.totalScoreOf(
+                            totalScoreByUserId[student.userId].orEmpty(),
+                            includeApprovedOnly = true,
+                            userGrade = student.grade,
+                        ),
                 )
             }
         val content = sheetGeneratorPort.generate(rows, sheetName)

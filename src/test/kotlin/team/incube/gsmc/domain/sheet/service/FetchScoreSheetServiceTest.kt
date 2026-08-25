@@ -10,6 +10,12 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import team.incube.gsmc.domain.category.Category
+import team.incube.gsmc.domain.category.CategoryType
+import team.incube.gsmc.domain.category.EvidenceType
+import team.incube.gsmc.domain.category.ScoreCalculationType
+import team.incube.gsmc.domain.score.Score
+import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.sheet.ScoreSheetRow
 import team.incube.gsmc.domain.sheet.SheetStudent
 import team.incube.gsmc.domain.sheet.port.out.SheetGeneratorPort
@@ -29,6 +35,23 @@ class FetchScoreSheetServiceTest :
         val storage = mockk<SheetStoragePort>()
         val memberUtil = mockk<MemberUtil>()
         val service = FetchScoreSheetService(memberPort, scorePort, generator, storage, memberUtil)
+        val category =
+            Category(
+                categoryId = 1L,
+                weight = 1,
+                categoryEnglishName = "academic",
+                categoryKoreanName = "교과성적",
+                categoryMaximumValue = 100,
+                isAccumulated = true,
+                evidenceType = EvidenceType.UNREQUIRED,
+                categoryType = CategoryType.ACADEMIC_GRADE,
+                calculationType = ScoreCalculationType.SCORE_BASED,
+            )
+        val approvedScore = mockk<Score>()
+        every { approvedScore.userId } returns 1L
+        every { approvedScore.scoreStatus } returns ScoreStatus.APPROVED
+        every { approvedScore.scoreValue } returns 12
+        every { approvedScore.category } returns category
         val students =
             listOf(
                 SheetStudent(2L, 2, 3, 2, "둘째", UserRole.STUDENT),
@@ -39,7 +62,7 @@ class FetchScoreSheetServiceTest :
         beforeTest {
             clearMocks(memberPort, scorePort, generator, storage, memberUtil)
             every { memberUtil.getCurrentUserRole() } returns UserRole.ROOT
-            every { scorePort.findApprovedTotalScoreByUserIds(any()) } returns mapOf(1L to 12)
+            every { scorePort.findApprovedScoresByUserIds(any()) } returns mapOf(1L to listOf(approvedScore))
             every { generator.generate(any(), any()) } returns byteArrayOf(1, 2, 3)
             every { storage.upload(any(), any(), any()) } just runs
             every { storage.createPresignedDownloadUrl(any()) } returns "https://download.example/sheet"
@@ -50,7 +73,7 @@ class FetchScoreSheetServiceTest :
                 When("학년 ${grade}와 반 ${classNumber}를 전달하면") {
                     Then("정상적인 범위로 처리한다") {
                         every { memberPort.findAllStudentsByGradeAndClass(grade, classNumber) } returns emptyList()
-                        every { scorePort.findApprovedTotalScoreByUserIds(emptyList()) } returns emptyMap()
+                        every { scorePort.findApprovedScoresByUserIds(emptyList()) } returns emptyMap()
 
                         service.execute(grade, classNumber)
 
@@ -71,7 +94,7 @@ class FetchScoreSheetServiceTest :
                     rowSlot.captured.map { it.number } shouldBe listOf(1, 2)
                     rowSlot.captured.map { it.totalScore } shouldBe listOf(12, 0)
                     verify {
-                        scorePort.findApprovedTotalScoreByUserIds(listOf(1L, 2L))
+                        scorePort.findApprovedScoresByUserIds(listOf(1L, 2L))
                         storage.upload(
                             match { it.startsWith("sheets/class/2/3/") && it.endsWith(".xlsx") },
                             byteArrayOf(1, 2, 3),
@@ -119,7 +142,7 @@ class FetchScoreSheetServiceTest :
             When("학생이 없는 학년이면") {
                 Then("헤더만 있는 파일 생성을 위해 빈 목록을 전달한다") {
                     every { memberPort.findAllStudentsByGrade(3) } returns emptyList()
-                    every { scorePort.findApprovedTotalScoreByUserIds(emptyList()) } returns emptyMap()
+                    every { scorePort.findApprovedScoresByUserIds(emptyList()) } returns emptyMap()
 
                     service.execute(3)
 
