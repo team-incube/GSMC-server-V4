@@ -1,0 +1,53 @@
+type Category {
+    categoryId: ID!
+    categoryType: CategoryType
+    categoryEnglishName: String
+    categoryKoreanName: String
+    weight: Int
+    categoryMaximumValue: Int
+    isAccumulated: Boolean
+    evidenceType: EvidenceType
+    calculationType: ScoreCalculationType
+}
+
+enum CategoryType {
+    CERTIFICATE
+    TOPCIT
+    TOEIC
+    JLPT
+    TOEIC_ACADEMY
+    READ_A_THON
+    VOLUNTEER
+    PROJECT_PARTICIPATION
+    AWARD
+    ACADEMIC_GRADE
+    EXTERNAL_ACTIVITY
+    NCS
+    NEWRROW_SCHOOL
+}
+
+enum EvidenceType {
+    EVIDENCE
+    FILE
+    UNREQUIRED
+}
+
+enum ScoreCalculationType {
+    COUNT_BASED
+    SCORE_BASED
+}
+
+type CategoryPayload {
+    categoryType: CategoryType!
+    englishName: String!
+    koreanName: String!
+    weight: Int!
+    maxRecordCount: Int!
+    evidenceType: EvidenceType!
+    calculationType: ScoreCalculationType!
+}
+
+extend type Query {
+    categories: [CategoryPayload!]!
+    searchCategories(keyword: String): [CategoryPayload!]!
+}

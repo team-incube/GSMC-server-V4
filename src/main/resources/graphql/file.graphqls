@@ -1,0 +1,38 @@
+type File {
+    fileId: ID!
+    userId: ID!
+    id: ID!
+    originalName: String!
+    uri: String!
+    fileUrl: String
+    fileOriginalName: String
+    fileStoredName: String
+}
+
+input CreatePresignedUploadUrlInput {
+    fileName: String!
+    fileSize: Long!
+    contentType: String!
+}
+
+input ConfirmFileUploadInput {
+    fileKey: String!
+    originalFileName: String!
+}
+
+type PresignedUploadUrlPayload {
+    presignedUrl: String!
+    fileKey: String!
+    expiresAt: String!
+}
+
+extend type Query {
+    myFiles: [File!]!
+    file(fileId: ID!): File!
+}
+
+extend type Mutation {
+    deleteFile(fileId: ID!): Boolean!
+    confirmFileUpload(input: ConfirmFileUploadInput!): File!
+    createPresignedUploadUrl(input: CreatePresignedUploadUrlInput!): PresignedUploadUrlPayload!
+}

@@ -1,0 +1,47 @@
+type Evidence {
+    evidenceId: ID!
+    userId: ID!
+    title: String!
+    content: String!
+    createdAt: DateTime
+    updatedAt: DateTime
+    evidenceTitle: String
+    evidenceContent: String
+    evidenceCreatedAt: DateTime
+    evidenceUpdatedAt: DateTime
+    files: [File!]!
+}
+
+input CreateEvidenceInput {
+    scoreId: ID!
+    title: String!
+    content: String!
+    fileIds: [ID!] = []
+}
+
+input PatchEvidenceInput {
+    scoreId: ID
+    title: String
+    content: String
+    fileIds: [ID!]
+}
+
+input CreateEvidenceDraftInput {
+    title: String = ""
+    content: String = ""
+    fileIds: [ID!] = []
+}
+
+extend type Query {
+    myEvidences: [Evidence!]!
+    myEvidenceDraft: Evidence
+    evidence(evidenceId: ID!): Evidence!
+}
+
+extend type Mutation {
+    createEvidence(input: CreateEvidenceInput!): Evidence!
+    patchEvidence(evidenceId: ID!, input: PatchEvidenceInput!): Evidence!
+    deleteEvidence(evidenceId: ID!): Boolean!
+    createEvidenceDraft(input: CreateEvidenceDraftInput!): Evidence!
+    deleteEvidenceDraft: Boolean!
+}

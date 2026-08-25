@@ -4,28 +4,58 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import team.incube.gsmc.domain.auth.port.out.AuthTokenPort
+import team.incube.gsmc.global.security.filter.JwtAuthenticationFilter
+import team.incube.gsmc.global.security.handler.JwtAccessDeniedHandler
+import team.incube.gsmc.global.security.handler.JwtAuthenticationEntryPoint
 
-/*
-TODO: 인증/인가 구현 또는 보안 관련 설정 시 해당 클래스를 무조건 변경하여주세요.
- */
 @Configuration
 class SecurityConfig(
-    @Value("\${cors.allowed-origins}") private val allowedOrigins: List<String>,
+    @param:Value("\${cors.allowed-origins}") private val allowedOrigins: List<String>,
+    private val authTokenPort: AuthTokenPort,
+    private val jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint,
+    private val jwtAccessDeniedHandler: JwtAccessDeniedHandler,
 ) {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .cors { it.configurationSource(corsConfigurationSource()) }
             .csrf { it.disable() }
-            .authorizeHttpRequests { auth ->
-                auth.anyRequest().permitAll()
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .authorizeHttpRequests(::configureEndpoints)
+            .exceptionHandling {
+                it.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                it.accessDeniedHandler(jwtAccessDeniedHandler)
             }.formLogin { it.disable() }
             .httpBasic { it.disable() }
+            .addFilterBefore(
+                JwtAuthenticationFilter(authTokenPort),
+                UsernamePasswordAuthenticationFilter::class.java,
+            )
         return http.build()
+    }
+
+    private fun configureEndpoints(
+        auth: AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry,
+    ) {
+        auth
+            .requestMatchers(
+                "/api/auth/authorization-url",
+                "/api/auth/signin",
+                "/api/auth/token/refresh",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/graphiql/**",
+            ).permitAll()
+            .anyRequest()
+            .authenticated()
     }
 
     @Bean

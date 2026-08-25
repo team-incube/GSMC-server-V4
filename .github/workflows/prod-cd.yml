@@ -1,0 +1,38 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+  
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v5
+        with:
+          Cache-read-only: false
+          Cache-cleanup: always
+
+      - name: Deploy backend
+        uses: appleboy/ssh-action@v1
+        with:
+          username: ubuntu
+          host: ${{ secrets.SERVER_HOST }}
+          key: ${{ secrets.SERVER_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd ~/GSMC-server-V4
+            git pull origin develop
+            sudo docker compose down
+            sudo docker compose up -d --build

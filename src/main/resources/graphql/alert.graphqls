@@ -1,0 +1,27 @@
+type Alert {
+    alertId: ID!
+    scoreId: ID
+    alertType: AlertType!
+    content: String!
+    isRead: Boolean!
+    createdAt: DateTime!
+}
+
+enum AlertType {
+    ADD_SCORE
+    APPROVED
+    REJECTED
+}
+
+input PatchAlertIsReadInput {
+    lastAlertId: ID!
+}
+
+extend type Query {
+    myAlerts: [Alert!]!
+}
+
+extend type Mutation {
+    patchAlertIsRead(input: PatchAlertIsReadInput!): Boolean!
+    deleteAlert(alertId: ID!): Boolean!
+}

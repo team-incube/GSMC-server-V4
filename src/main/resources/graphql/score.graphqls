@@ -1,0 +1,77 @@
+type Score {
+    scoreId: ID!
+    userId: ID!
+    category: Category!
+    evidence: Evidence
+    file: File
+    scoreStatus: ScoreStatus!
+    activityName: String
+    scoreValue: Int
+    rejectionReason: String
+    dgProjectId: ID
+    updatedAt: DateTime!
+}
+
+type ScoreCategoryGroup {
+    categoryType: CategoryType!
+    categoryEnglishName: String!
+    categoryKoreanName: String!
+    recognizedScore: Int!
+    scores: [Score!]!
+}
+
+type TotalScore {
+    totalScore: Int!
+}
+
+type Percentile {
+    topPercentile: Int!
+    bottomPercentile: Int!
+}
+
+enum ScoreStatus {
+    INCOMPLETE
+    PENDING
+    APPROVED
+    REJECTED
+}
+
+type Query {
+    myScores(categoryType: CategoryType, status: ScoreStatus): [Score!]!
+    score(scoreId: ID!): Score!
+    myScoresByCategory(status: ScoreStatus): [ScoreCategoryGroup!]!
+    scoresByCategory(memberId: ID!, status: ScoreStatus): [ScoreCategoryGroup!]!
+    myTotalScore(includeApprovedOnly: Boolean = true): TotalScore!
+    totalScore(memberId: ID!, includeApprovedOnly: Boolean = true): TotalScore!
+    myPercentInClass(includeApprovedOnly: Boolean = true): Percentile!
+    myPercentInGrade(includeApprovedOnly: Boolean = true): Percentile!
+    scoresByDgProjectId(dgProjectId: ID!): [Score!]!
+}
+
+input ScoreWithValueAndFileInput {
+    value: String
+    fileId: ID!
+}
+
+input ScoreWithValueInput {
+    value: String
+}
+
+input RejectScoreInput {
+    rejectionReason: String!
+}
+
+input SubmitProjectParticipationInput {
+    content: String!
+    fileIds: [ID!]!
+}
+
+type Mutation {
+    addScoreWithFile(categoryType: CategoryType!, input: ScoreWithValueAndFileInput!): Score!
+    addScoreWithValue(categoryType: CategoryType!, input: ScoreWithValueInput!): Score!
+    addScoreOnly(categoryType: CategoryType!): Score!
+    submitProjectParticipation(dgProjectId: ID!, input: SubmitProjectParticipationInput!): Score!
+    approveScore(scoreId: ID!): Boolean!
+    rejectScore(scoreId: ID!, input: RejectScoreInput!): Boolean!
+    deleteScore(scoreId: ID!): Boolean!
+}

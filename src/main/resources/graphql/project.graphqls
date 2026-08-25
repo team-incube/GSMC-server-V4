@@ -1,0 +1,34 @@
+type DataGsmClub {
+    clubId: ID!
+    clubName: String!
+    clubType: String
+}
+
+type DataGsmProjectParticipant {
+    participantId: ID!
+    participantName: String!
+    participantEmail: String!
+    studentNumber: String
+    major: String
+    sex: String
+}
+
+enum DataGsmProjectStatus {
+    ACTIVE
+    ENDED
+}
+
+type DataGsmProject {
+    dgProjectId: ID!
+    name: String!
+    description: String
+    startYear: Int
+    endYear: Int
+    status: DataGsmProjectStatus!
+    club: DataGsmClub
+    participants: [DataGsmProjectParticipant!]!
+}
+
+extend type Query {
+    myWritableDataGsmProjects: [DataGsmProject!]!
+}

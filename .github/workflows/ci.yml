@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - develop
-    types: [opened, edited, synchronize, reopened]
+    types: [opened, edited, synchronize, reopened, closed]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,17 +15,21 @@ jobs:
 
   validate-pr:
     runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
+
     permissions:
       pull-requests: write
+
     steps:
       - name: Validate PR Title and Body
         env:
           TITLE: ${{ github.event.pull_request.title }}
           BODY: ${{ github.event.pull_request.body }}
+
         run: |
           echo "=== PR 제목 검증 ==="
 
-          # 제목 prefix (예: [student]) 체크
+          # 제목 prefix 체크
           if ! echo "$TITLE" | grep -qP '^\[.+\]'; then
             echo "❌ 제목에 [domain] prefix가 없습니다."
             echo "   예시: [student] QueryDSL 벌크 업데이트로 성능 개선"
@@ -33,7 +37,6 @@ jobs:
           fi
 
           echo "✅ 제목 검증 통과"
-
 
           echo "=== PR 본문 검증 ==="
 
@@ -53,46 +56,124 @@ jobs:
   setup-pr-metadata:
     runs-on: ubuntu-latest
     continue-on-error: true
+
     permissions:
       contents: read
       pull-requests: write
+      issues: write
+
     steps:
       - name: Setup PR Metadata
         env:
           GH_TOKEN: ${{ github.token }}
+
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
           PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          EVENT="${{ github.event.action }}"
 
-          # 자동 리뷰어 목록
-          ALL_REVIEWERS="jyx-07,hej090224"
+          echo "PR Number: $PR_NUMBER"
+          echo "PR Author: $PR_AUTHOR"
+          echo "Branch: $BRANCH"
+          echo "Event: $EVENT"
 
-          # 본인(PR AUTHOR)은 제외
-          REVIEWERS=$(echo "$ALL_REVIEWERS" | tr ',' '\n' | grep -v "^${PR_AUTHOR}$" | tr '\n' ',' | sed 's/,$//')
+          REPO="${{ github.repository }}"
 
-          # 리뷰어 등록
-          if [ -n "$REVIEWERS" ]; then
-            gh pr edit $PR_NUMBER \
-              --repo ${{ github.repository }} \
-              --add-reviewer "$REVIEWERS"
+          # PR 닫힘/머지 → Status: Done
+          if [ "$EVENT" = "closed" ]; then
+            gh pr edit "$PR_NUMBER" --repo "$REPO" \
+              --remove-label "🌟 Status: Reviewing" 2>/dev/null || true
+            gh pr edit "$PR_NUMBER" --repo "$REPO" \
+              --add-label "🌟 Status: Done"
+            exit 0
           fi
 
+          # PR 열림/재오픈 → Status: Reviewing + 타입 라벨 + 리뷰어
+          if [ "$EVENT" = "opened" ] || [ "$EVENT" = "reopened" ]; then
+            gh pr edit "$PR_NUMBER" --repo "$REPO" \
+              --remove-label "🌟 Status: Done" 2>/dev/null || true
+            gh pr edit "$PR_NUMBER" --repo "$REPO" \
+              --add-label "🌟 Status: Reviewing"
+
+            # 브랜치명 패턴으로 타입 라벨 판단
+            if echo "$BRANCH" | grep -qP '^fix/'; then
+              TYPE_LABEL="🐞 Type: Bug/Function"
+            elif echo "$BRANCH" | grep -qP '^docs/'; then
+              TYPE_LABEL="📜 Type: Feature/Document"
+            elif echo "$BRANCH" | grep -qP '^cicd/'; then
+              TYPE_LABEL="⚙ Setting"
+            else
+              TYPE_LABEL="📩 Type: Feature/Function"
+            fi
+
+            echo "Type Label: $TYPE_LABEL"
+            gh pr edit "$PR_NUMBER" --repo "$REPO" \
+              --add-label "$TYPE_LABEL"
+
+            # 자동 리뷰어 등록 (작성자 제외)
+            ALL_REVIEWERS="jyx-07,hej090224,snowykte0426,minwoo-3,s26059-maker"
+            REVIEWERS=$(echo "$ALL_REVIEWERS" \
+              | tr ',' '\n' \
+              | grep -v "^${PR_AUTHOR}$" \
+              | tr '\n' ',' \
+              | sed 's/,$//')
+
+            echo "Reviewers: $REVIEWERS"
+            if [ -n "$REVIEWERS" ]; then
+              gh pr edit "$PR_NUMBER" --repo "$REPO" \
+                --add-reviewer "$REVIEWERS"
+            fi
+          fi
+
+  close-linked-issues:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Close Issues Linked in PR Body
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BODY: ${{ github.event.pull_request.body }}
+
+        run: |
+          ISSUE_NUMBERS=$(echo "$BODY" \
+            | grep -oiP '(close[sd]?|fix(e[sd])?|resolve[sd]?)\s*:?\s*#\K[0-9]+' \
+            | sort -u)
+
+          if [ -z "$ISSUE_NUMBERS" ]; then
+            echo "PR 본문에 연결된 이슈가 없습니다."
+            exit 0
+          fi
+
+          for NUM in $ISSUE_NUMBERS; do
+            echo "Closing issue #$NUM"
+            gh issue close "$NUM" --repo "$REPO" --reason completed || true
+          done
 
   build-and-test:
     runs-on: ubuntu-latest
-    needs: [validate-pr]
+    if: github.event.action != 'closed'
+
+    needs:
+      - validate-pr
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Ensure Gradlew Executable
         run: chmod +x ./gradlew
 
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
 
       - name: Setup Gradle
@@ -103,3 +184,40 @@ jobs:
 
       - name: Build
         run: ./gradlew build --parallel --build-cache
+
+  notify:
+    runs-on: ubuntu-latest
+    if: always() && github.event.action != 'closed'
+
+    needs:
+      - validate-pr
+      - setup-pr-metadata
+      - build-and-test
+
+    steps:
+      - name: Determine Status
+        id: status
+        run: |
+          if [[ "${{ needs.validate-pr.result }}" == "failure" ]] || \
+             [[ "${{ needs.build-and-test.result }}" == "failure" ]]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "color=0xFF4C4C" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.build-and-test.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "color=0x4CAF50" >> $GITHUB_OUTPUT
+          else
+            echo "status=cancelled" >> $GITHUB_OUTPUT
+            echo "color=0xFFA500" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_INFORMATION_ALERT_CHANNEL_WEBHOOK }}
+          status: ${{ steps.status.outputs.status }}
+          color: ${{ steps.status.outputs.color }}
+          title: "GSMC Server V4 CI"
+          description: |
+            **Validate PR:** ${{ needs.validate-pr.result }}
+            **Setup Metadata:** ${{ needs.setup-pr-metadata.result }}
+            **Build & Test:** ${{ needs.build-and-test.result }}

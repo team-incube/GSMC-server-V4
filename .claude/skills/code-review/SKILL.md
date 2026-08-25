@@ -22,6 +22,7 @@ Analyze changed files and verify the following items.
 - [ ] Entity named correctly? (e.g. `MemberJpaEntity`, `BlackListRedisRepository`)
 - [ ] Service class named with correct keyword? (`Fetch` / `Search` / `Modify` / `Append` / `Remove`)
 - [ ] `My` keyword used when accessing `SecurityContextHolder`?
+  (Exception: `developer` domain — see architecture skill)
 
 ### DTO
 - [ ] Request DTO name ends with `Query` or `Input`? (e.g. `GetUserQuery`, `CreateUserInput`)
@@ -43,6 +44,7 @@ Analyze changed files and verify the following items.
 - [ ] `@Transactional` opened in service layer, not repository layer?
 - [ ] `@Transactional(readOnly = true)` applied for read operations?
 - [ ] No N+1 problem? (Fetch Join needed?)
+- [ ] Kotlin type's nullability matches `@Column(nullable = ...)`? (For unique identifiers, use non-nullable with `unique = true` and `nullable = false`)
 
 ### Commit
 - [ ] Following commit message convention? (`type(scope): description`)
@@ -52,6 +54,8 @@ Analyze changed files and verify the following items.
 ### Security
 - [ ] No hardcoded secrets?
 - [ ] No sensitive information in logs?
+- [ ] For `developer` domain APIs, is `UserRole.ROOT` verified before the operation?
+- [ ] Is the `My` keyword correctly omitted in `developer` domain APIs?
 
 ## Report Format
 
