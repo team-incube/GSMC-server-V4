@@ -6,6 +6,8 @@ plugins {
     id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
+    id("jacoco")
+    id("org.sonarqube") version "5.1.0.4882"
 }
 
 group = "team.incube"
@@ -90,5 +92,33 @@ tasks.withType<Test> {
 ktlint {
     filter {
         exclude("**/generated/**")
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "jyx-07_gsmc-server-v4")
+        property("sonar.organization", "incube")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "${layout.buildDirectory.get()}/reports/jacoco/test/jacocoTestReport.xml",
+        )
     }
 }
