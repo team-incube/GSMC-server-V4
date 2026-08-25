@@ -1,5 +1,6 @@
 package team.incube.gsmc.domain.developer.adapter.out.persistence
 
+import team.incube.gsmc.domain.developer.adapter.out.persistence.repository.DeveloperAlertJpaRepository
 import team.incube.gsmc.domain.developer.adapter.out.persistence.repository.DeveloperEvidenceJpaRepository
 import team.incube.gsmc.domain.developer.adapter.out.persistence.repository.DeveloperFileJpaRepository
 import team.incube.gsmc.domain.developer.adapter.out.persistence.repository.DeveloperScoreJpaRepository
@@ -18,6 +19,7 @@ import team.incube.gsmc.global.annotation.adapter.Adapter
 @Adapter(direction = PortDirection.OUTBOUND)
 class DeveloperPersistenceAdapter(
     private val developerUserJpaRepository: DeveloperUserJpaRepository,
+    private val developerAlertJpaRepository: DeveloperAlertJpaRepository,
     private val developerEvidenceJpaRepository: DeveloperEvidenceJpaRepository,
     private val developerScoreJpaRepository: DeveloperScoreJpaRepository,
     private val developerFileJpaRepository: DeveloperFileJpaRepository,
@@ -40,7 +42,8 @@ class DeveloperPersistenceAdapter(
             ?.toDomain()
 
     override fun hasRelatedData(memberId: Long): Boolean =
-        developerEvidenceJpaRepository.existsByUserUserId(memberId) ||
+        developerAlertJpaRepository.existsByUserUserId(memberId) ||
+            developerEvidenceJpaRepository.existsByUserUserId(memberId) ||
             developerScoreJpaRepository.existsByUserUserId(memberId) ||
             developerFileJpaRepository.existsByUserUserId(memberId)
 
