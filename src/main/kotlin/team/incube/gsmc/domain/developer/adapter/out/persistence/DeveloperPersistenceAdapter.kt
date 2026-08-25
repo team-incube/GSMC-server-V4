@@ -1,5 +1,6 @@
 package team.incube.gsmc.domain.developer.adapter.out.persistence
 
+import org.springframework.dao.DataIntegrityViolationException
 import team.incube.gsmc.domain.developer.adapter.out.persistence.repository.DeveloperAlertJpaRepository
 import team.incube.gsmc.domain.developer.adapter.out.persistence.repository.DeveloperEvidenceJpaRepository
 import team.incube.gsmc.domain.developer.adapter.out.persistence.repository.DeveloperFileJpaRepository
@@ -11,6 +12,8 @@ import team.incube.gsmc.domain.user.adapter.out.persistence.entity.toDomain
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.toEntity
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.adapter.Adapter
+import team.incube.gsmc.global.exception.ErrorCode
+import team.incube.gsmc.global.exception.GsmcException
 
 /**
  * 개발자 도메인의 사용자 조회/저장을 담당하는 아웃바운드 어댑터 클래스입니다.
@@ -47,9 +50,19 @@ class DeveloperPersistenceAdapter(
             developerScoreJpaRepository.existsByUserUserId(memberId) ||
             developerFileJpaRepository.existsByUserUserId(memberId)
 
-    override fun delete(user: User) {
-        developerUserJpaRepository.deleteById(user.userId)
-    }
+    override fun save(user: User): User =
+        try {
+            developerUserJpaRepository.saveAndFlush(user.toEntity()).toDomain()
+        } catch (e: DataIntegrityViolationException) {
+            throw GsmcException(ErrorCode.DUPLICATE_RESOURCE)
+        }
 
-    override fun save(user: User): User = developerUserJpaRepository.save(user.toEntity()).toDomain()
+    override fun delete(user: User) {
+        try {
+            developerUserJpaRepository.deleteById(user.userId)
+            developerUserJpaRepository.flush()
+        } catch (e: DataIntegrityViolationException) {
+            throw GsmcException(ErrorCode.USER_HAS_RELATED_DATA)
+        }
+    }
 }
