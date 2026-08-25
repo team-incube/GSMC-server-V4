@@ -1,7 +1,7 @@
 language: ko
 tone: professional
 emoji: false
-minSeverity: minor
+minSeverity: nit
 maxInlineComments: 25
 
 exclude:
