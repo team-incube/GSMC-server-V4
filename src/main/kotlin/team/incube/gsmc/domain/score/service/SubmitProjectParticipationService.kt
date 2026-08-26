@@ -71,18 +71,15 @@ class SubmitProjectParticipationService(
             throw GsmcException(ErrorCode.INVALID_PROJECT_PARTICIPANT_COUNT)
         }
 
-        lateinit var saved: Score
-        transactionTemplate.executeWithoutResult {
-            saved =
-                persistSubmission(
-                    userId = userId,
-                    dgProjectId = dgProjectId,
-                    content = content,
-                    fileIds = fileIds,
-                    dgProject = dgProject,
-                )
+        return transactionTemplate.execute {
+            persistSubmission(
+                userId = userId,
+                dgProjectId = dgProjectId,
+                content = content,
+                fileIds = fileIds,
+                dgProject = dgProject,
+            )
         }
-        return saved
     }
 
     private fun persistSubmission(
