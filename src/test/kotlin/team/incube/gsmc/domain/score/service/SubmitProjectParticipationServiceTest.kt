@@ -9,6 +9,11 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.TransactionStatus
+import org.springframework.transaction.support.SimpleTransactionStatus
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import team.incube.gsmc.domain.category.Category
 import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.category.EvidenceType
@@ -33,6 +38,27 @@ import team.incube.gsmc.global.exception.GsmcException
 import team.incube.gsmc.global.util.MemberUtil
 import java.time.LocalDateTime
 
+private class TestTransactionManager : PlatformTransactionManager {
+    var commitCount = 0
+    var rollbackCount = 0
+
+    override fun getTransaction(definition: TransactionDefinition?): TransactionStatus {
+        TransactionSynchronizationManager.setActualTransactionActive(true)
+        TransactionSynchronizationManager.initSynchronization()
+        return SimpleTransactionStatus()
+    }
+
+    override fun commit(status: TransactionStatus) {
+        commitCount++
+        TransactionSynchronizationManager.clear()
+    }
+
+    override fun rollback(status: TransactionStatus) {
+        rollbackCount++
+        TransactionSynchronizationManager.clear()
+    }
+}
+
 class SubmitProjectParticipationServiceTest :
     BehaviorSpec({
         val categoryPersistencePort = mockk<CategoryPersistencePort>()
@@ -43,6 +69,7 @@ class SubmitProjectParticipationServiceTest :
         val memberPersistencePort = mockk<MemberPersistencePort>()
         val scoreTotalCacheInvalidator = mockk<ScoreTotalCacheInvalidator>()
         val memberUtil = mockk<MemberUtil>()
+        val transactionManager = TestTransactionManager()
         val service =
             SubmitProjectParticipationService(
                 categoryPersistencePort = categoryPersistencePort,
@@ -53,10 +80,14 @@ class SubmitProjectParticipationServiceTest :
                 memberPersistencePort = memberPersistencePort,
                 scoreTotalCacheInvalidator = scoreTotalCacheInvalidator,
                 memberUtil = memberUtil,
+                transactionManager = transactionManager,
             )
 
         beforeEach {
             clearAllMocks()
+            TransactionSynchronizationManager.clear()
+            transactionManager.commitCount = 0
+            transactionManager.rollbackCount = 0
             every { scoreTotalCacheInvalidator.invalidate(any()) } just runs
         }
 
@@ -115,9 +146,16 @@ class SubmitProjectParticipationServiceTest :
             When("본인 소유 파일을 첨부해 제출하면") {
                 Then("Evidence를 새로 만들고 파일을 연결한 뒤 PENDING 점수를 생성한다") {
                     commonMocksForStudent()
-                    every { dataGsmProjectApiPort.findProjectById(dgProjectId) } returns dgProject()
-                    every { categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION) } returns
+                    var apiTransactionActive = true
+                    var persistenceTransactionActive = false
+                    every { dataGsmProjectApiPort.findProjectById(dgProjectId) } answers {
+                        apiTransactionActive = TransactionSynchronizationManager.isActualTransactionActive()
+                        dgProject()
+                    }
+                    every { categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION) } answers {
+                        persistenceTransactionActive = TransactionSynchronizationManager.isActualTransactionActive()
                         category
+                    }
                     every { filePersistencePort.findById(10L) } returns file(10L)
                     every { scorePersistencePort.findByUserIdAndDgProjectId(userId, dgProjectId) } returns null
                     every { evidencePersistencePort.save(any()) } answers {
@@ -133,6 +171,9 @@ class SubmitProjectParticipationServiceTest :
                     result.activityName shouldBe "DataGSM 프로젝트"
                     result.dgProjectId shouldBe dgProjectId
                     verify(exactly = 1) { filePersistencePort.linkToEvidence(10L, 500L) }
+                    apiTransactionActive shouldBe false
+                    persistenceTransactionActive shouldBe true
+                    transactionManager.commitCount shouldBe 1
                 }
             }
         }
@@ -158,6 +199,12 @@ class SubmitProjectParticipationServiceTest :
                     val exception = shouldThrow<GsmcException> { service.execute(dgProjectId, "내용", emptyList()) }
 
                     exception.errorCode shouldBe ErrorCode.DATAGSM_PROJECT_NOT_FOUND
+                    verify(exactly = 0) {
+                        categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION)
+                    }
+                    verify(exactly = 0) { scorePersistencePort.save(any()) }
+                    transactionManager.commitCount shouldBe 0
+                    transactionManager.rollbackCount shouldBe 0
                 }
             }
         }
@@ -299,6 +346,28 @@ class SubmitProjectParticipationServiceTest :
                     val exception = shouldThrow<GsmcException> { service.execute(dgProjectId, "내용", listOf(30L)) }
 
                     exception.errorCode shouldBe ErrorCode.FORBIDDEN
+                }
+            }
+        }
+
+        Given("외부 API 검증 후 트랜잭션 내부 DB 처리에서 실패할 때") {
+            When("점수 저장이 실패하면") {
+                Then("트랜잭션을 롤백하고 캐시 무효화를 실행하지 않는다") {
+                    commonMocksForStudent()
+                    every { dataGsmProjectApiPort.findProjectById(dgProjectId) } returns dgProject()
+                    every { categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION) } returns
+                        category
+                    every { scorePersistencePort.findByUserIdAndDgProjectId(userId, dgProjectId) } returns null
+                    every { evidencePersistencePort.save(any()) } answers {
+                        firstArg<Evidence>().copy(evidenceId = 500L)
+                    }
+                    every { scorePersistencePort.save(any()) } throws GsmcException(ErrorCode.INTERNAL_SERVER_ERROR)
+
+                    shouldThrow<GsmcException> { service.execute(dgProjectId, "내용", emptyList()) }
+
+                    transactionManager.commitCount shouldBe 0
+                    transactionManager.rollbackCount shouldBe 1
+                    verify(exactly = 0) { scoreTotalCacheInvalidator.invalidate(any()) }
                 }
             }
         }
