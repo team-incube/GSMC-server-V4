@@ -16,4 +16,7 @@ class ProjectMemberPersistenceAdapter(
     private val userJpaRepository: ProjectUserJpaRepository,
 ) : ProjectMemberPersistencePort {
     override fun findByUserId(userId: Long): User? = userJpaRepository.findById(userId).orElse(null)?.toDomain()
+
+    override fun findAllByUserIds(userIds: Collection<Long>): List<User> =
+        if (userIds.isEmpty()) emptyList() else userJpaRepository.findAllByUserIdIn(userIds).map { it.toDomain() }
 }

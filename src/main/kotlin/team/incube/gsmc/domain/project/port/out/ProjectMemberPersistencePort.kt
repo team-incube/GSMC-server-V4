@@ -14,4 +14,6 @@ interface ProjectMemberPersistencePort {
      * @return 해당 사용자, 없으면 null
      */
     fun findByUserId(userId: Long): User?
+
+    fun findAllByUserIds(userIds: Collection<Long>): List<User>
 }

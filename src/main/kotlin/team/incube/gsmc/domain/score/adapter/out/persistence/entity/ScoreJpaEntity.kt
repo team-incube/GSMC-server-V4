@@ -17,6 +17,7 @@ import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import team.incube.gsmc.domain.category.adapter.out.persistence.entity.CategoryJpaEntity
 import team.incube.gsmc.domain.evidence.adapter.out.persistence.entity.EvidenceJpaEntity
+import team.incube.gsmc.domain.project.adapter.out.persistence.entity.ProjectJpaEntity
 import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
 import java.time.LocalDateTime
@@ -67,6 +68,10 @@ class ScoreJpaEntity(
     /** 연결된 DataGSM 프로젝트 ID — [team.incube.gsmc.domain.category.CategoryType.PROJECT_PARTICIPATION] 카테고리에서만 값이 있음 */
     @Column(name = "dg_project_id", nullable = true)
     val dgProjectId: Long?,
+    /** 연결된 내부 Project ID */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = true)
+    val project: ProjectJpaEntity? = null,
 ) {
     /** 최초 등록 일시 */
     @CreatedDate
