@@ -121,5 +121,11 @@ sonar {
             "${layout.buildDirectory.get()}/reports/jacoco/test/jacocoTestReport.xml",
         )
         property("sonar.exclusions", "src/main/resources/db/migration/**")
+        property("sonar.issue.ignore.multicriteria", "portInFunctionalInterface")
+        property("sonar.issue.ignore.multicriteria.portInFunctionalInterface.ruleKey", "kotlin:S6517")
+        property(
+            "sonar.issue.ignore.multicriteria.portInFunctionalInterface.resourceKey",
+            "src/main/kotlin/**/port/in/**/*.kt",
+        )
     }
 }
