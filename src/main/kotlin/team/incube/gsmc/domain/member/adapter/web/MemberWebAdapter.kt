@@ -3,6 +3,7 @@ package team.incube.gsmc.domain.member.adapter.web
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.stereotype.Controller
+import team.incube.gsmc.domain.member.SearchMembersQuery
 import team.incube.gsmc.domain.member.port.`in`.FetchMemberUseCase
 import team.incube.gsmc.domain.member.port.`in`.FetchMyMemberUseCase
 import team.incube.gsmc.domain.member.port.`in`.SearchMembersUseCase
@@ -31,14 +32,16 @@ class MemberWebAdapter(
     ): SearchMemberPayload =
         searchMembersUseCase
             .execute(
-                input.email,
-                input.name,
-                input.role,
-                input.grade,
-                input.classNumber,
-                input.number,
-                input.limit,
-                input.page,
-                input.sort,
+                SearchMembersQuery(
+                    email = input.email,
+                    name = input.name,
+                    role = input.role,
+                    grade = input.grade,
+                    classNumber = input.classNumber,
+                    number = input.number,
+                    limit = input.limit,
+                    page = input.page,
+                    sort = input.sort,
+                ),
             ).toPayload()
 }

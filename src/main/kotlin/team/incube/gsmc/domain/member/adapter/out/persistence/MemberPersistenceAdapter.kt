@@ -3,11 +3,11 @@ package team.incube.gsmc.domain.member.adapter.out.persistence
 import com.querydsl.core.types.OrderSpecifier
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
+import team.incube.gsmc.domain.member.SearchMembersQuery
 import team.incube.gsmc.domain.member.SortDirection
 import team.incube.gsmc.domain.member.adapter.out.persistence.repository.MemberUserJpaRepository
 import team.incube.gsmc.domain.member.port.out.MemberPersistencePort
 import team.incube.gsmc.domain.user.User
-import team.incube.gsmc.domain.user.UserRole
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.QUserJpaEntity.userJpaEntity
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.toDomain
 import team.incube.gsmc.global.annotation.PortDirection
@@ -26,37 +26,20 @@ class MemberPersistenceAdapter(
     override fun findByMemberId(memberId: Long): User? =
         memberUserJpaRepository.findById(memberId).orElse(null)?.toDomain()
 
-    override fun countBySearchCondition(
-        email: String?,
-        name: String?,
-        role: UserRole?,
-        grade: Int?,
-        classNumber: Int?,
-        number: Int?,
-    ): Long =
+    override fun countBySearchCondition(query: SearchMembersQuery): Long =
         queryFactory
             .select(userJpaEntity.count())
             .from(userJpaEntity)
-            .where(*buildSearchConditions(email, name, role, grade, classNumber, number).toTypedArray())
+            .where(*buildSearchConditions(query).toTypedArray())
             .fetchOne() ?: 0L
 
-    override fun findAllBySearchCondition(
-        email: String?,
-        name: String?,
-        role: UserRole?,
-        grade: Int?,
-        classNumber: Int?,
-        number: Int?,
-        limit: Int,
-        page: Int,
-        sortDirection: SortDirection,
-    ): List<User> =
+    override fun findAllBySearchCondition(query: SearchMembersQuery): List<User> =
         queryFactory
             .selectFrom(userJpaEntity)
-            .where(*buildSearchConditions(email, name, role, grade, classNumber, number).toTypedArray())
-            .orderBy(*buildOrderSpecifiers(sortDirection))
-            .offset((page * limit).toLong())
-            .limit(limit.toLong())
+            .where(*buildSearchConditions(query).toTypedArray())
+            .orderBy(*buildOrderSpecifiers(query.sort))
+            .offset((query.page * query.limit).toLong())
+            .limit(query.limit.toLong())
             .fetch()
             .map { it.toDomain() }
 
@@ -82,20 +65,13 @@ class MemberPersistenceAdapter(
      * 검색 조건 파라미터를 QueryDSL의 동적 WHERE 조건 목록으로 변환한다.
      * 값이 null인 조건은 목록에서 제외되어(=필터 끔) 실제 쿼리에 반영되지 않는다.
      */
-    private fun buildSearchConditions(
-        email: String?,
-        name: String?,
-        role: UserRole?,
-        grade: Int?,
-        classNumber: Int?,
-        number: Int?,
-    ): List<BooleanExpression> =
+    private fun buildSearchConditions(query: SearchMembersQuery): List<BooleanExpression> =
         listOfNotNull(
-            email?.let { userJpaEntity.userEmail.eq(it) },
-            name?.let { userJpaEntity.userName.eq(it) },
-            role?.let { userJpaEntity.userRole.eq(it) },
-            grade?.let { userJpaEntity.userGrade.eq(it) },
-            classNumber?.let { userJpaEntity.userClassNumber.eq(it) },
-            number?.let { userJpaEntity.userNumber.eq(it) },
+            query.email?.let { userJpaEntity.userEmail.eq(it) },
+            query.name?.let { userJpaEntity.userName.eq(it) },
+            query.role?.let { userJpaEntity.userRole.eq(it) },
+            query.grade?.let { userJpaEntity.userGrade.eq(it) },
+            query.classNumber?.let { userJpaEntity.userClassNumber.eq(it) },
+            query.number?.let { userJpaEntity.userNumber.eq(it) },
         )
 }
