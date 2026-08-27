@@ -35,6 +35,7 @@ dependencies {
     implementation(Libs.SPRING_BOOT_GRAPHQL)
     implementation(Libs.GRAPHQL_EXTENDED_SCALARS)
     implementation(Libs.AWS_SDK_S3)
+    implementation(Libs.APACHE_POI)
     implementation(Libs.SPRING_BOOT_SECURITY)
     implementation(Libs.SPRING_BOOT_WEB)
     implementation(Libs.JACKSON_KOTLIN)
