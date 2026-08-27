@@ -113,8 +113,8 @@ tasks.test {
 
 sonar {
     properties {
-        property("sonar.projectKey", "jyx-07_gsmc-server-v4")
-        property("sonar.organization", "incube")
+        property("sonar.projectKey", "team-incube_GSMC-server-V4")
+        property("sonar.organization", "team-incube")
         property("sonar.host.url", "https://sonarcloud.io")
         property(
             "sonar.coverage.jacoco.xmlReportPaths",
