@@ -26,9 +26,11 @@ private const val ACTIVE_STATUS = "ACTIVE"
 class DataGsmProjectApiAdapter(
     private val dataGsmOpenApiRestClient: RestClient,
 ) : DataGsmProjectApiPort {
+    /** DataGSM에서 현재 사용자가 참여한 활성 프로젝트를 조회합니다. */
     override fun findActiveProjectsByParticipantEmail(email: String): List<DataGsmProject> =
         fetchAllActiveProjects().filter { project -> project.participants.any { it.participantEmail == email } }
 
+    /** DataGSM 프로젝트 식별자로 외부 프로젝트를 조회합니다. */
     override fun findProjectById(dgProjectId: Long): DataGsmProject? =
         fetchProjectPage(mapOf("projectId" to dgProjectId))?.projects?.firstOrNull()?.toDomain()
 

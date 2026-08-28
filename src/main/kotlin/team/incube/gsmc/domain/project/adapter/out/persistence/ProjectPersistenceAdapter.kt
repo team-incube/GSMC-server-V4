@@ -24,6 +24,7 @@ class ProjectPersistenceAdapter(
     private val entityManager: EntityManager,
     private val queryFactory: JPAQueryFactory,
 ) : ProjectPersistencePort {
+    /** 프로젝트 상세와 연결된 점수 식별자를 조회합니다. */
     override fun findById(projectId: Long): Project? =
         queryFactory
             .selectFrom(projectJpaEntity)
@@ -31,6 +32,7 @@ class ProjectPersistenceAdapter(
             .fetchOne()
             ?.let { it.toDomain(findScoreIds(projectId)) }
 
+    /** 사용자가 소유하거나 참여한 프로젝트 요약을 최신 프로젝트부터 조회합니다. */
     override fun findAllByUserId(userId: Long): List<Project> {
         val entities =
             queryFactory
@@ -46,6 +48,7 @@ class ProjectPersistenceAdapter(
         return entities.map { it.toSummaryDomain() }
     }
 
+    /** 제목에 검색어가 포함된 프로젝트를 페이지 단위로 조회합니다. */
     override fun findAllByTitleContaining(
         title: String,
         page: Int,
@@ -60,6 +63,7 @@ class ProjectPersistenceAdapter(
             .fetch()
             .map { it.toSummaryDomain() }
 
+    /** 제목 검색 조건에 해당하는 프로젝트 전체 개수를 조회합니다. */
     override fun countByTitleContaining(title: String): Long =
         queryFactory
             .select(projectJpaEntity.count())
@@ -67,6 +71,7 @@ class ProjectPersistenceAdapter(
             .where(projectJpaEntity.title.containsIgnoreCase(title))
             .fetchOne() ?: 0L
 
+    /** 프로젝트와 참여자·파일 관계를 저장하고 저장된 도메인을 반환합니다. */
     override fun save(project: Project): Project {
         val owner = entityManager.getReference(UserJpaEntity::class.java, project.ownerId)
         val participants =
@@ -81,6 +86,7 @@ class ProjectPersistenceAdapter(
         return findById(saved.projectId) ?: project.copy(projectId = saved.projectId)
     }
 
+    /** 프로젝트 식별자로 프로젝트를 삭제합니다. */
     override fun deleteById(projectId: Long) {
         projectJpaRepository.deleteById(projectId)
     }

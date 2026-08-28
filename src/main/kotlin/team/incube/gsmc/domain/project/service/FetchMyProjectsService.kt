@@ -8,12 +8,13 @@ import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.port.Port
 import team.incube.gsmc.global.util.MemberUtil
 
-/** 현재 사용자가 소유하거나 참여한 프로젝트 목록을 조회합니다. */
+/** 현재 사용자가 소유하거나 참여한 프로젝트 목록 조회 유스케이스 구현 클래스입니다. */
 @Port(direction = PortDirection.INBOUND)
 class FetchMyProjectsService(
     private val projectPersistencePort: ProjectPersistencePort,
     private val memberUtil: MemberUtil,
 ) : FetchMyProjectsUseCase {
+    /** 현재 사용자가 소유하거나 참여한 프로젝트 요약 목록을 조회합니다. */
     @Transactional(readOnly = true)
     override fun execute(): List<ProjectSummary> {
         val userId = memberUtil.getCurrentUserId()

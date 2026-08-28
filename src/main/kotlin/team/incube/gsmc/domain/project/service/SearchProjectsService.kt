@@ -13,12 +13,16 @@ import team.incube.gsmc.global.util.MemberUtil
 
 private const val MAX_PAGE_SIZE = 100
 
-/** 프로젝트 제목 부분 일치 검색과 데이터베이스 페이지 처리를 담당합니다. */
+/**
+ * 프로젝트 제목 부분 일치 검색 유스케이스 구현 클래스입니다.
+ * 페이지 번호와 크기를 검증한 뒤 제목 검색 결과와 전체 개수를 함께 반환합니다.
+ */
 @Port(direction = PortDirection.INBOUND)
 class SearchProjectsService(
     private val projectPersistencePort: ProjectPersistencePort,
     private val memberUtil: MemberUtil,
 ) : SearchProjectsUseCase {
+    /** 제목 검색어와 페이지 조건을 검증하고 프로젝트 요약 목록을 조회합니다. */
     @Transactional(readOnly = true)
     override fun execute(
         title: String,

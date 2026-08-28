@@ -13,6 +13,7 @@ import org.springframework.web.client.RestClient
 class DataGsmOpenApiConfig(
     private val dataGsmOpenApiProperties: DataGsmOpenApiProperties,
 ) {
+    /** DataGSM 프로젝트 API 호출에 사용할 인증된 REST 클라이언트를 생성합니다. */
     @Bean
     fun dataGsmOpenApiRestClient(): RestClient =
         RestClient

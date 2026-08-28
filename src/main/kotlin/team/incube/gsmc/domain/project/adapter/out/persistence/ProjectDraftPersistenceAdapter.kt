@@ -20,6 +20,7 @@ class ProjectDraftPersistenceAdapter(
     private val entityManager: EntityManager,
     private val queryFactory: JPAQueryFactory,
 ) : ProjectDraftPersistencePort {
+    /** 소유자 식별자로 프로젝트 초안을 조회합니다. */
     override fun findByOwnerId(ownerId: Long): ProjectDraft? =
         queryFactory
             .selectFrom(projectDraftJpaEntity)
@@ -27,6 +28,7 @@ class ProjectDraftPersistenceAdapter(
             .fetchOne()
             ?.toDomain()
 
+    /** 프로젝트 초안을 신규 저장하거나 기존 초안으로 갱신합니다. */
     override fun save(
         ownerId: Long,
         draft: ProjectDraft,
@@ -58,6 +60,7 @@ class ProjectDraftPersistenceAdapter(
         return draft
     }
 
+    /** 소유자 식별자에 해당하는 프로젝트 초안을 삭제합니다. */
     override fun deleteByOwnerId(ownerId: Long) {
         queryFactory
             .selectFrom(projectDraftJpaEntity)
