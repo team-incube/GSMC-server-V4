@@ -8,13 +8,16 @@ import team.incube.gsmc.domain.user.adapter.out.persistence.entity.QUserJpaEntit
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.adapter.Adapter
 
+/** 점수 현황 파일에 필요한 학생 정보를 조회하는 영속성 어댑터입니다. */
 @Adapter(direction = PortDirection.OUTBOUND)
 class SheetMemberPersistenceAdapter(
     private val queryFactory: JPAQueryFactory,
 ) : SheetMemberPersistencePort {
+    /** 지정한 학년의 학생을 반과 번호 순서로 조회합니다. */
     override fun findAllStudentsByGrade(grade: Int): List<SheetStudent> =
         findStudents(grade = grade, classNumber = null)
 
+    /** 지정한 학년과 반의 학생을 번호 순서로 조회합니다. */
     override fun findAllStudentsByGradeAndClass(
         grade: Int,
         classNumber: Int,

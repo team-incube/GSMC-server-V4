@@ -14,8 +14,10 @@ import java.io.ByteArrayOutputStream
 
 private val HEADERS = listOf("학년", "반", "번호", "이름", "총점")
 
+/** 점수 현황 행 목록을 Apache POI 기반 XLSX 파일로 변환하는 어댑터입니다. */
 @Adapter(direction = PortDirection.OUTBOUND)
 class ApachePoiSheetGeneratorAdapter : SheetGeneratorPort {
+    /** 헤더와 학생별 점수를 포함한 XLSX 파일의 바이트 배열을 생성합니다. */
     override fun generate(
         rows: List<ScoreSheetRow>,
         sheetName: String,

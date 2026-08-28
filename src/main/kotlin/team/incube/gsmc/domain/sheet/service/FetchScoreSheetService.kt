@@ -19,6 +19,11 @@ import java.util.UUID
 
 private const val XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
+/**
+ * 학급·학년별 점수 현황 파일 조회 유스케이스 구현 클래스입니다.
+ * [FetchClassScoreSheetUseCase]와 [FetchGradeScoreSheetUseCase]를 구현하며, ROOT 역할만 호출할 수 있습니다.
+ * 학생과 승인 점수를 조회해 총점을 계산하고, XLSX 파일을 생성·저장한 뒤 임시 다운로드 URL을 반환합니다.
+ */
 @Port(direction = PortDirection.INBOUND)
 class FetchScoreSheetService(
     private val sheetMemberPersistencePort: SheetMemberPersistencePort,
@@ -28,6 +33,7 @@ class FetchScoreSheetService(
     private val memberUtil: MemberUtil,
 ) : FetchClassScoreSheetUseCase,
     FetchGradeScoreSheetUseCase {
+    /** 지정한 학급의 점수 현황 파일을 생성하고 다운로드 URL을 반환합니다. */
     override fun execute(
         grade: Int,
         classNumber: Int,
@@ -43,6 +49,7 @@ class FetchScoreSheetService(
         )
     }
 
+    /** 지정한 학년 전체의 점수 현황 파일을 생성하고 다운로드 URL을 반환합니다. */
     override fun execute(grade: Int): String {
         requireRoot()
         validateGrade(grade)

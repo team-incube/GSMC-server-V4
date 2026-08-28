@@ -16,12 +16,14 @@ import java.time.Duration
 
 private val DOWNLOAD_URL_TTL: Duration = Duration.ofMinutes(10)
 
+/** 생성된 점수 현황 파일을 S3에 저장하고 다운로드 URL을 발급하는 어댑터입니다. */
 @Adapter(direction = PortDirection.OUTBOUND)
 class SheetS3StorageAdapter(
     private val s3Client: S3Client,
     private val s3Presigner: S3Presigner,
     private val s3Properties: S3Properties,
 ) : SheetStoragePort {
+    /** 파일 내용을 지정한 S3 객체 키로 업로드합니다. */
     override fun upload(
         key: String,
         content: ByteArray,
@@ -43,6 +45,7 @@ class SheetS3StorageAdapter(
         }
     }
 
+    /** 10분 동안 유효한 S3 다운로드용 사전 서명 URL을 생성합니다. */
     override fun createPresignedDownloadUrl(key: String): String =
         try {
             val getObjectRequest =

@@ -9,10 +9,12 @@ import team.incube.gsmc.domain.sheet.port.out.SheetScorePersistencePort
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.adapter.Adapter
 
+/** 학생별 승인 점수를 한 번에 조회하는 영속성 어댑터입니다. */
 @Adapter(direction = PortDirection.OUTBOUND)
 class SheetScorePersistenceAdapter(
     private val queryFactory: JPAQueryFactory,
 ) : SheetScorePersistencePort {
+    /** 회원 식별자 목록에 해당하는 승인 점수를 회원별로 묶어 조회합니다. */
     override fun findApprovedScoresByUserIds(userIds: Collection<Long>): Map<Long, List<Score>> {
         if (userIds.isEmpty()) return emptyMap()
 
