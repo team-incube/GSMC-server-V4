@@ -7,7 +7,7 @@ import team.incube.gsmc.domain.project.DataGsmProject
  */
 interface DataGsmProjectApiPort {
     /**
-     * 참여자 이메일이 포함된 ACTIVE 프로젝트 목록을 조회한다.
+     * 참여자 이메일이 포함된 ACTIVE 프로젝트 목록을 조회합니다.
      *
      * @param email 조회할 참여자 이메일
      * @return 해당 이메일이 참여자로 포함된 ACTIVE 프로젝트 목록
@@ -15,7 +15,7 @@ interface DataGsmProjectApiPort {
     fun findActiveProjectsByParticipantEmail(email: String): List<DataGsmProject>
 
     /**
-     * ID로 프로젝트를 조회한다.
+     * ID로 프로젝트를 조회합니다.
      *
      * @param dgProjectId 조회할 DataGSM 프로젝트 ID
      * @return 해당 프로젝트, 없으면 null

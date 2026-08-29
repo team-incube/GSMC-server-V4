@@ -15,5 +15,10 @@ import team.incube.gsmc.global.annotation.adapter.Adapter
 class ProjectMemberPersistenceAdapter(
     private val userJpaRepository: ProjectUserJpaRepository,
 ) : ProjectMemberPersistencePort {
+    /** 사용자 식별자로 회원 정보를 조회합니다. */
     override fun findByUserId(userId: Long): User? = userJpaRepository.findById(userId).orElse(null)?.toDomain()
+
+    /** 사용자 식별자 목록으로 회원 정보를 일괄 조회합니다. */
+    override fun findAllByUserIds(userIds: Collection<Long>): List<User> =
+        if (userIds.isEmpty()) emptyList() else userJpaRepository.findAllByUserIdIn(userIds).map { it.toDomain() }
 }

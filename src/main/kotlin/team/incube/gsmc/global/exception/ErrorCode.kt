@@ -55,6 +55,11 @@ enum class ErrorCode(
     INVALID_PROJECT_PARTICIPANT_COUNT(HttpStatus.BAD_REQUEST, "프로젝트 참여자는 2인 이상이어야 합니다.", "BAD_REQUEST"),
     PROJECT_PARTICIPATION_ALREADY_SUBMITTED(HttpStatus.CONFLICT, "이미 제출하거나 심사 중인 프로젝트입니다.", "CONFLICT"),
 
+    // 내부 Project
+    PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "프로젝트를 찾을 수 없습니다.", "NOT_FOUND"),
+    INVALID_PROJECT_INPUT(HttpStatus.BAD_REQUEST, "프로젝트 입력값이 올바르지 않습니다.", "BAD_REQUEST"),
+    INVALID_PAGE(HttpStatus.BAD_REQUEST, "페이지 번호는 0 이상이어야 합니다.", "BAD_REQUEST"),
+
     // 알림
     ALERT_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다.", "NOT_FOUND"),
 

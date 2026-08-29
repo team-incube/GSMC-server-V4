@@ -41,4 +41,5 @@ data class Score(
     val dgProjectId: Long?,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
+    val projectId: Long? = null,
 )
