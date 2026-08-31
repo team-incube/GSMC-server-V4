@@ -9,6 +9,7 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
@@ -32,7 +33,10 @@ import java.time.LocalDateTime
  * @see ScoreStatus
  */
 @Entity
-@Table(name = "score_tb")
+@Table(
+    name = "score_tb",
+    indexes = [Index(name = "idx_score_dg_project_id", columnList = "dg_project_id")],
+)
 @EntityListeners(AuditingEntityListener::class)
 class ScoreJpaEntity(
     /** 점수 요청 고유 식별자 */
