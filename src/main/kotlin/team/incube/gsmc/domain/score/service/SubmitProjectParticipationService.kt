@@ -1,11 +1,13 @@
 package team.incube.gsmc.domain.score.service
 
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.category.port.out.CategoryPersistencePort
 import team.incube.gsmc.domain.evidence.Evidence
 import team.incube.gsmc.domain.evidence.port.out.EvidencePersistencePort
 import team.incube.gsmc.domain.file.port.out.FilePersistencePort
+import team.incube.gsmc.domain.project.DataGsmProject
 import team.incube.gsmc.domain.project.DataGsmProjectStatus
 import team.incube.gsmc.domain.project.port.out.DataGsmProjectApiPort
 import team.incube.gsmc.domain.score.Score
@@ -26,9 +28,10 @@ private const val MINIMUM_PARTICIPANT_COUNT = 2
 /**
  * 프로젝트 참여 개인 제출 유스케이스 구현 클래스입니다.
  * [SubmitProjectParticipationUseCase]를 구현하며, 학생(STUDENT)만 호출을 허용합니다. 제출 시점에
- * DataGSM을 재조회해 프로젝트 상태·참여자 여부·참여자 수를 검증하고, 기존 `REJECTED` 제출이 있으면
- * 그 근거 자료를 갈아끼워 재사용한다(§8.4 패턴을 dgProjectId 스코프로 확장). PENDING 상태로
- * 저장되므로 해당 학생의 반/학년 백분위 캐시([ScoreTotalCacheInvalidator])를 무효화한다.
+ * DataGSM을 재조회해 프로젝트 상태·참여자 여부·참여자 수를 검증한 뒤, DB 변경 작업만 트랜잭션으로
+ * 처리한다. 기존 `REJECTED` 제출이 있으면 그 근거 자료를 갈아끼워 재사용한다(§8.4 패턴을
+ * dgProjectId 스코프로 확장). PENDING 상태로 저장되므로 해당 학생의 반/학년 백분위 캐시
+ * ([ScoreTotalCacheInvalidator])를 무효화한다.
  */
 @Port(direction = PortDirection.INBOUND)
 class SubmitProjectParticipationService(
@@ -40,8 +43,10 @@ class SubmitProjectParticipationService(
     private val memberPersistencePort: MemberPersistencePort,
     private val scoreTotalCacheInvalidator: ScoreTotalCacheInvalidator,
     private val memberUtil: MemberUtil,
+    transactionManager: PlatformTransactionManager,
 ) : SubmitProjectParticipationUseCase {
-    @Transactional
+    private val transactionTemplate = TransactionTemplate(transactionManager)
+
     override fun execute(
         dgProjectId: Long,
         content: String,
@@ -66,6 +71,24 @@ class SubmitProjectParticipationService(
             throw GsmcException(ErrorCode.INVALID_PROJECT_PARTICIPANT_COUNT)
         }
 
+        return transactionTemplate.execute {
+            persistSubmission(
+                userId = userId,
+                dgProjectId = dgProjectId,
+                content = content,
+                fileIds = fileIds,
+                dgProject = dgProject,
+            )
+        }
+    }
+
+    private fun persistSubmission(
+        userId: Long,
+        dgProjectId: Long,
+        content: String,
+        fileIds: List<Long>,
+        dgProject: DataGsmProject,
+    ): Score {
         val category =
             categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION)
                 ?: throw GsmcException(ErrorCode.CATEGORY_NOT_FOUND)
