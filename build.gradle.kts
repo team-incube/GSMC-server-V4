@@ -6,6 +6,8 @@ plugins {
     id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
+    id("jacoco")
+    id("org.sonarqube") version "7.4.0.8496"
 }
 
 group = "team.incube"
@@ -91,5 +93,40 @@ tasks.withType<Test> {
 ktlint {
     filter {
         exclude("**/generated/**")
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.14"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "team-incube_GSMC-server-V4")
+        property("sonar.organization", "team-incube")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "${layout.buildDirectory.get()}/reports/jacoco/test/jacocoTestReport.xml",
+        )
+        property("sonar.exclusions", "src/main/resources/db/migration/**")
+        property("sonar.issue.ignore.multicriteria", "portInFunctionalInterface")
+        property("sonar.issue.ignore.multicriteria.portInFunctionalInterface.ruleKey", "kotlin:S6517")
+        property(
+            "sonar.issue.ignore.multicriteria.portInFunctionalInterface.resourceKey",
+            "src/main/kotlin/**/port/in/**/*.kt",
+        )
     }
 }

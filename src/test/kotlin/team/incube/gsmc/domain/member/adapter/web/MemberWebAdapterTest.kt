@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import team.incube.gsmc.domain.member.MemberSearchResult
+import team.incube.gsmc.domain.member.SearchMembersQuery
 import team.incube.gsmc.domain.member.SortDirection
 import team.incube.gsmc.domain.member.port.`in`.FetchMemberUseCase
 import team.incube.gsmc.domain.member.port.`in`.FetchMyMemberUseCase
@@ -80,8 +81,20 @@ class MemberWebAdapterTest :
                             page = 0,
                             sort = SortDirection.ASC,
                         )
+                    val query =
+                        SearchMembersQuery(
+                            email = null,
+                            name = "홍길동",
+                            role = UserRole.STUDENT,
+                            grade = 1,
+                            classNumber = 2,
+                            number = 10,
+                            limit = 50,
+                            page = 0,
+                            sort = SortDirection.ASC,
+                        )
                     every {
-                        searchMembersUseCase.execute(null, "홍길동", UserRole.STUDENT, 1, 2, 10, 50, 0, SortDirection.ASC)
+                        searchMembersUseCase.execute(query)
                     } returns MemberSearchResult(listOf(member(10L)), 1L, 1)
 
                     val result = webAdapter.searchMembers(input)
@@ -90,7 +103,7 @@ class MemberWebAdapterTest :
                     result.totalElements shouldBe 1
                     result.totalPages shouldBe 1
                     verify(exactly = 1) {
-                        searchMembersUseCase.execute(null, "홍길동", UserRole.STUDENT, 1, 2, 10, 50, 0, SortDirection.ASC)
+                        searchMembersUseCase.execute(query)
                     }
                 }
             }
