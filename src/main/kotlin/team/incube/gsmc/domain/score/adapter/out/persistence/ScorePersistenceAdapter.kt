@@ -280,10 +280,11 @@ class ScorePersistenceAdapter(
             .execute()
     }
 
+    /** `uk_file_score`가 점수당 파일을 1건으로 강제하므로 결과는 항상 0건 또는 1건이다. */
     private fun findFileByScoreId(scoreId: Long) =
         queryFactory
             .selectFrom(fileJpaEntity)
             .where(fileJpaEntity.score.scoreId.eq(scoreId))
-            .fetchFirst()
+            .fetchOne()
             ?.toDomain()
 }
