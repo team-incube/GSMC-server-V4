@@ -1,7 +1,9 @@
 package team.incube.gsmc.domain.score.adapter.out.persistence
 
+import com.querydsl.core.types.Predicate
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
+import org.springframework.dao.DataIntegrityViolationException
 import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.category.adapter.out.persistence.entity.CategoryJpaEntity
 import team.incube.gsmc.domain.evidence.adapter.out.persistence.entity.EvidenceJpaEntity
@@ -11,14 +13,20 @@ import team.incube.gsmc.domain.project.adapter.out.persistence.entity.ProjectJpa
 import team.incube.gsmc.domain.score.Score
 import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.score.adapter.out.persistence.entity.QScoreJpaEntity.scoreJpaEntity
+import team.incube.gsmc.domain.score.adapter.out.persistence.entity.QScoreUniqueSlotJpaEntity.scoreUniqueSlotJpaEntity
 import team.incube.gsmc.domain.score.adapter.out.persistence.entity.ScoreJpaEntity
+import team.incube.gsmc.domain.score.adapter.out.persistence.entity.ScoreSlotKind
+import team.incube.gsmc.domain.score.adapter.out.persistence.entity.ScoreUniqueSlotJpaEntity
 import team.incube.gsmc.domain.score.adapter.out.persistence.entity.toDomain
 import team.incube.gsmc.domain.score.adapter.out.persistence.entity.toEntity
 import team.incube.gsmc.domain.score.adapter.out.persistence.repository.ScoreJpaRepository
+import team.incube.gsmc.domain.score.adapter.out.persistence.repository.ScoreUniqueSlotJpaRepository
 import team.incube.gsmc.domain.score.port.out.ScorePersistencePort
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.adapter.Adapter
+import team.incube.gsmc.global.exception.ErrorCode
+import team.incube.gsmc.global.exception.GsmcException
 
 /**
  * 점수 요청 영속성 처리를 담당하는 아웃바운드 어댑터 클래스입니다.
@@ -33,6 +41,7 @@ import team.incube.gsmc.global.annotation.adapter.Adapter
 class ScorePersistenceAdapter(
     private val queryFactory: JPAQueryFactory,
     private val scoreJpaRepository: ScoreJpaRepository,
+    private val scoreUniqueSlotJpaRepository: ScoreUniqueSlotJpaRepository,
     private val entityManager: EntityManager,
 ) : ScorePersistencePort {
     override fun findById(scoreId: Long): Score? {
@@ -84,10 +93,20 @@ class ScorePersistenceAdapter(
         }
     }
 
-    override fun findByUserIdAndCategoryTypeAndScoreStatus(
+    override fun findUnapprovedByUserIdAndCategoryType(
         userId: Long,
         categoryType: CategoryType,
-        scoreStatus: ScoreStatus,
+    ): Score? = findByUserIdAndCategoryType(userId, categoryType, scoreJpaEntity.scoreStatus.ne(ScoreStatus.APPROVED))
+
+    override fun findApprovedByUserIdAndCategoryType(
+        userId: Long,
+        categoryType: CategoryType,
+    ): Score? = findByUserIdAndCategoryType(userId, categoryType, scoreJpaEntity.scoreStatus.eq(ScoreStatus.APPROVED))
+
+    private fun findByUserIdAndCategoryType(
+        userId: Long,
+        categoryType: CategoryType,
+        statusPredicate: Predicate,
     ): Score? {
         val entity =
             queryFactory
@@ -101,7 +120,7 @@ class ScorePersistenceAdapter(
                 .where(
                     scoreJpaEntity.user.userId.eq(userId),
                     scoreJpaEntity.category.categoryType.eq(categoryType),
-                    scoreJpaEntity.scoreStatus.eq(scoreStatus),
+                    statusPredicate,
                 ).fetchFirst() ?: return null
 
         return entity.toDomain(findFileByScoreId(entity.scoreId))
@@ -179,12 +198,16 @@ class ScorePersistenceAdapter(
     }
 
     override fun save(score: Score): Score {
+        val isNew = score.scoreId == 0L
         val user = entityManager.getReference(UserJpaEntity::class.java, score.userId)
         val category = entityManager.getReference(CategoryJpaEntity::class.java, score.category.categoryId)
         val evidence = score.evidence?.let { entityManager.getReference(EvidenceJpaEntity::class.java, it.evidenceId) }
         val project = score.projectId?.let { entityManager.getReference(ProjectJpaEntity::class.java, it) }
 
         val saved = scoreJpaRepository.save(score.toEntity(user, category, evidence, project))
+        if (!score.category.isAccumulated) {
+            syncUniqueSlot(saved.scoreId, score, isNew)
+        }
         return score.copy(
             scoreId = saved.scoreId,
             createdAt = saved.createdAt,
@@ -193,6 +216,7 @@ class ScorePersistenceAdapter(
     }
 
     override fun deleteById(scoreId: Long) {
+        releaseUniqueSlot(scoreId)
         scoreJpaRepository.deleteById(scoreId)
     }
 
@@ -202,6 +226,58 @@ class ScorePersistenceAdapter(
 
     override fun unlinkProject(projectId: Long) {
         scoreJpaRepository.unlinkProject(projectId)
+    }
+
+    /**
+     * 비누적 카테고리 점수의 슬롯을 현재 심사 상태에 맞춘다.
+     *
+     * 신규 점수면 슬롯을 새로 점유한다. 서비스 레이어가 조회로 먼저 중복을 걸러내지만
+     * (`AppendScoreSupport.findOrCreateScore`) 조회와 저장 사이의 동시 요청은 막지 못하므로,
+     * 이 UNIQUE 위반이 경쟁 상태를 잡는 마지막 방어선이다. `save`가 아닌 `saveAndFlush`를 쓰는 이유는
+     * 그냥 저장하면 INSERT가 커밋 시점으로 밀려 이 try 블록 밖에서 예외가 터지기 때문이다.
+     *
+     * 기존 점수면 승인 전환으로 슬롯 종류가 바뀌었을 때만 갱신한다.
+     */
+    private fun syncUniqueSlot(
+        scoreId: Long,
+        score: Score,
+        isNew: Boolean,
+    ) {
+        val slotKind = ScoreSlotKind.of(score.scoreStatus)
+        try {
+            if (isNew) {
+                scoreUniqueSlotJpaRepository.saveAndFlush(
+                    ScoreUniqueSlotJpaEntity(scoreId, score.userId, score.category.categoryId, slotKind),
+                )
+            } else {
+                queryFactory
+                    .update(scoreUniqueSlotJpaEntity)
+                    .set(scoreUniqueSlotJpaEntity.slotKind, slotKind)
+                    .where(
+                        scoreUniqueSlotJpaEntity.scoreId.eq(scoreId),
+                        scoreUniqueSlotJpaEntity.slotKind.ne(slotKind),
+                    ).execute()
+            }
+        } catch (e: DataIntegrityViolationException) {
+            throw GsmcException(ErrorCode.SCORE_ALREADY_EXISTS)
+        }
+    }
+
+    /**
+     * 점수가 점유한 슬롯을 즉시 비운다.
+     *
+     * DDL의 `ON DELETE CASCADE`로도 정리되지만 그건 점수 행 DELETE가 실제로 DB에 도달한 뒤의
+     * 얘기다. QueryDSL 벌크 삭제는 호출 시점에 바로 실행되므로 자리가 즉시 비워진다.
+     *
+     * 승인 전환에서 이게 필요하다. 밀려난 점수를 지우고 새 점수의 슬롯을 `APPROVED`로 올려야 하는데,
+     * 둘 다 엔티티 조작으로 두면 Hibernate가 `INSERT → UPDATE → DELETE` 순으로 재정렬해 슬롯
+     * UPDATE가 먼저 나가고, 그 시점엔 밀려난 슬롯이 아직 `APPROVED` 자리에 있어 UNIQUE 위반이 난다.
+     */
+    private fun releaseUniqueSlot(scoreId: Long) {
+        queryFactory
+            .delete(scoreUniqueSlotJpaEntity)
+            .where(scoreUniqueSlotJpaEntity.scoreId.eq(scoreId))
+            .execute()
     }
 
     private fun findFileByScoreId(scoreId: Long) =
