@@ -17,13 +17,15 @@ import team.incube.gsmc.global.util.MemberUtil
  * [RemoveScoreUseCase]를 구현하며, 교사(TEACHER) 이상만 호출을 허용합니다. 심사 상태와 무관하게
  * 하드 삭제합니다. 첨부 파일이 있으면 `score_id` FK 제약으로 삭제가 실패하므로, 삭제 전에 파일의
  * 점수 연결을 먼저 해제한다. 이 점수를 참조하는 알림이 있어도 같은 이유로 삭제가 실패하므로, 알림은
- * 삭제하지 않고 점수 연결만 해제해 알림 자체는 보존한다.
+ * 삭제하지 않고 점수 연결만 해제해 알림 자체는 보존한다. 삭제 후 해당 학생의 반/학년 백분위 캐시
+ * ([ScoreTotalCacheInvalidator])를 무효화한다.
  */
 @Port(direction = PortDirection.INBOUND)
 class RemoveScoreService(
     private val scorePersistencePort: ScorePersistencePort,
     private val filePersistencePort: FilePersistencePort,
     private val alertPersistencePort: AlertPersistencePort,
+    private val scoreTotalCacheInvalidator: ScoreTotalCacheInvalidator,
     private val memberUtil: MemberUtil,
 ) : RemoveScoreUseCase {
     @Transactional
@@ -36,6 +38,7 @@ class RemoveScoreService(
         score.file?.let { filePersistencePort.unlinkFromScore(it.fileId) }
         alertPersistencePort.unlinkAllByScoreId(scoreId)
         scorePersistencePort.deleteById(scoreId)
+        scoreTotalCacheInvalidator.invalidate(score.userId)
 
         return true
     }

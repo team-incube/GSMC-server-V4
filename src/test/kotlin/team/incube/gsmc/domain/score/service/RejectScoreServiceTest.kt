@@ -31,11 +31,21 @@ class RejectScoreServiceTest :
         val scorePersistencePort = mockk<ScorePersistencePort>()
         val alertPersistencePort = mockk<AlertPersistencePort>()
         val alertEventPublisherPort = mockk<AlertEventPublisherPort>()
+        val scoreTotalCacheInvalidator = mockk<ScoreTotalCacheInvalidator>()
         val memberUtil = mockk<MemberUtil>()
         val service =
-            RejectScoreService(scorePersistencePort, alertPersistencePort, alertEventPublisherPort, memberUtil)
+            RejectScoreService(
+                scorePersistencePort,
+                alertPersistencePort,
+                alertEventPublisherPort,
+                scoreTotalCacheInvalidator,
+                memberUtil,
+            )
 
-        beforeEach { clearAllMocks() }
+        beforeEach {
+            clearAllMocks()
+            every { scoreTotalCacheInvalidator.invalidate(any()) } just runs
+        }
 
         fun score(status: ScoreStatus) =
             Score(
@@ -109,6 +119,7 @@ class RejectScoreServiceTest :
                     verify(exactly = 1) { scorePersistencePort.save(any()) }
                     verify(exactly = 0) { alertPersistencePort.save(any()) }
                     verify(exactly = 0) { alertEventPublisherPort.publish(any()) }
+                    verify(exactly = 0) { scoreTotalCacheInvalidator.invalidate(any()) }
                 }
             }
 

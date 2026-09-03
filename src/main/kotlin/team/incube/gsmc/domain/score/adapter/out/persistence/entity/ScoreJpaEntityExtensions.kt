@@ -5,6 +5,7 @@ import team.incube.gsmc.domain.category.adapter.out.persistence.entity.toDomain
 import team.incube.gsmc.domain.evidence.adapter.out.persistence.entity.EvidenceJpaEntity
 import team.incube.gsmc.domain.evidence.adapter.out.persistence.entity.toDomain
 import team.incube.gsmc.domain.file.File
+import team.incube.gsmc.domain.project.adapter.out.persistence.entity.ProjectJpaEntity
 import team.incube.gsmc.domain.score.Score
 import team.incube.gsmc.domain.user.adapter.out.persistence.entity.UserJpaEntity
 
@@ -28,6 +29,7 @@ fun ScoreJpaEntity.toDomain(file: File?): Score =
         scoreValue = scoreValue,
         rejectionReason = rejectionReason,
         dgProjectId = dgProjectId,
+        projectId = project?.projectId,
         createdAt = createdAt,
         updatedAt = updatedAt,
     )
@@ -46,6 +48,7 @@ fun Score.toEntity(
     user: UserJpaEntity,
     category: CategoryJpaEntity,
     evidence: EvidenceJpaEntity?,
+    project: ProjectJpaEntity? = null,
 ): ScoreJpaEntity =
     ScoreJpaEntity(
         scoreId = scoreId,
@@ -57,6 +60,7 @@ fun Score.toEntity(
         scoreValue = scoreValue,
         rejectionReason = rejectionReason,
         dgProjectId = dgProjectId,
+        project = project,
     ).apply {
         this.createdAt = this@toEntity.createdAt
         this.updatedAt = this@toEntity.updatedAt

@@ -19,13 +19,15 @@ import team.incube.gsmc.global.util.MemberUtil
  * 파일 기반 점수 추가 유스케이스 구현 클래스입니다.
  * [AppendMyScoreWithFileUseCase]를 구현하며, 증빙 방식이 FILE인 카테고리에 대해 값과 파일을
  * 첨부해 점수를 신청한다. 값은 [team.incube.gsmc.domain.category.ScoreCalculationType]에 따라
- * scoreValue 또는 activityName에 저장된다.
+ * scoreValue 또는 activityName에 저장된다. PENDING 상태로 새로 생성되므로 해당 학생의 반/학년
+ * 백분위 캐시([ScoreTotalCacheInvalidator])를 무효화한다.
  */
 @Port(direction = PortDirection.INBOUND)
 class AppendMyScoreWithFileService(
     private val appendScoreSupport: AppendScoreSupport,
     private val scorePersistencePort: ScorePersistencePort,
     private val filePersistencePort: FilePersistencePort,
+    private val scoreTotalCacheInvalidator: ScoreTotalCacheInvalidator,
     private val memberUtil: MemberUtil,
 ) : AppendMyScoreWithFileUseCase {
     @Transactional
@@ -68,6 +70,7 @@ class AppendMyScoreWithFileService(
         if (oldFile?.fileId != fileId) {
             filePersistencePort.linkToScore(fileId, saved.scoreId)
         }
+        scoreTotalCacheInvalidator.invalidate(userId)
 
         return saved.copy(file = file)
     }

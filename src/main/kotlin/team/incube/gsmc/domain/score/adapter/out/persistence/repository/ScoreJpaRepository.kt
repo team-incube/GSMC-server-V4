@@ -16,4 +16,10 @@ interface ScoreJpaRepository : JpaRepository<ScoreJpaEntity, Long> {
     fun unlinkEvidence(
         @Param("evidenceId") evidenceId: Long,
     ): Int
+
+    @Modifying
+    @Query("update ScoreJpaEntity s set s.project = null where s.project.projectId = :projectId")
+    fun unlinkProject(
+        @Param("projectId") projectId: Long,
+    ): Int
 }

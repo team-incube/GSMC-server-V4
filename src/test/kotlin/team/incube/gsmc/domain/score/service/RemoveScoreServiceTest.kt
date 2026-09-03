@@ -30,10 +30,21 @@ class RemoveScoreServiceTest :
         val scorePersistencePort = mockk<ScorePersistencePort>()
         val filePersistencePort = mockk<FilePersistencePort>()
         val alertPersistencePort = mockk<AlertPersistencePort>()
+        val scoreTotalCacheInvalidator = mockk<ScoreTotalCacheInvalidator>()
         val memberUtil = mockk<MemberUtil>()
-        val service = RemoveScoreService(scorePersistencePort, filePersistencePort, alertPersistencePort, memberUtil)
+        val service =
+            RemoveScoreService(
+                scorePersistencePort,
+                filePersistencePort,
+                alertPersistencePort,
+                scoreTotalCacheInvalidator,
+                memberUtil,
+            )
 
-        beforeEach { clearAllMocks() }
+        beforeEach {
+            clearAllMocks()
+            every { scoreTotalCacheInvalidator.invalidate(any()) } just runs
+        }
 
         fun approvedScore(file: File? = null) =
             Score(

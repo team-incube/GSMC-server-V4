@@ -71,6 +71,12 @@ interface ScorePersistencePort {
      */
     fun findAllByDgProjectId(dgProjectId: Long): List<Score>
 
+    /** 특정 사용자가 내부 Project에 연결한 점수 요청을 조회한다. */
+    fun findByUserIdAndProjectId(
+        userId: Long,
+        projectId: Long,
+    ): Score?
+
     /**
      * 점수 요청을 저장한다. [score]의 scoreId가 기존 점수 요청의 ID와 같으면 값을 갈아끼우고(update),
      * 0이면 새로 생성한다(insert).
@@ -88,4 +94,7 @@ interface ScorePersistencePort {
     fun deleteById(scoreId: Long)
 
     fun unlinkEvidence(evidenceId: Long)
+
+    /** Project 삭제 전에 점수의 Project 연결만 해제한다. */
+    fun unlinkProject(projectId: Long)
 }

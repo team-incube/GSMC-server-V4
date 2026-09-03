@@ -21,6 +21,7 @@ class FetchMyWritableDataGsmProjectsService(
     private val projectMemberPersistencePort: ProjectMemberPersistencePort,
     private val memberUtil: MemberUtil,
 ) : FetchMyWritableDataGsmProjectsUseCase {
+    /** 학생 권한과 DataGSM 참여자 정보를 확인한 뒤 작성 가능한 활성 프로젝트를 조회합니다. */
     override fun execute(): List<DataGsmProject> {
         if (memberUtil.getCurrentUserRole() != UserRole.STUDENT) {
             throw GsmcException(ErrorCode.FORBIDDEN)

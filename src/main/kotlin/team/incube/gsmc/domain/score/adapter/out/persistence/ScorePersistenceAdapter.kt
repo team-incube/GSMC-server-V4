@@ -7,6 +7,7 @@ import team.incube.gsmc.domain.category.adapter.out.persistence.entity.CategoryJ
 import team.incube.gsmc.domain.evidence.adapter.out.persistence.entity.EvidenceJpaEntity
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.QFileJpaEntity.fileJpaEntity
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.toDomain
+import team.incube.gsmc.domain.project.adapter.out.persistence.entity.ProjectJpaEntity
 import team.incube.gsmc.domain.score.Score
 import team.incube.gsmc.domain.score.ScoreStatus
 import team.incube.gsmc.domain.score.adapter.out.persistence.entity.QScoreJpaEntity.scoreJpaEntity
@@ -156,12 +157,34 @@ class ScorePersistenceAdapter(
         }
     }
 
+    override fun findByUserIdAndProjectId(
+        userId: Long,
+        projectId: Long,
+    ): Score? {
+        val entity =
+            queryFactory
+                .selectFrom(scoreJpaEntity)
+                .join(scoreJpaEntity.user)
+                .fetchJoin()
+                .join(scoreJpaEntity.category)
+                .fetchJoin()
+                .leftJoin(scoreJpaEntity.evidence)
+                .fetchJoin()
+                .where(
+                    scoreJpaEntity.user.userId.eq(userId),
+                    scoreJpaEntity.project.projectId.eq(projectId),
+                ).fetchFirst() ?: return null
+
+        return entity.toDomain(findFileByScoreId(entity.scoreId))
+    }
+
     override fun save(score: Score): Score {
         val user = entityManager.getReference(UserJpaEntity::class.java, score.userId)
         val category = entityManager.getReference(CategoryJpaEntity::class.java, score.category.categoryId)
         val evidence = score.evidence?.let { entityManager.getReference(EvidenceJpaEntity::class.java, it.evidenceId) }
+        val project = score.projectId?.let { entityManager.getReference(ProjectJpaEntity::class.java, it) }
 
-        val saved = scoreJpaRepository.save(score.toEntity(user, category, evidence))
+        val saved = scoreJpaRepository.save(score.toEntity(user, category, evidence, project))
         return score.copy(
             scoreId = saved.scoreId,
             createdAt = saved.createdAt,
@@ -175,6 +198,10 @@ class ScorePersistenceAdapter(
 
     override fun unlinkEvidence(evidenceId: Long) {
         scoreJpaRepository.unlinkEvidence(evidenceId)
+    }
+
+    override fun unlinkProject(projectId: Long) {
+        scoreJpaRepository.unlinkProject(projectId)
     }
 
     private fun findFileByScoreId(scoreId: Long) =

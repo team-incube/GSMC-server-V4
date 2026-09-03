@@ -1,7 +1,10 @@
 package team.incube.gsmc.domain.project.adapter.out.openapi
 
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.client.ClientHttpRequestFactory
+import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.web.client.RestClient
 
 /**
@@ -13,11 +16,22 @@ import org.springframework.web.client.RestClient
 class DataGsmOpenApiConfig(
     private val dataGsmOpenApiProperties: DataGsmOpenApiProperties,
 ) {
+    /** DataGSM 프로젝트 API 호출에 사용할 인증된 REST 클라이언트를 생성합니다. */
     @Bean
-    fun dataGsmOpenApiRestClient(): RestClient =
+    fun dataGsmOpenApiRequestFactory(): ClientHttpRequestFactory =
+        SimpleClientHttpRequestFactory().apply {
+            setConnectTimeout(dataGsmOpenApiProperties.connectTimeout)
+            setReadTimeout(dataGsmOpenApiProperties.readTimeout)
+        }
+
+    @Bean
+    fun dataGsmOpenApiRestClient(
+        @Qualifier("dataGsmOpenApiRequestFactory") requestFactory: ClientHttpRequestFactory,
+    ): RestClient =
         RestClient
             .builder()
             .baseUrl(dataGsmOpenApiProperties.baseUrl)
             .defaultHeader("X-API-KEY", dataGsmOpenApiProperties.apiKey)
+            .requestFactory(requestFactory)
             .build()
 }
