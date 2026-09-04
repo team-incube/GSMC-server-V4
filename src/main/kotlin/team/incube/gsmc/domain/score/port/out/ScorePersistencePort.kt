@@ -35,18 +35,35 @@ interface ScorePersistencePort {
     fun findAllByUserIdIn(userIds: List<Long>): List<Score>
 
     /**
-     * 특정 사용자가 특정 카테고리에 제출한 점수 요청 중 특정 상태인 것을 조회한다. 범용 점수 추가
-     * 뮤테이션의 반려 후 재제출 시(§8.4) 재사용할 기존 `REJECTED` row를 찾는 데 사용한다.
+     * 특정 사용자가 특정 카테고리에 제출한 점수 요청 중 **아직 승인되지 않은** 건을 조회한다.
+     * 재제출 시 덮어쓸 기존 row를 찾는 데 사용한다.
+     *
+     * 비누적 카테고리는 승인 대기 중인 건이 사용자당 1건뿐이라 결과가 유일하다. 누적 카테고리는
+     * 여러 건이 존재할 수 있어 결과가 임의의 1건이 되므로 호출하지 않는다
+     * ([team.incube.gsmc.domain.score.service.AppendScoreSupport] 참고).
      *
      * @param userId 조회할 사용자 ID
      * @param categoryType 조회할 카테고리 유형
-     * @param scoreStatus 조회할 심사 상태
      * @return 조건에 맞는 점수 요청, 없으면 null
      */
-    fun findByUserIdAndCategoryTypeAndScoreStatus(
+    fun findUnapprovedByUserIdAndCategoryType(
         userId: Long,
         categoryType: CategoryType,
-        scoreStatus: ScoreStatus,
+    ): Score?
+
+    /**
+     * 특정 사용자가 특정 카테고리에서 **이미 승인받은** 점수 요청을 조회한다.
+     * 비누적 카테고리에서 새 점수를 승인할 때 밀려날 기존 승인 건을 찾는 데 사용한다.
+     *
+     * 비누적 카테고리는 승인된 건이 사용자당 1건뿐이라 결과가 유일하다.
+     *
+     * @param userId 조회할 사용자 ID
+     * @param categoryType 조회할 카테고리 유형
+     * @return 조건에 맞는 점수 요청, 없으면 null
+     */
+    fun findApprovedByUserIdAndCategoryType(
+        userId: Long,
+        categoryType: CategoryType,
     ): Score?
 
     /**
