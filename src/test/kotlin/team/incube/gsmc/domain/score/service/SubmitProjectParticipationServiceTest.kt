@@ -390,4 +390,22 @@ class SubmitProjectParticipationServiceTest :
                 }
             }
         }
+
+        Given("타인 소유 파일이 미존재 파일보다 앞에 있을 때") {
+            When("제출하면") {
+                Then("앞선 파일 기준으로 FORBIDDEN 예외가 발생한다") {
+                    commonMocksForStudent()
+                    every { dataGsmProjectApiPort.findProjectById(dgProjectId) } returns dgProject()
+                    every { categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION) } returns
+                        category
+                    every { filePersistencePort.findAllByIdIn(listOf(40L, 41L)) } returns
+                        listOf(file(40L, ownerId = 999L))
+
+                    val exception =
+                        shouldThrow<GsmcException> { service.execute(dgProjectId, "내용", listOf(40L, 41L)) }
+
+                    exception.errorCode shouldBe ErrorCode.FORBIDDEN
+                }
+            }
+        }
     })

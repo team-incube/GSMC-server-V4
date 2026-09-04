@@ -94,12 +94,10 @@ class SubmitProjectParticipationService(
                 ?: throw GsmcException(ErrorCode.CATEGORY_NOT_FOUND)
 
         val uniqueFileIds = fileIds.distinct()
-        val files = filePersistencePort.findAllByIdIn(uniqueFileIds)
-        if (uniqueFileIds.size != files.size) {
-            throw GsmcException(ErrorCode.FILE_NOT_FOUND)
-        }
-        if (files.any { it.userId != userId }) {
-            throw GsmcException(ErrorCode.FORBIDDEN)
+        val filesById = filePersistencePort.findAllByIdIn(uniqueFileIds).associateBy { it.fileId }
+        uniqueFileIds.forEach { fileId ->
+            val file = filesById[fileId] ?: throw GsmcException(ErrorCode.FILE_NOT_FOUND)
+            if (file.userId != userId) throw GsmcException(ErrorCode.FORBIDDEN)
         }
 
         val existing = scorePersistencePort.findByUserIdAndDgProjectId(userId, dgProjectId)
