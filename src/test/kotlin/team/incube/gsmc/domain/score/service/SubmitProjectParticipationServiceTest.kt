@@ -156,7 +156,7 @@ class SubmitProjectParticipationServiceTest :
                         persistenceTransactionActive = TransactionSynchronizationManager.isActualTransactionActive()
                         category
                     }
-                    every { filePersistencePort.findById(10L) } returns file(10L)
+                    every { filePersistencePort.findAllByIdIn(listOf(10L)) } returns listOf(file(10L))
                     every { scorePersistencePort.findByUserIdAndDgProjectId(userId, dgProjectId) } returns null
                     every { evidencePersistencePort.save(any()) } answers {
                         firstArg<Evidence>().copy(evidenceId = 500L)
@@ -273,6 +273,7 @@ class SubmitProjectParticipationServiceTest :
                             createdAt = LocalDateTime.now(),
                             updatedAt = LocalDateTime.now(),
                         )
+                    every { filePersistencePort.findAllByIdIn(emptyList()) } returns emptyList()
                     every { scorePersistencePort.findByUserIdAndDgProjectId(userId, dgProjectId) } returns pending
 
                     val exception = shouldThrow<GsmcException> { service.execute(dgProjectId, "내용", emptyList()) }
@@ -289,7 +290,7 @@ class SubmitProjectParticipationServiceTest :
                     every { dataGsmProjectApiPort.findProjectById(dgProjectId) } returns dgProject()
                     every { categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION) } returns
                         category
-                    every { filePersistencePort.findById(20L) } returns file(20L)
+                    every { filePersistencePort.findAllByIdIn(listOf(20L)) } returns listOf(file(20L))
 
                     val existingEvidence =
                         Evidence(
@@ -341,11 +342,28 @@ class SubmitProjectParticipationServiceTest :
                     every { dataGsmProjectApiPort.findProjectById(dgProjectId) } returns dgProject()
                     every { categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION) } returns
                         category
-                    every { filePersistencePort.findById(30L) } returns file(30L, ownerId = 999L)
+                    every { filePersistencePort.findAllByIdIn(listOf(30L)) } returns listOf(file(30L, ownerId = 999L))
 
                     val exception = shouldThrow<GsmcException> { service.execute(dgProjectId, "내용", listOf(30L)) }
 
                     exception.errorCode shouldBe ErrorCode.FORBIDDEN
+                }
+            }
+        }
+
+        Given("첨부한 파일 중 존재하지 않는 파일이 섞여 있을 때") {
+            When("제출하면") {
+                Then("FILE_NOT_FOUND 예외가 발생한다") {
+                    commonMocksForStudent()
+                    every { dataGsmProjectApiPort.findProjectById(dgProjectId) } returns dgProject()
+                    every { categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION) } returns
+                        category
+                    every { filePersistencePort.findAllByIdIn(listOf(40L, 41L)) } returns listOf(file(40L))
+
+                    val exception =
+                        shouldThrow<GsmcException> { service.execute(dgProjectId, "내용", listOf(40L, 41L)) }
+
+                    exception.errorCode shouldBe ErrorCode.FILE_NOT_FOUND
                 }
             }
         }
@@ -357,6 +375,7 @@ class SubmitProjectParticipationServiceTest :
                     every { dataGsmProjectApiPort.findProjectById(dgProjectId) } returns dgProject()
                     every { categoryPersistencePort.findByCategoryType(CategoryType.PROJECT_PARTICIPATION) } returns
                         category
+                    every { filePersistencePort.findAllByIdIn(emptyList()) } returns emptyList()
                     every { scorePersistencePort.findByUserIdAndDgProjectId(userId, dgProjectId) } returns null
                     every { evidencePersistencePort.save(any()) } answers {
                         firstArg<Evidence>().copy(evidenceId = 500L)
