@@ -56,4 +56,18 @@ interface FileJpaRepository : JpaRepository<FileJpaEntity, Long> {
     fun unlinkAllFromEvidence(
         @Param("evidenceId") evidenceId: Long,
     ): Int
+
+    /**
+     * 파일의 점수 연결을 해제한다.
+     *
+     * 엔티티 수정이 아니라 벌크 쿼리인 이유는 실행 시점을 코드가 정하기 위해서다. 점수 재제출
+     * 흐름(`AppendMyScoreWithFileService`)은 기존 파일 연결을 끊은 뒤 새 파일을 연결하는데, 둘 다
+     * 엔티티 수정이면 flush 시점에 Hibernate가 순서를 정해 연결이 먼저 나갈 수 있고, 그러면 두 행이
+     * 같은 `score_id`를 갖는 순간이 생겨 `uk_file_score`를 위반한다. 벌크 쿼리는 호출 즉시 실행된다.
+     */
+    @Modifying
+    @Query("update FileJpaEntity f set f.score = null where f.fileId = :fileId")
+    fun unlinkFromScore(
+        @Param("fileId") fileId: Long,
+    ): Int
 }
