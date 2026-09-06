@@ -8,6 +8,7 @@ import team.incube.gsmc.domain.project.adapter.out.openapi.dto.DataGsmApiRespons
 import team.incube.gsmc.domain.project.adapter.out.openapi.dto.DataGsmProjectPageDto
 import team.incube.gsmc.domain.project.adapter.out.openapi.dto.toDomain
 import team.incube.gsmc.domain.project.port.out.DataGsmProjectApiPort
+import team.incube.gsmc.domain.project.port.out.DataGsmProjectCachePort
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.adapter.Adapter
 import team.incube.gsmc.global.exception.ErrorCode
@@ -25,14 +26,21 @@ private const val ACTIVE_STATUS = "ACTIVE"
 @Adapter(direction = PortDirection.OUTBOUND)
 class DataGsmProjectApiAdapter(
     private val dataGsmOpenApiRestClient: RestClient,
+    private val dataGsmProjectCachePort: DataGsmProjectCachePort,
 ) : DataGsmProjectApiPort {
     /** DataGSM에서 현재 사용자가 참여한 활성 프로젝트를 조회합니다. */
     override fun findActiveProjectsByParticipantEmail(email: String): List<DataGsmProject> =
-        fetchAllActiveProjects().filter { project -> project.participants.any { it.participantEmail == email } }
+        findAllActiveProjects().filter { project -> project.participants.any { it.participantEmail == email } }
 
     /** DataGSM 프로젝트 식별자로 외부 프로젝트를 조회합니다. */
     override fun findProjectById(dgProjectId: Long): DataGsmProject? =
         fetchProjectPage(mapOf("projectId" to dgProjectId))?.projects?.firstOrNull()?.toDomain()
+
+    private fun findAllActiveProjects(): List<DataGsmProject> {
+        dataGsmProjectCachePort.findAll()?.let { return it }
+
+        return fetchAllActiveProjects().also(dataGsmProjectCachePort::saveAll)
+    }
 
     private fun fetchAllActiveProjects(): List<DataGsmProject> {
         val result = mutableListOf<DataGsmProject>()
