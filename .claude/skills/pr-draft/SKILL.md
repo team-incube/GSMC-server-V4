@@ -45,6 +45,7 @@ Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1 appropriate label.
 **Title** — Generate 3 options in the format `[scope] description`:
 - Scope: domain name (`[member]`, `[auth]`, `[score]`, etc.) or `[global]` / `[ci/cd]` for cross-cutting changes
 - Description: Korean, concise, no period, max 50 characters total
+- Wrap class names, method names, annotations, file names, and technical terms in backticks (e.g., `@Transactional`, `RemoveMyAlertService`, `SKILL.md`)
 - If a related issue was found, align the best option's description with the issue title
 - Mark the best option with `← 추천`
 
@@ -79,11 +80,32 @@ Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1 appropriate label.
 
 Write the body to `PR_BODY.md`, then display:
 
-> Base branch is always `develop`. Always pass `--base develop` when running `gh pr create`.
+```
+## PR 제목 후보
+1. [title1]
+2. [title2]
+3. [title3] ← 추천
+
+## 선택된 라벨
+- label
+
+## PR 본문 미리보기
+[body content]
+```
+
+Use AskUserQuestion to ask the user which title to use (present options 1/2/3). Wait for the answer before proceeding.
+
+> Base branch is always `develop`.
 
 ## Step 6 — Create PR & Cleanup
 
-After the user confirms and `gh pr create` succeeds, delete the temporary file:
+Run the creation script with the confirmed title and label(s) — do NOT call `gh pr create` directly, the script handles base branch and missing-label fallback:
+
+```bash
+bash "${CLAUDE_SKILL_DIR}/scripts/create-pr.sh" "<confirmed-title>" "PR_BODY.md" "<label>"
+```
+
+After creation, display the PR URL. Then delete the temporary file:
 
 ```bash
 rm -f PR_BODY.md
