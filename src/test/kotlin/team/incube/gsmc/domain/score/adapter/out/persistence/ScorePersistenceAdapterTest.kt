@@ -137,7 +137,7 @@ class ScorePersistenceAdapterTest :
             val fileQuery = mockk<JPAQuery<team.incube.gsmc.domain.file.adapter.out.persistence.entity.FileJpaEntity>>()
             every { queryFactory.selectFrom(fileJpaEntity) } returns fileQuery
             every { fileQuery.where(any<Predicate>()) } returns fileQuery
-            every { fileQuery.fetchFirst() } returns null
+            every { fileQuery.fetchOne() } returns null
         }
 
         Given("findUnapprovedByUserIdAndCategoryType로 조회할 때") {
