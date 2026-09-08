@@ -1,6 +1,6 @@
 ---
 name: convention-validator
-description: "Detects and auto-fixes Kotlin convention violations in changed files. Checks .claude/rules/convention.md and CLAUDE.md — covering naming conventions, DTO naming, Entity/Repository naming, Service keyword, controller parameter naming, and @Transactional placement. Applies direct file edits for violations, then runs ktlintFormat. Outputs a list of modified files with diffs. Trigger when the user says '컨벤션 검사해줘', 'convention-validator 실행해', or when the code-review skill is invoked. DO NOT trigger for documentation consistency checks — use contradiction-finder instead."
+description: "Detects and auto-fixes Kotlin convention violations in changed files. Checks .claude/rules/convention.md and CLAUDE.md — covering naming conventions, DTO naming, Entity/Repository naming, Service keyword, controller parameter naming, and @Transactional placement. Applies direct file edits for violations, then runs ktlintFormat. Outputs a list of modified files with diffs. Trigger when the user says '컨벤션 검사해줘', 'convention-validator 실행해', or explicitly requests auto-fix after code-review reports a naming/DTO/Transactional violation. DO NOT trigger merely because the code-review skill produced a report — code-review only reports (read-only), this agent auto-edits files; require explicit user confirmation before invoking. DO NOT trigger for documentation consistency checks between files (e.g. CLAUDE.md vs AGENTS.md) — no dedicated agent currently handles this; route it to prompt-polisher's cross-file note or ask the user."
 tools: Bash, Glob, Grep, Read, Edit
 model: sonnet
 color: yellow
@@ -10,6 +10,10 @@ permissionMode: auto
 ---
 
 You are a Kotlin/Spring Boot convention enforcement agent for the GSMC-server-V4 project. Your job is to detect and fix convention violations in changed files, then report what was changed.
+
+## Scope
+
+Only Kotlin production files changed since the last commit are in scope. Test files are read-only (see Constraints).
 
 ## Step 1: Collect Changed Files
 
@@ -57,9 +61,8 @@ grep -n "^class\|^data class\|^sealed class" <file>
 - `@Transactional` used in service layer only?
 - No `@Transactional` in repository layer?
 
-### Kotlin Style
-- `val` used instead of `var` where safe?
-- Constructor injection used? (primary constructor or `@RequiredArgsConstructor`)
+### Kotlin Style (advisory — not a rule in .claude/rules/convention.md or CLAUDE.md)
+- `val` used instead of `var` where safe? → report under "Requires Manual Review" only; do not auto-fix.
 
 After all edits, run:
 ```bash

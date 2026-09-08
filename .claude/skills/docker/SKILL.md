@@ -65,13 +65,11 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${RDB_PASSWORD}"]
 ```
 
-- 모든 자격증명은 `.env` 파일을 통한 환경 변수로만 주입한다 (`${VAR}` 형태). `docker-compose.yml`에 실제 비밀번호를 리터럴로 적지 않는다 — [[security-checklist]] 1번 항목.
+- 모든 자격증명은 `.env` 파일을 통한 환경 변수로만 주입한다 (`${VAR}` 형태). `docker-compose.yml`에 실제 비밀번호를 리터럴로 적지 않는다 — `.claude/skills/security-checklist/SKILL.md`의 "1. 하드코딩된 시크릿" 항목 참고.
 - 새 서비스(Redis 등)를 추가할 때도 같은 패턴: `depends_on` + `healthcheck` + 환경 변수 주입.
 - `.env`, `.env.local` 등은 반드시 `.gitignore`에 포함되어 있어야 한다. 커밋 전 `git status`로 실수 포함 여부 확인.
 
 ## 참고 파일
 
-```bash
-cat Dockerfile docker-compose.yml
-find . -maxdepth 1 -iname ".env*"
-```
+- `Dockerfile`
+- `docker-compose.yml`
