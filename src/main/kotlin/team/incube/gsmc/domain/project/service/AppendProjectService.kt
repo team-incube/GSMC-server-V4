@@ -5,6 +5,7 @@ import team.incube.gsmc.domain.project.Project
 import team.incube.gsmc.domain.project.ProjectFile
 import team.incube.gsmc.domain.project.ProjectParticipant
 import team.incube.gsmc.domain.project.port.`in`.AppendProjectUseCase
+import team.incube.gsmc.domain.project.port.out.ProjectDraftPersistencePort
 import team.incube.gsmc.domain.project.port.out.ProjectPersistencePort
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.port.Port
@@ -17,6 +18,7 @@ import team.incube.gsmc.global.util.MemberUtil
 @Port(direction = PortDirection.INBOUND)
 class AppendProjectService(
     private val projectPersistencePort: ProjectPersistencePort,
+    private val projectDraftPersistencePort: ProjectDraftPersistencePort,
     private val projectServiceSupport: ProjectServiceSupport,
     private val memberUtil: MemberUtil,
 ) : AppendProjectUseCase {
@@ -32,15 +34,18 @@ class AppendProjectService(
         projectServiceSupport.validateFinalContent(title, description)
         val participants = projectServiceSupport.findParticipants(participantIds, ownerId)
         val files = projectServiceSupport.validateFiles(fileIds, ownerId)
-        return projectPersistencePort.save(
-            Project(
-                projectId = 0,
-                ownerId = ownerId,
-                title = title,
-                description = description,
-                participants = participants.map { ProjectParticipant(it.userId, it.userName) },
-                files = files.map { ProjectFile(it.fileId, it.fileOriginalName, it.fileKey) },
-            ),
-        )
+        val project =
+            projectPersistencePort.save(
+                Project(
+                    projectId = 0,
+                    ownerId = ownerId,
+                    title = title,
+                    description = description,
+                    participants = participants.map { ProjectParticipant(it.userId, it.userName) },
+                    files = files.map { ProjectFile(it.fileId, it.fileOriginalName, it.fileKey) },
+                ),
+            )
+        projectDraftPersistencePort.deleteByOwnerId(ownerId)
+        return project
     }
 }
