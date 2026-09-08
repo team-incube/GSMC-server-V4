@@ -36,6 +36,7 @@ object Libs {
 
     // AWS SDK
     const val AWS_SDK_S3 = "software.amazon.awssdk:s3:2.29.52"
+    const val APACHE_POI = "org.apache.poi:poi-ooxml:5.4.1"
 
     // Util
     const val LOMBOK = "org.projectlombok:lombok"

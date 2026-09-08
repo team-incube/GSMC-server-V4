@@ -64,6 +64,8 @@ datagsm:
   openapi:
     base-url: ${DATAGSM_OPENAPI_BASE_URL:https://openapi.datagsm.kr}
     api-key: ${DATAGSM_OPENAPI_KEY}
+    connect-timeout: ${DATAGSM_OPENAPI_CONNECT_TIMEOUT:3s}
+    read-timeout: ${DATAGSM_OPENAPI_READ_TIMEOUT:5s}
 
 aws:
   s3:

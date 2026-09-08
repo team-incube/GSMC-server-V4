@@ -25,6 +25,10 @@ Gwangju Software Meister High School.
 - Code Formatting: KtLint
 - SDK: [the-sdk](https://github.com/themoment-team/the-sdk) `1.5`
 
+## the-sdk
+
+See `.claude/skills/the-sdk/SKILL.md` for which features are enabled in this project (logging is on; response/swagger/exception are off).
+
 ## Exception Handling
 
 Use `GsmcException` with `ErrorCode`. The global exception handler is implemented
@@ -49,37 +53,27 @@ This repository keeps two skill trees with the same rules:
 Both must be updated together when a rule changes. If they diverge,
 `.claude/skills/` is the reference.
 
-Some files exist in only one tree (`convention-validator`, `issue-parser` in
-`.agents/` only). Reconciling those is tracked separately.
+Some files exist in only one tree: `convention-validator` and `issue-parser` are
+Codex-only skills under `.agents/skills/` (their Claude Code counterpart, if any,
+is an agent under `.claude/agents/`, not a skill).
 
 ## Architecture
 
-Hexagonal Architecture. See `.claude/skills/architecture/SKILL.md` for details.
+Hexagonal Architecture. See `.agents/skills/architecture/SKILL.md` for details (layer rules and the layer-naming table live there — mirrors `.claude/skills/architecture/SKILL.md`).
 
 ### Dependency Direction
 
 ```
-adapter/in -> port/in -> service -> port/out -> adapter/out
+adapter/in → port/in → service → port/out → adapter/out
 ```
 
 - `domain/` must not depend on JPA, Spring, or any infrastructure.
 - `service` only knows `port/out` interfaces — never JPA directly.
-- `JpaEntity <-> Domain` conversion via Kotlin extension functions.
+- `JpaEntity ↔ Domain` conversion via Kotlin extension functions.
 
-### Naming
+## Naming Conventions
 
-| Layer | Naming |
-|-------|--------|
-| UseCase | `Fetch{Domain}UseCase`, `Append{Domain}UseCase` |
-| PersistencePort | `{Domain}PersistencePort` |
-| Service | `Fetch{Domain}Service`, `Modify{Domain}Service` |
-| WebAdapter | `{Domain}WebAdapter` |
-| PersistenceAdapter | `{Domain}PersistenceAdapter` |
-| JpaEntity | `{Domain}JpaEntity` |
-| JpaRepository | `{Domain}JpaRepository` |
-
-Service keywords: `Fetch` / `Search` / `Modify` / `Append` / `Remove`
-Request DTO suffix: `Query` or `Input` — Response DTO suffix: `Payload` or `MutationPayload`
+See `.claude/rules/convention.md` for full details (DTO suffix, Service keyword, Entity/Repository naming).
 
 ## Domain Modules
 

@@ -1,5 +1,5 @@
 ---
-name: resolve-reviews
+name: resolve-pr-comments
 description: Collect PR review comments, critically assess each one against project conventions, auto-apply valid ones, post refutation replies for invalid ones, and prompt for partial ones.
 ---
 

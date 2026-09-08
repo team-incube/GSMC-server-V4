@@ -83,8 +83,7 @@ class FilePersistenceAdapter(
     }
 
     override fun unlinkFromScore(fileId: Long) {
-        val entity = fileJpaRepository.findById(fileId).orElse(null) ?: return
-        fileJpaRepository.save(entity.copy(score = null))
+        fileJpaRepository.unlinkFromScore(fileId)
     }
 
     override fun isLinkedToApprovedScore(fileId: Long): Boolean =

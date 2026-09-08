@@ -1,0 +1,15 @@
+# .harness/sync.yml
+groups:
+  - claude
+  - codex
+
+language: ko
+
+# GSMC-server-V4는 백엔드(Kotlin/Spring) 전용 저장소이므로 프론트엔드 스킬은 동기화하지 않는다.
+overrides:
+  claude/skills/nextjs-fsd-architecture: false
+  claude/skills/nextjs-turborepo-fsd: false
+  claude/skills/nextjs-package-boundaries: false
+  claude/skills/tailwind-shadcn: false
+  claude/skills/tanstack-query-zod: false
+  claude/agents/frontend-convention-validator: false

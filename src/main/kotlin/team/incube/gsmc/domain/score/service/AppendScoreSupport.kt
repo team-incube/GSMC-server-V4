@@ -72,14 +72,25 @@ class AppendScoreSupport(
     }
 
     /**
-     * 재사용할 기존 `REJECTED` 점수 요청이 있으면 그것을, 없으면 새로 저장할 빈 [Score]를 반환한다.
+     * 재사용할 기존 점수 요청이 있으면 그것을, 없으면 새로 저장할 빈 [Score]를 반환한다.
      * 호출부는 반환된 객체를 `copy()`해서 실제 값을 채운 뒤 저장한다.
      *
      * 누적 카테고리([Category.isAccumulated]=true, 예: 자격증)는 같은 카테고리에 여러 건이 동시에
-     * 존재할 수 있어(취득한 자격증마다 별개의 제출) `REJECTED` row가 여러 개일 수 있다 — 카테고리
-     * 단위로 하나만 재사용하면 다른 제출을 덮어쓰고, `fetchOne()`이 `NonUniqueResultException`을
-     * 던질 수도 있다. 그래서 누적 카테고리는 항상 새 [Score]를 생성하고, 비누적 카테고리에서만
-     * 재사용한다(비누적 카테고리는 카테고리당 제출이 항상 1건이므로 안전).
+     * 존재할 수 있어(취득한 자격증마다 별개의 제출) 재사용 대상을 특정할 수 없다 — 카테고리 단위로
+     * 하나만 재사용하면 다른 제출을 덮어쓴다. 그래서 누적 카테고리는 항상 새 [Score]를 생성하고,
+     * 카테고리당 제출이 1건인 비누적 카테고리에서만 재사용한다.
+     *
+     * 비누적 카테고리에 아직 승인되지 않은 요청이 있으면 그 row를 재사용해 덮어쓴다. 심사 대기 중에
+     * 사진을 다시 올리거나 점수를 고쳐 내도 행이 늘지 않는다.
+     *
+     * 이미 승인된 건만 있으면 **새 [Score]를 만든다.** 토익처럼 나중에 더 높은 점수를 받아 다시
+     * 제출하는 경우가 있는데, 기존 승인 행을 덮어쓰면 재심사가 끝날 때까지 인정 점수가 비어버린다.
+     * 별개 행으로 두면 심사 중에도 기존 승인 점수가 유지되고, 새 건이 승인될 때 예전 행이 정리된다
+     * ([ApproveScoreService] 참고).
+     *
+     * 이 조회는 사용자에게 의미 있는 동작을 주기 위한 것이고, 조회와 저장 사이의 동시 요청까지
+     * 막지는 못한다. 그 경쟁 상태는 `score_unique_slot_tb`의 UNIQUE 제약이 잡는다
+     * ([team.incube.gsmc.domain.score.adapter.out.persistence.ScorePersistenceAdapter] 참고).
      *
      * @param userId 현재 사용자 ID
      * @param category 대상 카테고리
@@ -91,13 +102,8 @@ class AppendScoreSupport(
     ): Score {
         if (!category.isAccumulated) {
             scorePersistencePort
-                .findByUserIdAndCategoryTypeAndScoreStatus(
-                    userId,
-                    category.categoryType,
-                    ScoreStatus.REJECTED,
-                )?.let {
-                    return it
-                }
+                .findUnapprovedByUserIdAndCategoryType(userId, category.categoryType)
+                ?.let { return it }
         }
 
         val now = LocalDateTime.now()

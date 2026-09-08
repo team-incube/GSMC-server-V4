@@ -112,7 +112,7 @@ jobs:
               --add-label "$TYPE_LABEL"
 
             # 자동 리뷰어 등록 (작성자 제외)
-            ALL_REVIEWERS="jyx-07,hej090224,snowykte0426,minwoo-3,s26059-maker"
+            ALL_REVIEWERS="jyx-07,exijn,snowykte0426,minwoo-3,s26059-maker"
             REVIEWERS=$(echo "$ALL_REVIEWERS" \
               | tr ',' '\n' \
               | grep -v "^${PR_AUTHOR}$" \
@@ -177,7 +177,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
         with:
           cache-read-only: false
           cache-cleanup: always
