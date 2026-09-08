@@ -1,14 +1,14 @@
 ---
 name: kotest-guide
-description: 이 프로젝트의 Kotest + MockK 테스트 패턴 — BehaviorSpec Given/When/Then 구조, mockk 생성, GsmcException 검증. 테스트 코드를 작성하거나 리뷰할 때 참조.
+description: This project's Kotest + MockK test patterns — BehaviorSpec Given/When/Then structure, mockk creation, GsmcException verification. Reference when writing or reviewing test code.
 ---
 
-# Kotest + MockK 테스트 가이드
+# Kotest + MockK Test Guide
 
-이 프로젝트는 `BehaviorSpec`의 `Given`/`When`/`Then`을 사용한다 (`DescribeSpec`이 아님).
-실제 예시: `src/test/kotlin/team/incube/gsmc/domain/alert/service/RemoveMyAlertServiceTest.kt`
+This project uses `BehaviorSpec` with `Given`/`When`/`Then` (not `DescribeSpec`).
+Real example: `src/test/kotlin/team/incube/gsmc/domain/alert/service/RemoveMyAlertServiceTest.kt`
 
-## Given-When-Then 패턴
+## Given-When-Then Pattern
 
 ```kotlin
 class RemoveMyAlertServiceTest :
@@ -24,14 +24,14 @@ class RemoveMyAlertServiceTest :
             userId = userId,
             scoreId = null,
             alertType = AlertType.APPROVED,
-            content = "내용",
+            content = "content",
             isRead = false,
             createdAt = LocalDateTime.now(),
         )
 
-        Given("로그인한 사용자가") {
-            When("본인의 알림을 삭제하면") {
-                Then("정상적으로 삭제된다") {
+        Given("a logged-in user") {
+            When("deletes their own alert") {
+                Then("it is deleted successfully") {
                     every { memberUtil.getCurrentUserId() } returns 10L
                     every { alertPersistencePort.findById(1L) } returns alert(1L, 10L)
                     every { alertPersistencePort.deleteById(1L) } just runs
@@ -46,35 +46,35 @@ class RemoveMyAlertServiceTest :
     })
 ```
 
-- 최상위 `Given`은 상태/주체, `When`은 행동, `Then`은 검증. 중첩된 `When`으로 여러 시나리오를 분기한다.
-- 매번 새 mock을 만들지 않고 스펙 최상단에서 한 번만 생성한 뒤 `beforeEach { clearAllMocks() }`로 초기화한다.
-- port/util 등 의존성은 실제 구현이 아니라 `port/out` 인터페이스나 `global/util`의 유틸을 mock한다 (JPA를 직접 mock하지 않는다).
+- The top-level `Given` is the state/subject, `When` is the action, `Then` is the assertion. Branch multiple scenarios with nested `When` blocks.
+- Don't create a new mock for every test — create it once at the top of the spec and reset it with `beforeEach { clearAllMocks() }`.
+- Mock the `port/out` interfaces or utilities in `global/util`, not real implementations (don't mock JPA directly) — dependencies like ports/utils.
 
-## MockK 패턴
+## MockK Patterns
 
 ```kotlin
-// 생성
+// creation
 val port = mockk<AlertPersistencePort>()
 
-// 스터빙
+// stubbing
 every { port.findById(1L) } returns alert
 every { port.deleteById(1L) } just runs
 
-// 코루틴
+// coroutines
 coEvery { port.save(any()) } returns alert
 
-// 검증
+// verification
 verify(exactly = 1) { port.deleteById(1L) }
 verify(exactly = 0) { port.deleteById(any()) }
 ```
 
-## 예외 검증 — `GsmcException` + `ErrorCode`
+## Exception Verification — `GsmcException` + `ErrorCode`
 
-이 프로젝트는 `ExpectedException`이 아니라 `GsmcException(errorCode: ErrorCode)`를 던진다. `errorCode` 프로퍼티까지 검증한다:
+This project throws `GsmcException(errorCode: ErrorCode)`, not `ExpectedException`. Verify the `errorCode` property as well:
 
 ```kotlin
-When("다른 사용자의 알림을 삭제하려 하면") {
-    Then("ALERT_NOT_FOUND 예외가 발생하고 삭제는 호출되지 않는다") {
+When("trying to delete another user's alert") {
+    Then("an ALERT_NOT_FOUND exception is thrown and delete is not called") {
         every { memberUtil.getCurrentUserId() } returns 10L
         every { alertPersistencePort.findById(2L) } returns alert(2L, 999L)
 
@@ -86,9 +86,9 @@ When("다른 사용자의 알림을 삭제하려 하면") {
 }
 ```
 
-단순히 예외 타입만 검증하지 말고 `errorCode`까지 확인해야 잘못된 `ErrorCode`로 리팩터링했을 때 테스트가 실제로 잡아준다.
+Don't just verify the exception type — check the `errorCode` too, so the test actually catches a refactor that introduces the wrong `ErrorCode`.
 
-## 인자 캡처
+## Argument Capture
 
 ```kotlin
 val slot = slot<Alert>()
@@ -97,9 +97,9 @@ service.execute(reqDto)
 slot.captured.content shouldBe "expected"
 ```
 
-## 참고 파일 탐색
+## Reference Files
 
-```bash
-find src/test -name "*ServiceTest.kt" | head -5
-find src/test -name "*Test.kt" | xargs grep -l "BehaviorSpec" | head -5
-```
+- `src/test/kotlin/team/incube/gsmc/domain/alert/service/RemoveMyAlertServiceTest.kt`
+- `src/test/kotlin/team/incube/gsmc/domain/auth/service/RefreshTokenServiceTest.kt`
+- `src/test/kotlin/team/incube/gsmc/domain/developer/service/RemoveMemberServiceTest.kt`
+- `src/test/kotlin/team/incube/gsmc/domain/category/service/SearchCategoriesServiceTest.kt`

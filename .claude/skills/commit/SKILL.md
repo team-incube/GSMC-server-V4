@@ -60,4 +60,4 @@ Format: `type(scope): description`
     - `git commit -m "message"`
 4. Verify with `git log --oneline -n <count>`
 
-> **Rule**: Changes with the same logical purpose go into one commit. Changes with different purposes must be separated.
+> **Edge case**: if a single file touches two unrelated concerns (e.g. a bug fix and a rename in the same file), stage only the relevant hunks with `git add -p` instead of the whole file.

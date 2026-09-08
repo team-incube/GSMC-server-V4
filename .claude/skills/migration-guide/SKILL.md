@@ -15,13 +15,13 @@ description: DB 스키마 변경과 Entity 수정의 영향 분석 및 올바른
 
 ## 변경 순서 (헥사고날 아키텍처 기준)
 
-1. **Flyway 마이그레이션 작성**: `src/main/resources/db/migration/V{n}__{description}.sql` — [[database-schema]]의 네이밍 규칙 준수
+1. **Flyway 마이그레이션 작성**: `src/main/resources/db/migration/V{n}__{description}.sql` — `.claude/skills/database-schema/SKILL.md`의 네이밍 규칙 준수
 2. **domain/ 수정**: 순수 Kotlin 클래스, 새 필드 추가/제거
 3. **adapter/out/persistence/entity/ 수정**: `{Domain}JpaEntity`에 컬럼 매핑 추가, `toDomain()`/`toEntity()` 확장 함수 갱신
 4. **port/out, port/in DTO 수정**: 영향받는 UseCase 시그니처, 요청/응답 DTO
 5. **service/ 수정**: 비즈니스 로직 반영
 6. **adapter/in (GraphQL 스키마) 수정**: `*.graphqls`에 필드 추가, non-null 여부 결정
-7. **테스트 갱신**: Entity/Service 테스트 ([[kotest-guide]] 참고)
+7. **테스트 갱신**: Entity/Service 테스트 (`.claude/skills/kotest-guide/SKILL.md` 참고)
 
 > 순서를 지키는 이유: `domain/`이 인프라에 의존하지 않는 계층이므로, 도메인 모델을 먼저 확정한 뒤 바깥쪽(영속성 → 서비스 → 어댑터)으로 전파해야 컴파일 에러로 누락을 조기에 발견할 수 있다.
 
@@ -44,9 +44,7 @@ ALTER TABLE score_tb ADD COLUMN dg_project_id BIGINT NOT NULL DEFAULT 0;
 -- 2) 필요하면 후속 마이그레이션에서 DEFAULT 제약을 제거
 ```
 
-## 참고 파일 탐색
+## 참고 파일
 
-```bash
-find src/main/resources/db/migration -name "V*.sql" | sort -V | tail -1   # 최신 버전 번호 확인
-find src/main -type d -name "domain" -path "*/main/*"
-```
+- 최신 마이그레이션 예시: `src/main/resources/db/migration/V7__add_score_dg_project_id_index.sql` (실제 최신 버전 번호는 `src/main/resources/db/migration/` 디렉터리에서 다시 확인할 것 — 새 마이그레이션이 추가되었을 수 있다)
+- 도메인 루트: `src/main/kotlin/team/incube/gsmc/domain/`

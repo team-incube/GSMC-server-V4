@@ -1,5 +1,5 @@
 ---
-name: resolve-reviews
+name: resolve-pr-comments
 description: Collect PR review comments, critically assess each one against project conventions, auto-apply valid ones, post refutation replies for invalid ones, and prompt for partial ones.
 disable-model-invocation: true
 allowed-tools: Bash(bash *get-pr-data.sh:*), Bash(gh api:*), Bash(gh pr view:*), Bash(gh repo:*), Bash(git add:*), Bash(git commit:*), Bash(git log:*), Bash(git push:*), Bash(git rev-parse:*), Bash(rm:*), Edit, Read
@@ -34,7 +34,7 @@ find .claude/rules -name "*.md" 2>/dev/null
 
 Read each returned file in full. These are the authoritative rules for judging each review comment.
 
-**Rule priority**: `CLAUDE.md` > `.claude/rules/**` > `.gemini/styleguide.md` > `CONTRIBUTING.md`
+**Rule priority**: `CLAUDE.md` > `.claude/rules/**` (this repo has no `.gemini/styleguide.md` or `CONTRIBUTING.md` currently — add them back to the priority list if/when created)
 
 For each comment in `pr_comments.json`, apply the following **layered judgment criteria**:
 

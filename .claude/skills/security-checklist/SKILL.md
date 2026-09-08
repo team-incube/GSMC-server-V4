@@ -43,10 +43,17 @@ grep -rn "createNativeQuery\|@Query.*+" --include="*.kt" src/main
 - [ ] OAuth `state` 파라미터를 `OAuthStatePersistencePort`로 검증해 CSRF를 막는가?
 - [ ] `redirect_uri`가 화이트리스트(`ErrorCode.INVALID_REDIRECT_URI`)로 제한되는가?
 
-```bash
-find src/main -path "*/security/jwt/*" -name "*.kt"
-find src/main -path "*/domain/auth/*" -name "*.kt"
-```
+JWT 구현체:
+- `src/main/kotlin/team/incube/gsmc/global/security/jwt/JwtTokenProvider.kt`
+- `src/main/kotlin/team/incube/gsmc/global/security/jwt/JwtProperties.kt`
+- `src/main/kotlin/team/incube/gsmc/global/security/jwt/JwtConfig.kt`
+
+OAuth / 로그인 흐름:
+- `src/main/kotlin/team/incube/gsmc/domain/auth/service/LoginService.kt`
+- `src/main/kotlin/team/incube/gsmc/domain/auth/service/RefreshTokenService.kt`
+- `src/main/kotlin/team/incube/gsmc/domain/auth/service/FetchAuthorizationUrlService.kt`
+- `src/main/kotlin/team/incube/gsmc/domain/auth/adapter/out/oauth/DataGsmOAuthAdapter.kt`
+- `src/main/kotlin/team/incube/gsmc/domain/auth/adapter/out/persistence/OAuthStatePersistenceAdapter.kt`
 
 ## 4. 리프레시 토큰 / 세션 관리
 
@@ -66,15 +73,21 @@ grep -rn "log\.\(info\|debug\|warn\)" --include="*.kt" src/main | grep -iE "toke
 
 - [ ] 로그인 필요 엔드포인트가 Spring Security 필터 체인(`JwtAuthenticationFilter`)을 거치는가?
 - [ ] 본인 리소스만 접근하는 API(`My` 키워드가 붙은 서비스)는 `SecurityContextHolder`/`MemberUtil.getCurrentUserId()`로 요청자 ID를 가져와 소유권을 검증하는가? (파라미터로 넘어온 ID를 그대로 신뢰하지 않는가)
-- [ ] `developer` 도메인처럼 타인의 데이터를 다루는 API는 서비스 메서드 진입 시점에 `UserRole.ROOT`를 검증하는가? (자세한 규칙은 [[architecture]] 스킬의 "Developer-only APIs" 참고)
+- [ ] `developer` 도메인처럼 타인의 데이터를 다루는 API는 서비스 메서드 진입 시점에 `UserRole.ROOT`를 검증하는가? (자세한 규칙은 `.claude/skills/architecture/SKILL.md`의 "Developer-only APIs" 참고)
 - [ ] DB 유니크 제약에만 기대지 않고, 조회 후 존재 여부를 먼저 검증해 적절한 `GsmcException`을 던지는가?
 
-## 참고 파일 탐색
+## 참고 파일
 
-```bash
-find src/main -name "GsmcException.kt" -o -name "ErrorCode.kt" -o -name "GsmcExceptionResolver.kt"
-find src/main -path "*/security/*" -name "*.kt"
-```
+예외 처리:
+- `src/main/kotlin/team/incube/gsmc/global/exception/GsmcException.kt`
+- `src/main/kotlin/team/incube/gsmc/global/exception/ErrorCode.kt`
+- `src/main/kotlin/team/incube/gsmc/global/exception/GsmcExceptionResolver.kt`
+
+Spring Security 설정:
+- `src/main/kotlin/team/incube/gsmc/global/security/config/SecurityConfig.kt`
+- `src/main/kotlin/team/incube/gsmc/global/security/filter/JwtAuthenticationFilter.kt`
+- `src/main/kotlin/team/incube/gsmc/global/security/handler/JwtAuthenticationEntryPoint.kt`
+- `src/main/kotlin/team/incube/gsmc/global/security/handler/JwtAccessDeniedHandler.kt`
 
 ## 리포트 형식
 

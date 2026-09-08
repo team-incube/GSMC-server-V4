@@ -35,7 +35,7 @@ sdk:
 
 - 모든 HTTP 요청/응답에 UUID `Log-ID`를 부여해 자동으로 로깅한다.
 - `not-logging-urls`에 등록된 경로는 로깅에서 제외된다 (GraphiQL, GraphQL 엔드포인트 본문, SSE 스트림처럼 노이즈가 크거나 민감한 경로).
-- 새 엔드포인트를 추가했는데 요청/응답 바디에 민감 정보(토큰, 개인정보)가 포함된다면 `not-logging-urls`에 추가하는 것을 검토한다. ([[security-checklist]] 5번 항목 참고)
+- 새 엔드포인트를 추가했는데 요청/응답 바디에 민감 정보(토큰, 개인정보)가 포함된다면 `not-logging-urls`에 추가하는 것을 검토한다. (`.claude/skills/security-checklist/SKILL.md`의 "5. 민감 정보 로깅" 항목 참고)
 
 ## 새 기능이 필요할 때
 
@@ -45,6 +45,5 @@ sdk:
 
 ## 참고 파일
 
-```bash
-find src/main -name "GsmcExceptionResolver.kt" -o -name "application.yaml"
-```
+- `src/main/kotlin/team/incube/gsmc/global/exception/GsmcExceptionResolver.kt`
+- `src/main/resources/application.yaml`

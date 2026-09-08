@@ -5,7 +5,7 @@ description: Hexagonal architecture structure and rules for this project. Use th
 
 ## Dependency Direction
 ```
-adapter/in -> port/in -> service -> port/out -> adapter/out
+adapter/in → port/in → service → port/out → adapter/out
 ```
 
 - `adapter/in` depends on `port/in`
@@ -38,7 +38,7 @@ adapter/in -> port/in -> service -> port/out -> adapter/out
 
 ### adapter/out/persistence/
 - Implements persistence port.
-- Knows JPA. Handles `{Domain}JpaEntity` <-> `{Domain}` conversion via extension functions.
+- Knows JPA. Handles `{Domain}JpaEntity` ↔ `{Domain}` conversion via extension functions.
 
 ```kotlin
 fun {Domain}JpaEntity.toDomain() = {Domain}(...)

@@ -8,7 +8,7 @@ description: 이 프로젝트의 DB 스키마 규칙 — xxxx_tb 단수 테이�
 MySQL + Flyway(`V{n}__{description}.sql`, `src/main/resources/db/migration/`) + JPA(`ddl-auto: validate`) 조합을 사용한다.
 즉 **스키마 변경은 반드시 Flyway 마이그레이션 파일로 하고, JPA는 검증만 한다.**
 
-## 네이밍 규칙 ([[architecture]] 참고)
+## 네이밍 규칙 (`.claude/skills/architecture/SKILL.md` 참고)
 
 - 테이블: `snake_case`, **단수**, `xxxx_tb` 접미사 — `alert_tb`, `score_tb`, `user_tb`
 - PK 컬럼: `{table}_id` (단순 `id`가 아님) — `alert_id`, `score_id`
@@ -83,11 +83,18 @@ class AlertJpaEntity(
 
 - 고유 식별자(unique key) 컬럼은 Kotlin 타입도 non-nullable로 맞추고 `unique = true, nullable = false`를 명시한다.
 - Enum은 반드시 `@Enumerated(EnumType.STRING)` — `ORDINAL`은 컬럼 순서 변경 시 데이터가 깨진다.
-- Entity ↔ Domain 변환은 확장 함수로 (`{Domain}JpaEntity.toDomain()`, `{Domain}.toEntity()`) — [[architecture]] 참고.
+- Entity ↔ Domain 변환은 확장 함수로 (`{Domain}JpaEntity.toDomain()`, `{Domain}.toEntity()`) — `.claude/skills/architecture/SKILL.md` 참고.
 
-## 참고 파일 탐색
+## 참고 파일
 
-```bash
-find src/main/resources/db/migration -name "V*.sql" | sort -V | tail -5
-find src/main -name "*JpaEntity.kt" | head -5
-```
+최근 마이그레이션 예시 (실제 최신 버전은 `src/main/resources/db/migration/` 디렉터리에서 다시 확인할 것):
+- `src/main/resources/db/migration/V3__add_file_uri_unique_constraint.sql`
+- `src/main/resources/db/migration/V4__create_alert_table.sql`
+- `src/main/resources/db/migration/V5__add_evidence_draft.sql`
+- `src/main/resources/db/migration/V6__create_project_tables.sql`
+- `src/main/resources/db/migration/V7__add_score_dg_project_id_index.sql`
+
+JPA Entity 예시:
+- `src/main/kotlin/team/incube/gsmc/domain/alert/adapter/out/persistence/entity/AlertJpaEntity.kt`
+- `src/main/kotlin/team/incube/gsmc/domain/category/adapter/out/persistence/entity/CategoryJpaEntity.kt`
+- `src/main/kotlin/team/incube/gsmc/domain/evidence/adapter/out/persistence/entity/EvidenceJpaEntity.kt`
