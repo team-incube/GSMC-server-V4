@@ -200,45 +200,57 @@ class AppendScoreSupportTest :
         }
 
         Given("findOrCreateScore") {
-            When("비누적 카테고리에 재사용 가능한 REJECTED 점수가 있으면") {
-                Then("그 점수를 그대로 반환한다") {
-                    val cat = category(EvidenceType.FILE, ScoreCalculationType.SCORE_BASED, isAccumulated = false)
-                    val rejected =
-                        Score(
-                            scoreId = 5L,
-                            userId = userId,
-                            category = cat,
-                            evidence = null,
-                            file = null,
-                            scoreStatus = ScoreStatus.REJECTED,
-                            activityName = null,
-                            scoreValue = 100,
-                            rejectionReason = "사유",
-                            dgProjectId = null,
-                            createdAt = LocalDateTime.now(),
-                            updatedAt = LocalDateTime.now(),
-                        )
-                    every {
-                        scorePersistencePort.findByUserIdAndCategoryTypeAndScoreStatus(
-                            userId,
-                            cat.categoryType,
-                            ScoreStatus.REJECTED,
-                        )
-                    } returns rejected
+            fun existingScore(
+                cat: Category,
+                status: ScoreStatus,
+            ) = Score(
+                scoreId = 5L,
+                userId = userId,
+                category = cat,
+                evidence = null,
+                file = null,
+                scoreStatus = status,
+                activityName = null,
+                scoreValue = 100,
+                rejectionReason = if (status == ScoreStatus.REJECTED) "사유" else null,
+                dgProjectId = null,
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now(),
+            )
 
-                    support.findOrCreateScore(userId, cat) shouldBe rejected
+            listOf(ScoreStatus.REJECTED, ScoreStatus.PENDING, ScoreStatus.INCOMPLETE).forEach { status ->
+                When("비누적 카테고리에 승인되지 않은 $status 점수가 있으면") {
+                    Then("그 점수를 그대로 반환해 덮어쓰게 한다") {
+                        val cat = category(EvidenceType.FILE, ScoreCalculationType.SCORE_BASED, isAccumulated = false)
+                        val existing = existingScore(cat, status)
+                        every {
+                            scorePersistencePort.findUnapprovedByUserIdAndCategoryType(userId, cat.categoryType)
+                        } returns existing
+
+                        support.findOrCreateScore(userId, cat) shouldBe existing
+                    }
                 }
             }
 
-            When("비누적 카테고리에 재사용 가능한 REJECTED 점수가 없으면") {
+            When("비누적 카테고리에 승인된 점수만 있으면") {
+                Then("기존 승인 점수를 건드리지 않고 새 점수를 반환한다") {
+                    val cat = category(EvidenceType.FILE, ScoreCalculationType.SCORE_BASED, isAccumulated = false)
+                    every {
+                        scorePersistencePort.findUnapprovedByUserIdAndCategoryType(userId, cat.categoryType)
+                    } returns null
+
+                    val result = support.findOrCreateScore(userId, cat)
+
+                    result.scoreId shouldBe 0L
+                    result.scoreStatus shouldBe ScoreStatus.PENDING
+                }
+            }
+
+            When("비누적 카테고리에 기존 점수가 없으면") {
                 Then("scoreId가 0인 새 점수를 반환한다") {
                     val cat = category(EvidenceType.FILE, ScoreCalculationType.SCORE_BASED, isAccumulated = false)
                     every {
-                        scorePersistencePort.findByUserIdAndCategoryTypeAndScoreStatus(
-                            userId,
-                            cat.categoryType,
-                            ScoreStatus.REJECTED,
-                        )
+                        scorePersistencePort.findUnapprovedByUserIdAndCategoryType(userId, cat.categoryType)
                     } returns null
 
                     val result = support.findOrCreateScore(userId, cat)
@@ -253,7 +265,7 @@ class AppendScoreSupportTest :
             }
 
             When("누적 카테고리면") {
-                Then("REJECTED 점수가 있어도 재사용하지 않고 항상 새 점수를 반환한다") {
+                Then("기존 점수가 있어도 재사용하지 않고 항상 새 점수를 반환한다") {
                     val cat = category(EvidenceType.FILE, ScoreCalculationType.COUNT_BASED, isAccumulated = true)
 
                     val result = support.findOrCreateScore(userId, cat)
@@ -262,7 +274,7 @@ class AppendScoreSupportTest :
                     result.userId shouldBe userId
                     result.scoreStatus shouldBe ScoreStatus.PENDING
                     verify(exactly = 0) {
-                        scorePersistencePort.findByUserIdAndCategoryTypeAndScoreStatus(any(), any(), any())
+                        scorePersistencePort.findUnapprovedByUserIdAndCategoryType(any(), any())
                     }
                 }
             }

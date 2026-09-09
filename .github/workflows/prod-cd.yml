@@ -21,11 +21,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          Cache-read-only: false
-          Cache-cleanup: always
+          cache-read-only: false
+          cache-cleanup: always
 
       - name: Deploy backend
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1
         with:
           username: ubuntu
           host: ${{ secrets.SERVER_HOST }}

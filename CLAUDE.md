@@ -58,7 +58,7 @@ sdk:
 
 ## Architecture
 
-Hexagonal Architecture. See `.claude/skills/architecture/skill.md` for details.
+Hexagonal Architecture. See `.claude/skills/architecture/SKILL.md` for details.
 
 ### Dependency Direction
 - adapter/in → port/in → service → port/out → adapter/out
@@ -85,7 +85,7 @@ Hexagonal Architecture. See `.claude/skills/architecture/skill.md` for details.
 
 ## Naming Conventions
 
-See `.claude/skills/convention/skill.md` for full details.
+See `.claude/rules/convention.md` for full details.
 
 ## Transaction Management
 
@@ -94,7 +94,7 @@ See `.claude/skills/convention/skill.md` for full details.
 
 ## Git Conventions
 
-See `.claude/skills/commit/skill.md` for full details.
+See `.claude/skills/commit/SKILL.md` for full details.
 
 ## New Feature Checklist
 

@@ -260,26 +260,24 @@ class FilePersistenceAdapterTest :
         }
 
         Given("unlinkFromScore로 점수 요청 연결을 해제할 때") {
-            When("대상 파일이 존재하면") {
-                Then("score를 null로 비운 새 엔티티로 저장한다") {
-                    val scoreRef = mockk<ScoreJpaEntity>()
-                    val target = entity(10L, score = scoreRef)
-                    every { fileJpaRepository.findById(10L) } returns Optional.of(target)
-                    val savedSlot = slot<FileJpaEntity>()
-                    every { fileJpaRepository.save(capture(savedSlot)) } answers { savedSlot.captured }
+            When("호출하면") {
+                Then("조회 왕복 없이 벌크 쿼리로 연결을 끊는다") {
+                    every { fileJpaRepository.unlinkFromScore(10L) } returns 1
 
                     adapter.unlinkFromScore(10L)
 
-                    savedSlot.captured.score shouldBe null
+                    verify(exactly = 1) { fileJpaRepository.unlinkFromScore(10L) }
+                    verify(exactly = 0) { fileJpaRepository.findById(any()) }
+                    verify(exactly = 0) { fileJpaRepository.save(any()) }
                 }
             }
             When("대상 파일이 존재하지 않으면") {
-                Then("아무 것도 하지 않는다") {
-                    every { fileJpaRepository.findById(999L) } returns Optional.empty()
+                Then("영향받은 행이 0건일 뿐 예외는 발생하지 않는다") {
+                    every { fileJpaRepository.unlinkFromScore(999L) } returns 0
 
                     adapter.unlinkFromScore(999L)
 
-                    verify(exactly = 0) { fileJpaRepository.save(any()) }
+                    verify(exactly = 1) { fileJpaRepository.unlinkFromScore(999L) }
                 }
             }
         }

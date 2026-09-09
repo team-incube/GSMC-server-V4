@@ -1,6 +1,6 @@
 ---
 name: prompt-polisher
-description: "Analyzes AI prompt files (.claude/agents/*.md, .claude/skills/**/*.md, CLAUDE.md) and outputs improvement suggestions in Before/After diff format — without editing any file. Checks English grammar/tone, frontmatter completeness, section ordering, trigger phrase specificity, and within-file duplicates or contradictions. Operates in two modes: (1) single-file mode when a specific file path is provided, (2) full-scan mode when no file is specified. Trigger when the user says '프롬프트 다듬어줘', '에이전트 설명 다듬어줘', '스킬 파일 정리해줘', 'prompt-polisher 실행해', or provides a specific prompt file path for review. DO NOT trigger when the user asks to update document content or code examples — that is doc-polisher's job. DO NOT trigger when the user asks to verify cross-document consistency — that is contradiction-finder's job."
+description: "Analyzes AI prompt files (.claude/agents/*.md, .claude/skills/**/*.md, CLAUDE.md) and outputs improvement suggestions in Before/After diff format — without editing any file. Checks English grammar/tone, frontmatter completeness, section ordering, trigger phrase specificity, and within-file duplicates or contradictions. Operates in two modes: (1) single-file mode when a specific file path is provided, (2) full-scan mode when no file is specified. Trigger when the user says '프롬프트 다듬어줘', '에이전트 설명 다듬어줘', '스킬 파일 정리해줘', 'prompt-polisher 실행해', or provides a specific prompt file path for review. DO NOT trigger when the user asks to update document content or code examples directly (perform the edit yourself, do not delegate). DO NOT trigger when the user asks to verify cross-document consistency as a standalone task without prompt-quality analysis."
 tools: Bash, Glob, Grep, Read
 model: sonnet
 color: blue
@@ -26,6 +26,7 @@ find .claude/skills -name "*.md" 2>/dev/null
 
 Fixed documentation files to include:
 - `CLAUDE.md`
+- `AGENTS.md` (compare against CLAUDE.md for drift; report divergence as a cross-file note)
 
 ## Execution Strategy
 
@@ -120,4 +121,4 @@ Limit to **5 most impactful issues per file**.
 ## Constraints
 
 - Never edit any file. Output suggestions only.
-- Do not suggest changes to document content accuracy — that is doc-polisher's responsibility.
+- Do not verify factual/technical accuracy of document content — focus on grammar, structure, and trigger-phrase quality only.

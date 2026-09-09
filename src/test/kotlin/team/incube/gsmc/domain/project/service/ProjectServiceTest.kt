@@ -9,6 +9,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import io.mockk.verifyOrder
 import team.incube.gsmc.domain.evidence.Evidence
 import team.incube.gsmc.domain.evidence.port.out.EvidencePersistencePort
 import team.incube.gsmc.domain.file.File
@@ -38,7 +39,8 @@ class ProjectServiceTest :
         val evidencePersistencePort = mockk<EvidencePersistencePort>()
         val memberUtil = mockk<MemberUtil>()
         val support = ProjectServiceSupport(projectMemberPersistencePort, filePersistencePort)
-        val appendService = AppendProjectService(projectPersistencePort, support, memberUtil)
+        val appendService =
+            AppendProjectService(projectPersistencePort, projectDraftPersistencePort, support, memberUtil)
         val modifyService = ModifyProjectService(projectPersistencePort, support, memberUtil)
         val removeService = RemoveProjectService(projectPersistencePort, scorePersistencePort, memberUtil)
         val draftAppendService = AppendProjectDraftService(projectDraftPersistencePort, support, memberUtil)
@@ -78,12 +80,64 @@ class ProjectServiceTest :
                         listOf(user(2L), user(1L))
                     every { filePersistencePort.findAllByIdIn(listOf(20L)) } returns listOf(file(20L))
                     every { projectPersistencePort.save(any()) } answers { firstArg() }
+                    every { projectDraftPersistencePort.deleteByOwnerId(1L) } just runs
 
                     val result = appendService.execute("제목", "설명".repeat(150), listOf(20L, 20L), listOf(2L, 2L))
 
                     result.participants.map { it.id } shouldBe listOf(2L, 1L)
                     result.files.map { it.id } shouldBe listOf(20L)
                     verify { projectPersistencePort.save(match { it.ownerId == 1L }) }
+                    verify { projectDraftPersistencePort.deleteByOwnerId(1L) }
+                }
+            }
+
+            When("draft가 없는 사용자가 프로젝트를 생성하면") {
+                Then("프로젝트를 생성하고 현재 사용자 draft 정리를 정상 처리한다") {
+                    every { memberUtil.getCurrentUserId() } returns 1L
+                    every { projectMemberPersistencePort.findAllByUserIds(listOf(1L)) } returns listOf(user(1L))
+                    every { filePersistencePort.findAllByIdIn(emptyList()) } returns emptyList()
+                    every { projectPersistencePort.save(any()) } answers { firstArg() }
+                    every { projectDraftPersistencePort.deleteByOwnerId(1L) } just runs
+
+                    appendService.execute("제목", "설명".repeat(150), emptyList(), emptyList())
+
+                    verify { projectPersistencePort.save(any()) }
+                    verify { projectDraftPersistencePort.deleteByOwnerId(1L) }
+                }
+            }
+
+            When("프로젝트 저장에 실패하면") {
+                Then("draft를 삭제하지 않고 예외를 전파한다") {
+                    every { memberUtil.getCurrentUserId() } returns 1L
+                    every { projectMemberPersistencePort.findAllByUserIds(listOf(1L)) } returns listOf(user(1L))
+                    every { filePersistencePort.findAllByIdIn(emptyList()) } returns emptyList()
+                    every { projectPersistencePort.save(any()) } throws GsmcException(ErrorCode.INTERNAL_SERVER_ERROR)
+
+                    shouldThrow<GsmcException> {
+                        appendService.execute("제목", "설명".repeat(150), emptyList(), emptyList())
+                    }.errorCode shouldBe ErrorCode.INTERNAL_SERVER_ERROR
+
+                    verify(exactly = 0) { projectDraftPersistencePort.deleteByOwnerId(any()) }
+                }
+            }
+
+            When("프로젝트 생성 후 draft 삭제에 실패하면") {
+                Then("삭제 예외를 전파해 트랜잭션 롤백 대상이 되게 한다") {
+                    every { memberUtil.getCurrentUserId() } returns 1L
+                    every { projectMemberPersistencePort.findAllByUserIds(listOf(1L)) } returns listOf(user(1L))
+                    every { filePersistencePort.findAllByIdIn(emptyList()) } returns emptyList()
+                    every { projectPersistencePort.save(any()) } answers { firstArg() }
+                    every { projectDraftPersistencePort.deleteByOwnerId(1L) } throws
+                        GsmcException(ErrorCode.INTERNAL_SERVER_ERROR)
+
+                    shouldThrow<GsmcException> {
+                        appendService.execute("제목", "설명".repeat(150), emptyList(), emptyList())
+                    }.errorCode shouldBe ErrorCode.INTERNAL_SERVER_ERROR
+
+                    verifyOrder {
+                        projectPersistencePort.save(any())
+                        projectDraftPersistencePort.deleteByOwnerId(1L)
+                    }
                 }
             }
 

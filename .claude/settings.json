@@ -14,6 +14,15 @@
             "command": ".claude/hooks/preCommit.sh"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/secretGuard.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
