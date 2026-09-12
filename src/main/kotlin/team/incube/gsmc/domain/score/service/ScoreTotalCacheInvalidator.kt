@@ -37,6 +37,7 @@ class ScoreTotalCacheInvalidator(
     private val memberPersistencePort: MemberPersistencePort,
     private val scoreTotalCachePort: ScoreTotalCachePort,
     private val taskScheduler: TaskScheduler,
+    private val scoreTotalCacheSingleFlight: ScoreTotalCacheSingleFlight,
 ) {
     companion object {
         private val DEBOUNCE_DELAY: Duration = Duration.ofSeconds(5)
@@ -61,7 +62,9 @@ class ScoreTotalCacheInvalidator(
             taskScheduler.schedule(
                 {
                     try {
-                        scoreTotalCachePort.evictGradeTotals(userGrade)
+                        scoreTotalCacheSingleFlight.invalidateGradeTotals(userGrade) {
+                            scoreTotalCachePort.evictGradeTotals(userGrade)
+                        }
                     } catch (e: Exception) {
                         log.warn("학년 백분위 캐시 무효화 실행 실패 (userGrade={})", userGrade, e)
                     } finally {
@@ -82,7 +85,9 @@ class ScoreTotalCacheInvalidator(
             taskScheduler.schedule(
                 {
                     try {
-                        scoreTotalCachePort.evictClassTotals(userGrade, userClassNumber)
+                        scoreTotalCacheSingleFlight.invalidateClassTotals(userGrade, userClassNumber) {
+                            scoreTotalCachePort.evictClassTotals(userGrade, userClassNumber)
+                        }
                     } catch (e: Exception) {
                         log.warn("반 백분위 캐시 무효화 실행 실패 (userGrade={}, userClassNumber={})", userGrade, userClassNumber, e)
                     } finally {
