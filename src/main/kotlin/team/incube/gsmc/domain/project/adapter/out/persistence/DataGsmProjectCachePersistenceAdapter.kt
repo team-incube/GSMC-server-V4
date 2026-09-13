@@ -1,6 +1,7 @@
 package team.incube.gsmc.domain.project.adapter.out.persistence
 
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.types.Expiration
 import team.incube.gsmc.domain.project.DataGsmProject
 import team.incube.gsmc.domain.project.port.out.DataGsmProjectCachePort
 import team.incube.gsmc.global.annotation.PortDirection
@@ -30,8 +31,7 @@ class DataGsmProjectCachePersistenceAdapter(
             redisTemplate.opsForValue().set(
                 CACHE_KEY,
                 objectMapper.writeValueAsString(projects),
-                CACHE_TTL_HOURS,
-                TimeUnit.HOURS,
+                Expiration.from(CACHE_TTL_HOURS, TimeUnit.HOURS),
             )
         }.onFailure {
             logger().warn("DataGSM 프로젝트 캐시 저장에 실패했습니다. key={}", CACHE_KEY, it)

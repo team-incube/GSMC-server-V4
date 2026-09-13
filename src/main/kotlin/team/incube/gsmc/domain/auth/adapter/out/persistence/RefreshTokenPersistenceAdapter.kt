@@ -1,6 +1,7 @@
 package team.incube.gsmc.domain.auth.adapter.out.persistence
 
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.types.Expiration
 import team.incube.gsmc.domain.auth.port.out.RefreshTokenPersistencePort
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.adapter.Adapter
@@ -34,8 +35,7 @@ class RefreshTokenPersistenceAdapter(
         redisTemplate.opsForValue().set(
             KEY_PREFIX + userId,
             refreshToken,
-            jwtProperties.refreshTokenExpiry,
-            TimeUnit.SECONDS,
+            Expiration.from(jwtProperties.refreshTokenExpiry, TimeUnit.SECONDS),
         )
     }
 

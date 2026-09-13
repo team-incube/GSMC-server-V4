@@ -1,6 +1,7 @@
 package team.incube.gsmc.domain.score.adapter.out.persistence
 
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.types.Expiration
 import team.incube.gsmc.domain.score.port.out.ScoreTotalCachePort
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.adapter.Adapter
@@ -77,7 +78,11 @@ class ScoreTotalCachePersistenceAdapter(
         totals: Map<Long, Int>,
     ) {
         runCatching {
-            redisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(totals), TTL_MINUTES, TimeUnit.MINUTES)
+            redisTemplate.opsForValue().set(
+                key,
+                objectMapper.writeValueAsString(totals),
+                Expiration.from(TTL_MINUTES, TimeUnit.MINUTES),
+            )
         }.onFailure { logger().warn("반/학년 백분위 캐시 저장 실패 (key={})", key, it) }
     }
 
