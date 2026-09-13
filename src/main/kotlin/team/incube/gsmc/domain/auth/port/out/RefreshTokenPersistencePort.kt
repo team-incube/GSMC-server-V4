@@ -3,7 +3,7 @@ package team.incube.gsmc.domain.auth.port.out
 /**
  * 리프레시 토큰 영속성을 추상화하는 아웃바운드 포트 인터페이스입니다.
  * 리프레시 토큰의 저장, 조회, 삭제 기능의 계약을 정의합니다.
- * [RefreshTokenPersistenceAdapter]가 이 인터페이스를 구현하여 Redis에 실제 처리를 위임합니다.
+ * [team.incube.gsmc.domain.auth.adapter.out.persistence.RefreshTokenPersistenceAdapter]가 이 인터페이스를 구현하여 Redis에 실제 처리를 위임합니다.
  */
 interface RefreshTokenPersistencePort {
     /**
