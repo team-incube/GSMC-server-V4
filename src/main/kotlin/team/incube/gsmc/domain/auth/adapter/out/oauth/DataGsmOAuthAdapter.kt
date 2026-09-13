@@ -8,6 +8,7 @@ import team.incube.gsmc.global.annotation.adapter.Adapter
 import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
 import team.themoment.datagsm.sdk.oauth.DataGsmOAuthClient
+import team.themoment.datagsm.sdk.oauth.model.AccountObjectType
 
 private const val DEFAULT_OAUTH_TOKEN_EXPIRY_SECONDS = 3600L
 
@@ -82,7 +83,7 @@ class DataGsmOAuthAdapter(
                 client.getUserInfo(accessToken)
             }.getOrElse { throw GsmcException(ErrorCode.OAUTH_USER_INFO_FETCH_FAILED) }
 
-        val isStudent = userInfo.getIsStudent() == true
+        val isStudent = userInfo.objectType == AccountObjectType.STUDENT
         val student = if (isStudent) userInfo.student else null
 
         return OAuthUserInfo(
