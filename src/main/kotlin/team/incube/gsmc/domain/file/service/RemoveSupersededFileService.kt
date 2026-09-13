@@ -1,6 +1,5 @@
 package team.incube.gsmc.domain.file.service
 
-import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
@@ -10,6 +9,7 @@ import team.incube.gsmc.domain.file.port.out.FilePersistencePort
 import team.incube.gsmc.domain.file.port.out.FileStoragePort
 import team.incube.gsmc.global.annotation.PortDirection
 import team.incube.gsmc.global.annotation.port.Port
+import team.themoment.sdk.logging.logger.logger
 
 /**
  * 밀려난 점수에 딸린 파일 정리 유스케이스 구현 클래스입니다.
@@ -25,8 +25,6 @@ class RemoveSupersededFileService(
     private val filePersistencePort: FilePersistencePort,
     private val fileStoragePort: FileStoragePort,
 ) : RemoveSupersededFileUseCase {
-    private val log = LoggerFactory.getLogger(RemoveSupersededFileService::class.java)
-
     @Transactional
     override fun execute(file: File) {
         filePersistencePort.deleteById(file.fileId)
@@ -37,7 +35,7 @@ class RemoveSupersededFileService(
                     try {
                         fileStoragePort.deleteObject(file.fileKey)
                     } catch (e: Exception) {
-                        log.error(
+                        this@RemoveSupersededFileService.logger().error(
                             "스토리지 객체 삭제 실패로 고아 객체가 남았습니다. fileId={}, fileKey={}",
                             file.fileId,
                             file.fileKey,

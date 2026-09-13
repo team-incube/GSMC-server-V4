@@ -1,10 +1,10 @@
 package team.incube.gsmc.domain.score.service
 
-import org.slf4j.LoggerFactory
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 import team.incube.gsmc.domain.score.port.out.MemberPersistencePort
 import team.incube.gsmc.domain.score.port.out.ScoreTotalCachePort
+import team.themoment.sdk.logging.logger.logger
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
@@ -41,7 +41,6 @@ class ScoreTotalCacheInvalidator(
 ) {
     companion object {
         private val DEBOUNCE_DELAY: Duration = Duration.ofSeconds(5)
-        private val log = LoggerFactory.getLogger(ScoreTotalCacheInvalidator::class.java)
     }
 
     private val pendingGradeEvictions = ConcurrentHashMap<Int, ScheduledFuture<*>>()
@@ -54,7 +53,7 @@ class ScoreTotalCacheInvalidator(
 
             debounceGradeEviction(userGrade)
             member.userClassNumber?.let { debounceClassEviction(userGrade, it) }
-        }.onFailure { log.warn("반/학년 백분위 캐시 무효화 실패 (userId={})", userId, it) }
+        }.onFailure { logger().warn("반/학년 백분위 캐시 무효화 실패 (userId={})", userId, it) }
     }
 
     private fun debounceGradeEviction(userGrade: Int) {
@@ -66,7 +65,7 @@ class ScoreTotalCacheInvalidator(
                             scoreTotalCachePort.evictGradeTotals(userGrade)
                         }
                     } catch (e: Exception) {
-                        log.warn("학년 백분위 캐시 무효화 실행 실패 (userGrade={})", userGrade, e)
+                        logger().warn("학년 백분위 캐시 무효화 실행 실패 (userGrade={})", userGrade, e)
                     } finally {
                         pendingGradeEvictions.remove(userGrade)
                     }
@@ -89,7 +88,12 @@ class ScoreTotalCacheInvalidator(
                             scoreTotalCachePort.evictClassTotals(userGrade, userClassNumber)
                         }
                     } catch (e: Exception) {
-                        log.warn("반 백분위 캐시 무효화 실행 실패 (userGrade={}, userClassNumber={})", userGrade, userClassNumber, e)
+                        logger().warn(
+                            "반 백분위 캐시 무효화 실행 실패 (userGrade={}, userClassNumber={})",
+                            userGrade,
+                            userClassNumber,
+                            e,
+                        )
                     } finally {
                         pendingClassEvictions.remove(key)
                     }

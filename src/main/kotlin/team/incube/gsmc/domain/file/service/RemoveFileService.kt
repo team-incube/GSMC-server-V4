@@ -1,6 +1,5 @@
 package team.incube.gsmc.domain.file.service
 
-import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
@@ -12,6 +11,7 @@ import team.incube.gsmc.global.annotation.port.Port
 import team.incube.gsmc.global.exception.ErrorCode
 import team.incube.gsmc.global.exception.GsmcException
 import team.incube.gsmc.global.util.MemberUtil
+import team.themoment.sdk.logging.logger.logger
 
 /**
  * 파일 삭제 유스케이스 구현 클래스입니다.
@@ -28,8 +28,6 @@ class RemoveFileService(
     private val fileStoragePort: FileStoragePort,
     private val memberUtil: MemberUtil,
 ) : RemoveFileUseCase {
-    private val log = LoggerFactory.getLogger(RemoveFileService::class.java)
-
     @Transactional
     override fun execute(fileId: Long): Boolean {
         val file = filePersistencePort.findById(fileId) ?: throw GsmcException(ErrorCode.FILE_NOT_FOUND)
@@ -46,7 +44,7 @@ class RemoveFileService(
                     try {
                         fileStoragePort.deleteObject(file.fileKey)
                     } catch (e: Exception) {
-                        log.error(
+                        this@RemoveFileService.logger().error(
                             "스토리지 객체 삭제 실패로 고아 객체가 남았습니다. fileId={}, fileKey={}",
                             file.fileId,
                             file.fileKey,
