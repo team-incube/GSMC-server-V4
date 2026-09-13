@@ -66,7 +66,7 @@ class AlertEmitterRegistry(
      * `sse-team.incube.gsmc.domain.alert.adapter.sse.AlertSseProperties` 형태로 등록되므로,
      * 빈을 참조하는 `#{...}` 대신 프로퍼티 플레이스홀더 `${...}`를 사용한다.
      */
-    @Scheduled(fixedRateString = "\${sse.heartbeat-interval}")
+    @Scheduled(fixedRateString = $$"${sse.heartbeat-interval}")
     fun sendHeartbeat() {
         emittersByUserId.forEach { (userId, emitters) ->
             emitters.toList().forEach { emitter ->

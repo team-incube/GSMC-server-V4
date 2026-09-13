@@ -18,7 +18,7 @@ import team.incube.gsmc.global.security.handler.JwtAuthenticationEntryPoint
 
 @Configuration
 class SecurityConfig(
-    @param:Value("\${cors.allowed-origins}") private val allowedOrigins: List<String>,
+    @param:Value($$"${cors.allowed-origins}") private val allowedOrigins: List<String>,
     private val authTokenPort: AuthTokenPort,
     private val jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint,
     private val jwtAccessDeniedHandler: JwtAccessDeniedHandler,

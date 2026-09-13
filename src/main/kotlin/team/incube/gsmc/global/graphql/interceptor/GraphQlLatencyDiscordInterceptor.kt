@@ -19,9 +19,9 @@ import java.time.Instant
 class GraphQlLatencyDiscordInterceptor(
     private val discordWebhookClient: DiscordWebhookClient,
     private val userPersistencePort: UserPersistencePort,
-    @param:Value("\${discord.webhook.graphql-latency-url}") private val webhookUrl: String,
-    @param:Value("\${spring.application.name}") private val applicationName: String,
-    @param:Value("\${spring.profiles.active:local}") private val activeProfile: String,
+    @param:Value($$"${discord.webhook.graphql-latency-url}") private val webhookUrl: String,
+    @param:Value($$"${spring.application.name}") private val applicationName: String,
+    @param:Value($$"${spring.profiles.active:local}") private val activeProfile: String,
 ) : WebGraphQlInterceptor {
     private val logger = LoggerFactory.getLogger(GraphQlLatencyDiscordInterceptor::class.java)
 
