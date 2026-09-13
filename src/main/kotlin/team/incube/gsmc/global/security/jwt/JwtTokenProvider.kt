@@ -65,8 +65,6 @@ class JwtTokenProvider(
             Pair(userId, role)
         }.getOrNull()
 
-    fun getExpiryFromToken(token: String): Long = parseClaims(token).expiration.time
-
     private fun parseClaims(token: String) =
         Jwts
             .parser()
