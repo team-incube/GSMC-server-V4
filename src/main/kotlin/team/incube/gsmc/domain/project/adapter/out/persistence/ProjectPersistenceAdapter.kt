@@ -30,7 +30,7 @@ class ProjectPersistenceAdapter(
             .selectFrom(projectJpaEntity)
             .where(projectJpaEntity.projectId.eq(projectId))
             .fetchOne()
-            ?.let { it.toDomain(findScoreIds(projectId)) }
+            ?.toDomain(findScoreIds(projectId))
 
     /** 사용자가 소유하거나 참여한 프로젝트 요약을 최신 프로젝트부터 조회합니다. */
     override fun findAllByUserId(userId: Long): List<Project> {

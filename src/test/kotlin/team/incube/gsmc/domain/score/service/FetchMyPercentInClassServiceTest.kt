@@ -32,8 +32,15 @@ class FetchMyPercentInClassServiceTest :
         val memberPersistencePort = mockk<MemberPersistencePort>()
         val scoreTotalCachePort = mockk<ScoreTotalCachePort>()
         val memberUtil = mockk<MemberUtil>()
+        val scoreTotalCacheSingleFlight = ScoreTotalCacheSingleFlight()
         val service =
-            FetchMyPercentInClassService(scorePersistencePort, memberPersistencePort, scoreTotalCachePort, memberUtil)
+            FetchMyPercentInClassService(
+                scorePersistencePort,
+                memberPersistencePort,
+                scoreTotalCachePort,
+                scoreTotalCacheSingleFlight,
+                memberUtil,
+            )
 
         beforeEach {
             clearAllMocks()

@@ -1,6 +1,5 @@
 package team.incube.gsmc.global.graphql.interceptor
 
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.graphql.server.WebGraphQlInterceptor
 import org.springframework.graphql.server.WebGraphQlRequest
@@ -13,18 +12,17 @@ import team.incube.gsmc.domain.auth.port.out.UserPersistencePort
 import team.incube.gsmc.global.auth.CustomUserDetails
 import team.incube.gsmc.global.discord.DiscordEmbed
 import team.incube.gsmc.global.discord.DiscordWebhookClient
+import team.themoment.sdk.logging.logger.logger
 import java.time.Instant
 
 @Component
 class GraphQlLatencyDiscordInterceptor(
     private val discordWebhookClient: DiscordWebhookClient,
     private val userPersistencePort: UserPersistencePort,
-    @param:Value("\${discord.webhook.graphql-latency-url}") private val webhookUrl: String,
-    @param:Value("\${spring.application.name}") private val applicationName: String,
-    @param:Value("\${spring.profiles.active:local}") private val activeProfile: String,
+    @param:Value($$"${discord.webhook.graphql-latency-url}") private val webhookUrl: String,
+    @param:Value($$"${spring.application.name}") private val applicationName: String,
+    @param:Value($$"${spring.profiles.active:local}") private val activeProfile: String,
 ) : WebGraphQlInterceptor {
-    private val logger = LoggerFactory.getLogger(GraphQlLatencyDiscordInterceptor::class.java)
-
     override fun intercept(
         request: WebGraphQlRequest,
         chain: WebGraphQlInterceptor.Chain,
@@ -37,7 +35,7 @@ class GraphQlLatencyDiscordInterceptor(
             .next(request)
             .doOnNext { response ->
                 runCatching { report(request, response, System.currentTimeMillis() - start, authentication) }
-                    .onFailure { logger.warn("GraphQL 응답속도 Discord 알림 실패: {}", it.message) }
+                    .onFailure { logger().warn("GraphQL 응답속도 Discord 알림 실패: {}", it.message) }
             }
     }
 

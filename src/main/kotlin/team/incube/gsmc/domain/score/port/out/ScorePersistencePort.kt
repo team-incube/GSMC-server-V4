@@ -2,7 +2,6 @@ package team.incube.gsmc.domain.score.port.out
 
 import team.incube.gsmc.domain.category.CategoryType
 import team.incube.gsmc.domain.score.Score
-import team.incube.gsmc.domain.score.ScoreStatus
 
 /**
  * 점수 요청 영속성을 추상화하는 아웃바운드 포트 인터페이스입니다.
