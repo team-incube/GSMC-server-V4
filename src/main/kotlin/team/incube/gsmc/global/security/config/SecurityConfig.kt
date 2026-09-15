@@ -12,6 +12,7 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import team.incube.gsmc.domain.auth.port.out.AuthTokenPort
+import team.incube.gsmc.domain.auth.port.out.TokenInvalidationPort
 import team.incube.gsmc.global.security.filter.JwtAuthenticationFilter
 import team.incube.gsmc.global.security.handler.JwtAccessDeniedHandler
 import team.incube.gsmc.global.security.handler.JwtAuthenticationEntryPoint
@@ -22,6 +23,7 @@ class SecurityConfig(
     private val authTokenPort: AuthTokenPort,
     private val jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint,
     private val jwtAccessDeniedHandler: JwtAccessDeniedHandler,
+    private val tokenInvalidationPort: TokenInvalidationPort,
 ) {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -36,7 +38,7 @@ class SecurityConfig(
             }.formLogin { it.disable() }
             .httpBasic { it.disable() }
             .addFilterBefore(
-                JwtAuthenticationFilter(authTokenPort),
+                JwtAuthenticationFilter(authTokenPort, tokenInvalidationPort),
                 UsernamePasswordAuthenticationFilter::class.java,
             )
         return http.build()
