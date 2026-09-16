@@ -10,6 +10,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import jakarta.persistence.EntityManager
 import team.incube.gsmc.domain.file.adapter.out.persistence.entity.FileJpaEntity
 import team.incube.gsmc.domain.project.Project
@@ -225,6 +226,8 @@ class ProjectPersistenceAdapterTest :
                     every { projectJpaRepository.deleteById(10L) } returns Unit
 
                     adapter.deleteById(10L)
+
+                    verify(exactly = 1) { projectJpaRepository.deleteById(10L) }
                 }
             }
         }
