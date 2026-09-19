@@ -14,7 +14,6 @@ services:
     image: redis:7-alpine
     container_name: gsmc-redis
     restart: always
-    command: ["redis-server", "--requirepass", "yes"]
     ports:
       - "6379:6379"
     volumes:
