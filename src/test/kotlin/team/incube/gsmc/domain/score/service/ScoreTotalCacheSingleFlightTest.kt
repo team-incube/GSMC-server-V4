@@ -18,13 +18,15 @@ class ScoreTotalCacheSingleFlightTest :
         fun gradeKey(includeApprovedOnly: Boolean = true) =
             ScoreTotalCacheSingleFlight.CacheKey.gradeTotals(2, includeApprovedOnly)
 
+        // CI 러너가 부하로 스레드 스케줄링이 지연되는 상황에서도 흔들리지 않도록,
+        // 실제 검증 대상(중복 계산 방지)과 무관한 대기 시간은 여유 있게 잡는다.
         fun join(thread: Thread) {
-            thread.join(TimeUnit.SECONDS.toMillis(3))
+            thread.join(TimeUnit.SECONDS.toMillis(10))
             thread.isAlive shouldBe false
         }
 
         fun awaitWaiting(thread: Thread) {
-            val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(1)
+            val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
             while (thread.state !in setOf(Thread.State.WAITING, Thread.State.TIMED_WAITING) &&
                 System.nanoTime() < deadline
             ) {
@@ -35,7 +37,10 @@ class ScoreTotalCacheSingleFlightTest :
 
         Given("같은 캐시 키에 여러 요청이 동시에 들어오면") {
             Then("대표 요청만 계산하고 모든 후발 요청이 같은 결과를 받는다") {
-                val singleFlight = ScoreTotalCacheSingleFlight()
+                // 이 테스트는 타임아웃 폴백이 아닌 중복 계산 방지 자체를 검증하므로, CI 러너가
+                // 느려 후발 요청이 대기 중 타임아웃으로 오탐(false positive) 재계산하지 않도록
+                // 넉넉한 대기 시간을 준다. 타임아웃 폴백 동작은 아래 별도 테스트에서 검증한다.
+                val singleFlight = ScoreTotalCacheSingleFlight(Duration.ofSeconds(30))
                 val key = classKey()
                 val computeCount = AtomicInteger()
                 val started = CountDownLatch(1)
@@ -131,7 +136,9 @@ class ScoreTotalCacheSingleFlightTest :
 
         Given("대표 요청의 계산이 실패하면") {
             Then("후발 요청이 대기에서 풀리고 원래 도메인 예외를 받으며 다음 요청은 재시도된다") {
-                val singleFlight = ScoreTotalCacheSingleFlight()
+                // 후발 요청이 타임아웃으로 대기에서 풀리는 것이 아니라 leader의 예외 전파로
+                // 풀리는지를 검증하는 테스트이므로, 타임아웃 자체는 넉넉하게 잡는다.
+                val singleFlight = ScoreTotalCacheSingleFlight(Duration.ofSeconds(30))
                 val key = gradeKey()
                 val failure = GsmcException(ErrorCode.USER_NOT_FOUND)
                 val started = CountDownLatch(1)
