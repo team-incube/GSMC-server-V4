@@ -6,22 +6,23 @@ services:
     container_name: gsmc-server
     ports:
       - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
-
-      RDB_SCHEMA: ${RDB_SCHEMA}
-      RDB_USERNAME: ${RDB_USERNAME}
-      RDB_PASSWORD: ${RDB_PASSWORD}
-
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
-
-      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
-      AWS_S3_REGION: ${AWS_S3_REGION}
-      AWS_S3_ACCESS_KEY: ${AWS_S3_ACCESS_KEY}
-      AWS_S3_SECRET_KEY: ${AWS_S3_SECRET_KEY}
+    env_file:
+      - .env
     restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: gsmc-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:
