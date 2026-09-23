@@ -51,32 +51,38 @@ class DataGsmProjectSingleFlightTest :
                 val computeCount = AtomicInteger()
                 val started = CountDownLatch(1)
                 val release = CountDownLatch(1)
-                val start = CountDownLatch(1)
                 val results = Collections.synchronizedList(mutableListOf<List<DataGsmProject>>())
                 val failures = Collections.synchronizedList(mutableListOf<Throwable>())
-                val threads =
-                    (1..8).map {
-                        Thread {
-                            start.await()
-                            try {
-                                results +=
-                                    singleFlight.load {
-                                        computeCount.incrementAndGet()
-                                        started.countDown()
-                                        release.await()
-                                        listOf(project)
-                                    }
-                            } catch (e: Throwable) {
-                                failures += e
-                            }
+
+                fun caller() =
+                    Thread {
+                        try {
+                            results +=
+                                singleFlight.load {
+                                    computeCount.incrementAndGet()
+                                    started.countDown()
+                                    release.await()
+                                    listOf(project)
+                                }
+                        } catch (e: Throwable) {
+                            failures += e
                         }
                     }
 
-                threads.forEach(Thread::start)
-                start.countDown()
+                // 스레드를 한꺼번에 띄우고 곧바로 풀어주면, 러너가 느릴 때 후발 요청이 load에
+                // 닿기 전에 대표 요청이 끝나버려 각자 새 대표가 된다. 그래서 대표가 조회에
+                // 들어간 것과 후발이 모두 대기 상태가 된 것을 확인한 뒤에 풀어준다.
+                val leader = caller()
+                leader.start()
                 started.await(5, TimeUnit.SECONDS) shouldBe true
+
+                val followers = (1..7).map { caller() }
+                followers.forEach(Thread::start)
+                followers.forEach(::awaitWaiting)
+
                 release.countDown()
-                threads.forEach(::join)
+                join(leader)
+                followers.forEach(::join)
 
                 computeCount.get() shouldBe 1
                 failures shouldBe emptyList()
